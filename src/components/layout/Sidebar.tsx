@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, Users, Calendar, FileText } from 'lucide-react';
+import { Home, Users, Calendar, FileText, Settings } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   const { t } = useTranslation();
@@ -31,6 +31,13 @@ const Sidebar: React.FC = () => {
           </Link>
         ))}
       </nav>
+      
+      <div className="sidebar-footer">
+        <button className="sidebar-settings">
+          <Settings size={20} />
+          <span>Settings</span>
+        </button>
+      </div>
     </div>
   );
 };

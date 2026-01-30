@@ -640,11 +640,18 @@ h6 { font-size: var(--font-size-base); }
 /* Authentication Styles */
 .auth-container {
   min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   padding: var(--spacing-4);
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .auth-card {
@@ -654,6 +661,8 @@ h6 { font-size: var(--font-size-base); }
   padding: var(--spacing-10);
   width: 100%;
   max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .auth-header {
@@ -1001,6 +1010,32 @@ h6 { font-size: var(--font-size-base); }
 
 .method-card.in-person {
   border-left: 4px solid var(--warning);
+}
+
+/* Sidebar Footer Styles */
+.sidebar-footer {
+  padding: var(--spacing-4);
+  border-top: 1px solid var(--gray-200);
+}
+
+.sidebar-settings {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-4) var(--spacing-6);
+  background: none;
+  border: none;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+}
+
+.sidebar-settings:hover {
+  background-color: var(--gray-50);
+  color: var(--primary);
 }
 
 /* Dashboard Specific Styles */

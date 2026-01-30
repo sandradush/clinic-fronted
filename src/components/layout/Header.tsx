@@ -19,10 +19,6 @@ const Header: React.FC = () => {
           <span className="notification-badge">3</span>
         </button>
 
-        <button className="header-btn">
-          <Settings size={20} />
-        </button>
-
         <div className="user-menu">
           <button 
             className="user-btn"
