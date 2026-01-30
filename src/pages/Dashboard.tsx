@@ -1,15 +1,8 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Calendar, Users, FileText, Clock, Bell, Search, TrendingUp, Activity } from 'lucide-react';
+import { Calendar, Users, FileText, Clock, TrendingUp, Activity } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-// Components
-import TodaySchedule from '../components/dashboard/TodaySchedule';
-import QuickActions from '../components/dashboard/QuickActions';
-import RecentPatients from '../components/dashboard/RecentPatients';
-
 const Dashboard: React.FC = () => {
-  const { t } = useTranslation();
   const { user } = useAuth();
 
   const stats = [
@@ -55,16 +48,6 @@ const Dashboard: React.FC = () => {
           <h1>Welcome back, <span className="text-primary">{user?.name || 'Clinic Administrator'}</span> 👋</h1>
           <p className="subtitle">Manage appointments and clinic operations</p>
         </div>
-        <div className="header-actions">
-          <div className="search-bar">
-            <Search size={20} />
-            <input 
-              type="text" 
-              placeholder="Search patients, appointments..."
-              className="search-input"
-            />
-          </div>
-        </div>
       </div>
 
       {/* Stats Cards */}
@@ -92,68 +75,51 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content Grid */}
       <div className="dashboard-grid">
-        {/* Today's Schedule */}
-        <div className="card dashboard-schedule">
-          <div className="card-header">
-            <div>
-              <h3>Today's Schedule</h3>
-              <p className="card-subtitle">18 appointments scheduled</p>
-            </div>
-            <button className="btn btn-outline btn-sm">
-              View All
-            </button>
-          </div>
-          <TodaySchedule />
-        </div>
-
-        {/* Recent Patients */}
-        <div className="card dashboard-patients">
-          <div className="card-header">
-            <div>
-              <h3>Recent Appointments</h3>
-              <p className="card-subtitle">Latest scheduled appointments</p>
-            </div>
-            <button className="btn btn-outline btn-sm">
-              See All
-            </button>
-          </div>
-          <RecentPatients />
-        </div>
-
-        {/* Quick Actions */}
-        <div className="card dashboard-actions">
-          <div className="card-header">
-            <h3>Quick Actions</h3>
-          </div>
-          <QuickActions />
-        </div>
-
-        {/* System Status */}
+        {/* Today's Summary */}
         <div className="card dashboard-status">
           <div className="card-header">
             <div>
-              <h3>System Status</h3>
-              <p className="card-subtitle">All systems operational</p>
+              <h3>Today's Summary</h3>
+              <p className="card-subtitle">Daily clinic overview</p>
             </div>
             <div className="status-indicator online">
               <Activity size={16} />
             </div>
           </div>
-          <div className="status-grid">
-            <div className="status-item">
-              <span className="status-label">Server Status</span>
-              <span className="status-value success">Online</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Last Sync</span>
-              <span className="status-value">2 min ago</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Storage Used</span>
-              <div className="storage-bar">
-                <div className="storage-fill" style={{ width: '65%' }}></div>
+          <div className="summary-charts">
+            <div className="chart-item">
+              <div className="circular-chart">
+                <div className="circle-progress" style={{ '--progress': '82%' } as React.CSSProperties}>
+                  <span className="chart-value">18/22</span>
+                </div>
               </div>
-              <span className="status-value">65%</span>
+              <span className="chart-label">Appointments</span>
+            </div>
+            <div className="chart-item">
+              <div className="circular-chart">
+                <div className="circle-progress success" style={{ '--progress': '60%' } as React.CSSProperties}>
+                  <span className="chart-value">3/5</span>
+                </div>
+              </div>
+              <span className="chart-label">Doctors Available</span>
+            </div>
+            <div className="chart-item">
+              <div className="bar-chart">
+                <div className="bar-label">Patients Seen</div>
+                <div className="bar-container">
+                  <div className="bar-fill" style={{ width: '80%' }}></div>
+                </div>
+                <div className="bar-value">24</div>
+              </div>
+            </div>
+            <div className="chart-item">
+              <div className="bar-chart">
+                <div className="bar-label">Avg Wait Time</div>
+                <div className="bar-container">
+                  <div className="bar-fill warning" style={{ width: '40%' }}></div>
+                </div>
+                <div className="bar-value">12 min</div>
+              </div>
             </div>
           </div>
         </div>

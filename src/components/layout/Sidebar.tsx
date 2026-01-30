@@ -1,15 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Home, Users, Calendar, FileText, Settings } from 'lucide-react';
+import { Home, Users, Calendar, FileText, UserCheck, Settings } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
-  const { t } = useTranslation();
   const location = useLocation();
 
   const menuItems = [
     { path: '/', icon: Home, label: 'Dashboard' },
     { path: '/appointments', icon: Calendar, label: 'Appointments' },
+    { path: '/doctors', icon: UserCheck, label: 'Doctors' },
     { path: '/consultation', icon: Users, label: 'Consultation' },
     { path: '/prescriptions', icon: FileText, label: 'Prescriptions' },
   ];

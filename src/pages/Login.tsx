@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -46,7 +45,6 @@ const Login: React.FC = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h1>🏥 Clinic Management</h1>
           <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
           <p>{isLogin ? 'Sign in to your account' : 'Register to get started'}</p>
         </div>
@@ -91,7 +89,7 @@ const Login: React.FC = () => {
             <div className="input-wrapper">
               <Lock size={20} />
               <input
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -99,13 +97,6 @@ const Login: React.FC = () => {
                 placeholder="Enter your password"
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="password-toggle"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
             </div>
           </div>
 
