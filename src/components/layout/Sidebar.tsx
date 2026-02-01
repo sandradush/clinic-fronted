@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, Calendar, FileText, UserCheck, Settings } from 'lucide-react';
+import { Home, Users, Calendar, FileText, UserCheck, Settings, LogOut } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const { logout } = useAuth();
 
   const menuItems = [
     { path: '/', icon: Home, label: 'Dashboard' },
@@ -11,6 +13,7 @@ const Sidebar: React.FC = () => {
     { path: '/doctors', icon: UserCheck, label: 'Doctors' },
     { path: '/consultation', icon: Users, label: 'Consultation' },
     { path: '/prescriptions', icon: FileText, label: 'Prescriptions' },
+    { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 
   return (
@@ -32,9 +35,9 @@ const Sidebar: React.FC = () => {
       </nav>
       
       <div className="sidebar-footer">
-        <button className="sidebar-settings">
-          <Settings size={20} />
-          <span>Settings</span>
+        <button onClick={logout} className="sidebar-settings">
+          <LogOut size={20} />
+          <span>Sign Out</span>
         </button>
       </div>
     </div>

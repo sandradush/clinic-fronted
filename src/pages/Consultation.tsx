@@ -130,45 +130,6 @@ const Consultation: React.FC = () => {
             ))}
           </div>
         </div>
-
-        {/* Consultation Options */}
-        <div className="consultation-options">
-          <h3>Consultation Methods</h3>
-          <div className="method-cards">
-            <div className="method-card video">
-              <Video size={32} />
-              <h4>Video Consultation</h4>
-              <p>Face-to-face consultation via video call</p>
-              <ul>
-                <li>Visual examination possible</li>
-                <li>Screen sharing for results</li>
-                <li>Recording available</li>
-              </ul>
-            </div>
-            
-            <div className="method-card phone">
-              <Phone size={32} />
-              <h4>Phone Consultation</h4>
-              <p>Voice-only consultation call</p>
-              <ul>
-                <li>Quick follow-ups</li>
-                <li>Medication reviews</li>
-                <li>Test result discussions</li>
-              </ul>
-            </div>
-            
-            <div className="method-card in-person">
-              <User size={32} />
-              <h4>In-Person Visit</h4>
-              <p>Traditional clinic visit</p>
-              <ul>
-                <li>Physical examination</li>
-                <li>Procedures and tests</li>
-                <li>Complex consultations</li>
-              </ul>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

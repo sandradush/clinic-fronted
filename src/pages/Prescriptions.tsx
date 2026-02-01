@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Search, Filter, Plus, Printer, Download } from 'lucide-react';
+import { FileText, Search, Plus, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 
 const Prescriptions: React.FC = () => {
@@ -60,16 +60,7 @@ const Prescriptions: React.FC = () => {
             className="search-input"
           />
         </div>
-        <div className="filter-actions">
-          <button className="btn btn-outline">
-            <Filter size={18} />
-            Filter
-          </button>
-          <button className="btn btn-outline">
-            <Download size={18} />
-            Export
-          </button>
-        </div>
+
       </div>
 
       {/* Prescriptions List */}
@@ -110,13 +101,13 @@ const Prescriptions: React.FC = () => {
                     <Printer size={14} />
                     Print
                   </button>
-                  <button className="btn btn-sm btn-primary">
+                  <button className="btn btn-sm btn-black">
                     Edit
                   </button>
-                  <button className="btn btn-sm btn-success">
+                  <button className="btn btn-sm btn-black">
                     Update
                   </button>
-                  <button className="btn btn-sm btn-danger">
+                  <button className="btn btn-sm btn-black">
                     Cancel
                   </button>
                 </div>

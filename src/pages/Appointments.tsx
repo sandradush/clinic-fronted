@@ -215,10 +215,6 @@ const Appointments: React.FC = () => {
                       <User size={14} />
                       <span>{appointment.doctor}</span>
                     </div>
-                    <div className="detail-item">
-                      <CalendarIcon size={14} />
-                      <span>{appointment.room}</span>
-                    </div>
                   </div>
                   
                   {appointment.notes && (

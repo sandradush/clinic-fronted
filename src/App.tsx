@@ -15,6 +15,7 @@ import Prescriptions from './pages/Prescriptions';
 import NewAppointment from './pages/NewAppointment';
 import Consultation from './pages/Consultation';
 import Doctors from './pages/Doctors';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 
 // Context & Config
@@ -50,6 +51,7 @@ const ProtectedRoutes = () => {
         <Route path="consultation" element={<Consultation />} />
         <Route path="prescriptions" element={<Prescriptions />} />
         <Route path="doctors" element={<Doctors />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
   );
