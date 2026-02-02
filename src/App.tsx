@@ -1,12 +1,11 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'react-hot-toast';
 
 // Layout
 import MainLayout from './components/layout/MainLayout';
 import OfflineIndicator from './components/common/OfflineIndicator';
-import LanguageToggle from './components/common/LanguageToggle';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -23,14 +22,15 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { OfflineProvider } from './contexts/OfflineContext';
 import i18n from './i18n/config';
 
-// Styles
-import './styles/global.css';
+
 
 // Loading Component
 const Loading = () => (
-  <div className="loading-screen">
-    <div className="loading-spinner"></div>
-    <p>Loading...</p>
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="text-center">
+      <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+      <p className="text-gray-600">Loading...</p>
+    </div>
   </div>
 );
 
@@ -45,7 +45,8 @@ const ProtectedRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
-        <Route index element={<Dashboard />} />
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="appointments" element={<Appointments />} />
         <Route path="appointments/new" element={<NewAppointment />} />
         <Route path="consultation" element={<Consultation />} />
@@ -63,9 +64,8 @@ const App: React.FC = () => {
       <OfflineProvider>
         <AuthProvider>
           <Router>
-            <div className="app-container">
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
               <OfflineIndicator />
-              <LanguageToggle />
               <Toaster position="top-right" />
               
               <Suspense fallback={<Loading />}>

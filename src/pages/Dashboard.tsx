@@ -88,41 +88,41 @@ const Dashboard: React.FC = () => {
     : 60;
 
   return (
-    <div className="dashboard">
+    <div className="p-4">
       {/* Welcome Section */}
-      <div className="welcome-section">
-        <h1>
-          Welcome back, <span className="text-primary">{user?.name || 'david'}</span>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold mb-2">
+          Welcome back, <span className="text-blue-600">{user?.name || 'david'}</span>
         </h1>
-        <p className="subtitle">Manage appointments and clinic operations</p>
+        <p className="text-gray-600 text-sm mb-4">Manage appointments and clinic operations</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="stats-grid">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((stat, index) => (
-          <div key={index} className={`stat-card ${stat.color}`}>
-            <div className="stat-header">
-              <div 
-                className="stat-icon"
-                style={{ 
-                  background: stat.bgColor,
-                  color: stat.iconColor
-                }}
-              >
-                {stat.icon}
-              </div>
-              <div className="stat-trend">
-                {stat.changeType === 'positive' ? (
-                  <TrendingUp size={16} style={{ color: '#10b981' }} />
-                ) : (
-                  <TrendingDown size={16} style={{ color: '#ef4444' }} />
-                )}
-              </div>
+          <div key={index} className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3">
+            <div 
+              className="w-14 h-14 rounded-lg flex items-center justify-center"
+              style={{ 
+                background: stat.bgColor,
+                color: stat.iconColor
+              }}
+            >
+              {stat.icon}
             </div>
-            <div className="stat-content">
-              <h3 className="stat-value">{stat.value}</h3>
-              <p className="stat-title">{stat.title}</p>
-              <div className={`stat-change ${stat.changeType}`}>
+            <div className="flex-1">
+              <div className="flex items-start justify-between mb-1">
+                <h3 className="text-xl font-bold">{stat.value}</h3>
+                <div className="text-xs">
+                  {stat.changeType === 'positive' ? (
+                    <TrendingUp size={16} className="text-green-500" />
+                  ) : (
+                    <TrendingDown size={16} className="text-red-500" />
+                  )}
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
+              <div className={`text-xs ${stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
                 {stat.change}
               </div>
             </div>
@@ -131,93 +131,62 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="dashboard-grid">
+      <div className="w-full">
         {/* Today's Summary */}
-        <div className="card dashboard-status">
-          <div className="card-header">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
             <div>
-              <h3>Today's Summary</h3>
-              <p className="card-subtitle">Daily clinic overview</p>
+              <h3 className="text-xl font-semibold">Today's Summary</h3>
+              <p className="text-gray-600 text-sm">Daily clinic overview</p>
             </div>
-            <div className="status-indicator online">
+            <div className="flex items-center gap-2 text-green-500">
               <Activity size={16} />
             </div>
           </div>
-          
-          <div className="summary-charts">
-            {/* Circular Progress 1 - Appointments */}
-            <div className="chart-item">
-              <div className="circular-chart">
-                <div 
-                  className="circle-progress" 
-                  style={{ 
-                    '--progress': `${appointmentProgress}%`,
-                    background: `conic-gradient(
-                      #0ea5e9 ${appointmentProgress * 3.6}deg,
-                      #e5e7eb 0deg
-                    )`
-                  } as React.CSSProperties}
-                >
-                  <span className="chart-value">
-                    {todayAppointments}/{Math.max(totalAppointments, 22)}
-                  </span>
+
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            {/* Pie chart (Appointments) */}
+            <div className="w-full md:w-1/2 flex justify-center">
+              <div
+                className="w-full max-w-[280px] aspect-square rounded-full flex items-center justify-center relative shadow-lg overflow-hidden"
+                style={{
+                  background: `conic-gradient(
+                    #0ea5e9 ${appointmentProgress * 3.6}deg,
+                    #e5e7eb 0deg
+                  )`,
+                } as React.CSSProperties}
+              >
+                <div className="absolute w-[60%] h-[60%] rounded-full bg-white z-0"></div>
+                <div className="absolute z-10 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold text-blue-500">{Math.round(appointmentProgress)}%</span>
+                  <span className="text-sm text-gray-700">{todayAppointments} of {Math.max(totalAppointments, 22)}</span>
+                  <span className="text-xs text-gray-500 uppercase">completed</span>
                 </div>
               </div>
-              <span className="chart-label">Appointments</span>
             </div>
 
-            {/* Circular Progress 2 - Doctors Available */}
-            <div className="chart-item">
-              <div className="circular-chart">
-                <div 
-                  className="circle-progress success" 
-                  style={{ 
-                    '--progress': `${doctorProgress}%`,
-                    background: `conic-gradient(
-                      #10b981 ${doctorProgress * 3.6}deg,
-                      #e5e7eb 0deg
-                    )`
-                  } as React.CSSProperties}
-                >
-                  <span className="chart-value">
-                    {availableDoctors}/{totalDoctors}
-                  </span>
-                </div>
-              </div>
-              <span className="chart-label">Doctors Available</span>
-            </div>
-
-            {/* Bar Chart 1 - Patients Seen */}
-            <div className="chart-item">
-              <div className="bar-chart">
-                <div className="bar-label">Patients Seen</div>
-                <div className="bar-container">
-                  <div 
-                    className="bar-fill" 
-                    style={{ 
-                      width: `${(patientsSeenToday / Math.max(patients.length, 30)) * 100}%`,
-                      background: '#0ea5e9'
-                    }}
+            {/* Bar charts column */}
+            <div className="w-full md:w-1/2 flex flex-col gap-6">
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Patients Seen Today</h4>
+                <div className="w-full h-3 bg-gray-100 rounded overflow-hidden">
+                  <div
+                    className="h-3 bg-blue-500 rounded"
+                    style={{ width: `${(patientsSeenToday / Math.max(patients.length, 30)) * 100}%` }}
                   ></div>
                 </div>
-                <div className="bar-value">{patientsSeenToday}</div>
+                <div className="mt-2 text-sm text-gray-600 font-semibold">{patientsSeenToday} Patients</div>
               </div>
-            </div>
 
-            {/* Bar Chart 2 - Avg Wait Time */}
-            <div className="chart-item">
-              <div className="bar-chart">
-                <div className="bar-label">Avg Wait Time</div>
-                <div className="bar-container">
-                  <div 
-                    className="bar-fill warning" 
-                    style={{ 
-                      width: `${(avgWaitTime / 30) * 100}%`,
-                      background: '#f59e0b'
-                    }}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Average Wait Time</h4>
+                <div className="w-full h-3 bg-gray-100 rounded overflow-hidden">
+                  <div
+                    className="h-3 bg-yellow-500 rounded"
+                    style={{ width: `${(avgWaitTime / 30) * 100}%` }}
                   ></div>
                 </div>
-                <div className="bar-value">{avgWaitTime} min</div>
+                <div className="mt-2 text-sm text-gray-600 font-semibold">{avgWaitTime} minutes</div>
               </div>
             </div>
           </div>
