@@ -3,12 +3,13 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface User {
   email: string;
   name?: string;
+  role: 'admin' | 'doctor';
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string, role: 'admin' | 'doctor') => Promise<boolean>;
   logout: () => void;
   user: User | null;
 }
@@ -44,7 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     // Mock login - always succeeds
-    const mockUser = { email, name: email.split('@')[0] };
+    const mockUser = { email, name: email.split('@')[0], role: 'doctor' as 'admin' | 'doctor' };
     localStorage.setItem('session', JSON.stringify({ token: 'mock-token' }));
     localStorage.setItem('user', JSON.stringify(mockUser));
     setIsAuthenticated(true);
@@ -52,13 +53,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return true;
   };
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Mock register - always succeeds
-    const mockUser = { email, name };
-    localStorage.setItem('session', JSON.stringify({ token: 'mock-token' }));
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    setIsAuthenticated(true);
-    setUser(mockUser);
+  const register = async (name: string, email: string, password: string, role: 'admin' | 'doctor'): Promise<boolean> => {
+    // Mock register - always succeeds but doesn't auto-login
     return true;
   };
 

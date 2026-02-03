@@ -10,7 +10,8 @@ const Login: React.FC = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'doctor' as 'admin' | 'doctor'
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -67,9 +68,13 @@ const Login: React.FC = () => {
         setSuccess('Login successful! Redirecting...');
         navigate('/dashboard', { replace: true });
       } else {
-        await register(formData.name, formData.email, formData.password);
-        setSuccess('Account created successfully! Redirecting...');
-        navigate('/dashboard', { replace: true });
+        await register(formData.name, formData.email, formData.password, formData.role);
+        setSuccess('Account created successfully! Please sign in.');
+        setTimeout(() => {
+          setIsLogin(true);
+          setFormData({ name: '', email: formData.email, password: '', confirmPassword: '', role: 'doctor' });
+          setSuccess('');
+        }, 2000);
       }
     } catch (error) {
       setErrors({ 
@@ -92,7 +97,7 @@ const Login: React.FC = () => {
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
-    setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+    setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'doctor' });
     setErrors({});
     setSuccess('');
   };
@@ -121,22 +126,37 @@ const Login: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-              <div className={`relative flex items-center border rounded-md ${errors.name ? 'border-red-300' : 'border-gray-300'} focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500`}>
-                <User size={18} className="ml-3 text-gray-400" />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="flex-1 px-3 py-2 pl-2 border-0 rounded-md focus:outline-none"
-                  placeholder="Enter your full name"
-                  autoComplete="name"
-                />
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                <div className={`relative flex items-center border rounded-md ${errors.name ? 'border-red-300' : 'border-gray-300'} focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500`}>
+                  <User size={18} className="ml-3 text-gray-400" />
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="flex-1 px-3 py-2 pl-2 border-0 rounded-md focus:outline-none"
+                    placeholder="Enter your full name"
+                    autoComplete="name"
+                  />
+                </div>
+                {errors.name && <span className="text-red-500 text-sm mt-1 block">{errors.name}</span>}
               </div>
-              {errors.name && <span className="text-red-500 text-sm mt-1 block">{errors.name}</span>}
-            </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange as any}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="doctor">Doctor</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </>
           )}
 
           <div>
