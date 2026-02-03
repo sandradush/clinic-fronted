@@ -1,3 +1,4 @@
+// App.tsx - Simplified version
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
@@ -22,8 +23,6 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { OfflineProvider } from './contexts/OfflineContext';
 import i18n from './i18n/config';
 
-
-
 // Loading Component
 const Loading = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -39,7 +38,12 @@ const ProtectedRoutes = () => {
   const { isAuthenticated } = useAuth();
   
   if (!isAuthenticated) {
-    return <Login />;
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
 
   return (
@@ -53,11 +57,13 @@ const ProtectedRoutes = () => {
         <Route path="prescriptions" element={<Prescriptions />} />
         <Route path="doctors" element={<Doctors />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="*" element={<Navigate to="dashboard" replace />} />
       </Route>
     </Routes>
   );
 };
 
+// Main App Component
 const App: React.FC = () => {
   return (
     <I18nextProvider i18n={i18n}>

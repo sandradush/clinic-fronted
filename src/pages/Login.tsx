@@ -165,18 +165,20 @@ const Login: React.FC = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="flex-1 px-3 py-2 pl-2 border-0 rounded-md focus:outline-none"
+                className="flex-1 px-3 py-2 pl-2 border-0 rounded-md focus:outline-none [&::-ms-reveal]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
                 placeholder="Enter your password"
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
               />
-              <button
-                type="button"
-                className="p-2 text-gray-400 hover:text-gray-600"
-                onClick={() => setShowPassword(prev => !prev)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+              {formData.password && (
+                <button
+                  type="button"
+                  className="p-2 text-gray-400 hover:text-gray-600"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              )}
             </div>
             {errors.password && <span className="text-red-500 text-sm mt-1 block">{errors.password}</span>}
             {!isLogin && !errors.password && (
@@ -194,18 +196,20 @@ const Login: React.FC = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="flex-1 px-3 py-2 pl-2 border-0 rounded-md focus:outline-none"
+                  className="flex-1 px-3 py-2 pl-2 border-0 rounded-md focus:outline-none [&::-ms-reveal]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
                   placeholder="Confirm your password"
                   autoComplete="new-password"
                 />
-                <button
-                  type="button"
-                  className="p-2 text-gray-400 hover:text-gray-600"
-                  onClick={() => setShowConfirmPassword(prev => !prev)}
-                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+                {formData.confirmPassword && (
+                  <button
+                    type="button"
+                    className="p-2 text-gray-400 hover:text-gray-600"
+                    onClick={() => setShowConfirmPassword(prev => !prev)}
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                )}
               </div>
               {errors.confirmPassword && <span className="text-red-500 text-sm mt-1 block">{errors.confirmPassword}</span>}
             </div>

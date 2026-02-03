@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface User {
   email: string;
@@ -31,27 +31,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock login - replace with actual API call
-    if (email && password) {
+  useEffect(() => {
+    const session = localStorage.getItem('session');
+    if (session) {
       setIsAuthenticated(true);
-      setUser({ email, name: email.split('@')[0] }); // Or provide proper user object
-      return true;
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
     }
-    return false;
+  }, []);
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    // Mock login - always succeeds
+    const mockUser = { email, name: email.split('@')[0] };
+    localStorage.setItem('session', JSON.stringify({ token: 'mock-token' }));
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    setIsAuthenticated(true);
+    setUser(mockUser);
+    return true;
   };
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Mock registration - replace with actual API call
-    if (name && email && password) {
-      setIsAuthenticated(true);
-      setUser({ email, name });
-      return true;
-    }
-    return false;
+    // Mock register - always succeeds
+    const mockUser = { email, name };
+    localStorage.setItem('session', JSON.stringify({ token: 'mock-token' }));
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    setIsAuthenticated(true);
+    setUser(mockUser);
+    return true;
   };
 
   const logout = () => {
+    localStorage.removeItem('session');
+    localStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
   };
