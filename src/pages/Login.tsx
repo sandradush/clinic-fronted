@@ -64,17 +64,25 @@ const Login: React.FC = () => {
 
     try {
       if (isLogin) {
-        await login(formData.email, formData.password);
-        setSuccess('Login successful! Redirecting...');
-        navigate('/dashboard', { replace: true });
+        const result = await login(formData.email, formData.password);
+        if (result.success) {
+          setSuccess('Login successful! Redirecting...');
+          navigate('/dashboard', { replace: true });
+        } else {
+          setErrors({ general: result.message || 'Invalid email or password. Please try again.' });
+        }
       } else {
-        await register(formData.name, formData.email, formData.password, formData.role);
-        setSuccess('Account created successfully! Please sign in.');
-        setTimeout(() => {
-          setIsLogin(true);
-          setFormData({ name: '', email: formData.email, password: '', confirmPassword: '', role: 'doctor' });
-          setSuccess('');
-        }, 2000);
+        const reg = await register(formData.name, formData.email, formData.password, formData.role);
+        if (reg) {
+          setSuccess('Account created successfully! Please sign in.');
+          setTimeout(() => {
+            setIsLogin(true);
+            setFormData({ name: '', email: formData.email, password: '', confirmPassword: '', role: 'doctor' });
+            setSuccess('');
+          }, 2000);
+        } else {
+          setErrors({ general: 'Registration failed. Please try again.' });
+        }
       }
     } catch (error) {
       setErrors({ 
