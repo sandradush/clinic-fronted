@@ -15,6 +15,8 @@ export interface Doctor {
   phone: string;
   experience: number;
   availability: 'available' | 'busy' | 'offline';
+  status?: 'pending' | 'approved' | 'rejected';
+  password?: string;
 }
 
 export interface Appointment {
@@ -42,6 +44,22 @@ export interface Prescription {
   status: 'active' | 'completed';
 }
 
+export interface DoctorRequest {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  specialty: string;
+  experience: number;
+  qualifications: string;
+  licenseNumber: string;
+  requestDate: string;
+  status: 'pending' | 'approved' | 'rejected';
+  documents?: string[];
+  notes?: string;
+  password: string;
+}
+
 // Mock data
 let mockDoctors: Doctor[] = [
   { id: '1', name: 'Dr. Sandra', specialty: 'General Medicine', email: 'sandra@clinic.com', phone: '078 555 0001', experience: 8, availability: 'available' },
@@ -53,13 +71,71 @@ let mockAppointments: Appointment[] = [
   { id: '2', patientId: '2', doctorId: '1', date: '2024-01-15', time: '10:30', duration: 45, status: 'pending', type: 'Follow-up' },
 ];
 
+let mockPrescriptions: Prescription[] = [
+  { id: '1', patientId: '1', doctorId: '1', medications: [{ name: 'Paracetamol', dosage: '500mg', frequency: 'Twice daily' }], date: '2024-01-10', status: 'active' },
+];
+
+let mockDoctorRequests: DoctorRequest[] = [
+  {
+    id: '1',
+    name: 'Dr. Alice Uwimana',
+    email: 'alice.uwimana@gmail.com',
+    phone: '+250 788 123 456',
+    specialty: 'Cardiology',
+    experience: 5,
+    qualifications: 'MD, Cardiology Specialist',
+    licenseNumber: 'RW-DOC-2019-001',
+    requestDate: '2024-01-10',
+    status: 'pending',
+    documents: ['license.pdf', 'cv.pdf', 'certificates.pdf']
+  },
+  {
+    id: '2',
+    name: 'Dr. John Mugisha',
+    email: 'john.mugisha@gmail.com',
+    phone: '+250 788 234 567',
+    specialty: 'Pediatrics',
+    experience: 8,
+    qualifications: 'MD, Pediatrics',
+    licenseNumber: 'RW-DOC-2018-045',
+    requestDate: '2024-01-12',
+    status: 'pending',
+    documents: ['license.pdf', 'cv.pdf']
+  }
+];
+
+let mockPendingUsers: Array<{
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requestId: string;
+}> = [];
+
 class ApiService {
   // Mock auth
   async login(email: string, password: string) {
-    return new Promise(resolve => setTimeout(() => resolve({
-      session: { token: 'mock-token' },
-      user: { email, name: email.split('@')[0], role: 'doctor' }
-    }), 500));
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Check if user is in pending users (not yet approved)
+        const pendingUser = mockPendingUsers.find(u => u.email === email && u.password === password);
+        if (pendingUser && pendingUser.status === 'pending') {
+          reject(new Error('Your account is pending admin approval. Please wait for approval before logging in.'));
+          return;
+        }
+        if (pendingUser && pendingUser.status === 'rejected') {
+          reject(new Error('Your account application was rejected. Please contact admin.'));
+          return;
+        }
+        
+        // Normal login for approved users or admin
+        resolve({
+          session: { token: 'mock-token' },
+          user: { email, name: email.split('@')[0], role: 'doctor' }
+        });
+      }, 500);
+    });
   }
 
   async register(name: string, email: string, password: string, role: 'admin' | 'doctor') {
@@ -86,9 +162,7 @@ class ApiService {
   }
   
   async getPrescriptions(): Promise<Prescription[]> {
-    return new Promise(resolve => setTimeout(() => resolve([
-      { id: '1', patientId: '1', doctorId: '1', medications: [{ name: 'Paracetamol', dosage: '500mg', frequency: 'Twice daily' }], date: '2024-01-10', status: 'active' },
-    ]), 500));
+    return new Promise(resolve => setTimeout(() => resolve([...mockPrescriptions]), 500));
   }
 
   // Mock admin functions
@@ -107,6 +181,178 @@ class ApiService {
       setTimeout(() => {
         const doctor = mockDoctors.find(d => d.id === doctorId);
         if (doctor) doctor.availability = availability;
+        resolve({ success: true });
+      }, 500);
+    });
+  }
+
+  async createDoctor(doctorData: {
+    name: string;
+    specialty: string;
+    phone: string;
+    email: string;
+    password: string;
+  }) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const newDoctor: Doctor = {
+          id: `doc_${Date.now()}`,
+          name: doctorData.name,
+          specialty: doctorData.specialty,
+          email: doctorData.email,
+          phone: doctorData.phone,
+          experience: 0,
+          availability: 'available',
+          password: doctorData.password
+        };
+        mockDoctors.push(newDoctor);
+        resolve({ success: true, doctor: newDoctor });
+      }, 500);
+    });
+  }
+
+  // Doctor request management
+  async getDoctorRequests(): Promise<DoctorRequest[]> {
+    return new Promise(resolve => setTimeout(() => resolve([...mockDoctorRequests]), 500));
+  }
+
+  async approveDoctorRequest(requestId: string) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const request = mockDoctorRequests.find(r => r.id === requestId);
+        if (request) {
+          request.status = 'approved';
+          // Add approved doctor to doctors list
+          const newDoctor: Doctor = {
+            id: `doc_${Date.now()}`,
+            name: request.name,
+            specialty: request.specialty,
+            email: request.email,
+            phone: request.phone,
+            experience: request.experience,
+            availability: 'available',
+            status: 'approved'
+          };
+          mockDoctors.push(newDoctor);
+          
+          // Approve user account
+          const pendingUser = mockPendingUsers.find(u => u.requestId === requestId);
+          if (pendingUser) {
+            pendingUser.status = 'approved';
+          }
+        }
+        resolve({ success: true });
+      }, 500);
+    });
+  }
+
+  async rejectDoctorRequest(requestId: string) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const request = mockDoctorRequests.find(r => r.id === requestId);
+        if (request) request.status = 'rejected';
+        
+        // Reject user account
+        const pendingUser = mockPendingUsers.find(u => u.requestId === requestId);
+        if (pendingUser) {
+          pendingUser.status = 'rejected';
+        }
+        
+        resolve({ success: true });
+      }, 500);
+    });
+  }
+
+  async submitDoctorRequest(requestData: {
+    name: string;
+    email: string;
+    phone: string;
+    specialty: string;
+    experience: number;
+    qualifications: string;
+    licenseNumber: string;
+    documents: string[];
+    password: string;
+  }) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const requestId = `req_${Date.now()}`;
+        const newRequest: DoctorRequest = {
+          id: requestId,
+          name: requestData.name,
+          email: requestData.email,
+          phone: requestData.phone,
+          specialty: requestData.specialty,
+          experience: requestData.experience,
+          qualifications: requestData.qualifications,
+          licenseNumber: requestData.licenseNumber,
+          requestDate: new Date().toISOString().split('T')[0],
+          status: 'pending',
+          documents: requestData.documents,
+          password: requestData.password
+        };
+        mockDoctorRequests.push(newRequest);
+        
+        // Create pending user account
+        mockPendingUsers.push({
+          id: `user_${Date.now()}`,
+          name: requestData.name,
+          email: requestData.email,
+          password: requestData.password,
+          status: 'pending',
+          requestId: requestId
+        });
+        
+        resolve({ success: true });
+      }, 1000);
+    });
+  }
+
+  async createAppointment(appointmentData: {
+    patientName: string;
+    patientPhone: string;
+    patientEmail: string;
+    date: string;
+    time: string;
+    type: string;
+    doctor: string;
+    notes: string;
+  }) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const newAppointment: Appointment = {
+          id: `apt_${Date.now()}`,
+          patientId: `patient_${Date.now()}`,
+          doctorId: '1', // Default doctor ID
+          date: appointmentData.date,
+          time: appointmentData.time,
+          duration: 30,
+          status: 'confirmed',
+          type: appointmentData.type,
+          notes: appointmentData.notes
+        };
+        mockAppointments.push(newAppointment);
+        resolve({ success: true });
+      }, 500);
+    });
+  }
+
+  async createPrescription(prescriptionData: {
+    patientName: string;
+    medications: { name: string; dosage: string; frequency: string }[];
+    notes: string;
+  }) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const newPrescription: Prescription = {
+          id: `rx_${Date.now()}`,
+          patientId: `patient_${Date.now()}`,
+          doctorId: '1', // Default doctor ID
+          medications: prescriptionData.medications,
+          date: new Date().toISOString().split('T')[0],
+          status: 'active'
+        };
+        mockPrescriptions.push(newPrescription);
         resolve({ success: true });
       }, 500);
     });

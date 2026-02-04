@@ -20,8 +20,6 @@ const Login: React.FC = () => {
   const { login, register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect logic is now handled in the login submit handler only
-
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
     

@@ -85,15 +85,6 @@ const AdminDashboard: React.FC = () => {
                 }`}>
                   {doctor.availability}
                 </span>
-                <select
-                  onChange={(e) => handleUpdateDoctorStatus(doctor.id, e.target.value as any)}
-                  className="text-sm border rounded px-2 py-1"
-                  defaultValue={doctor.availability}
-                >
-                  <option value="available">Available</option>
-                  <option value="busy">Busy</option>
-                  <option value="offline">Offline</option>
-                </select>
               </div>
             </div>
           ))}

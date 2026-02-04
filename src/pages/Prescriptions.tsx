@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { FileText, Search, Plus, Printer, Edit, Trash2 } from 'lucide-react';
+import { FileText, Search, Plus, Printer, Edit, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { api } from '../services/api';
+import { usePrescriptions } from '../hooks/useApiData';
 
 type Prescription = {
   id: string;
@@ -11,6 +13,12 @@ type Prescription = {
   doctor?: string;
 };
 
+interface NewPrescriptionForm {
+  patientName: string;
+  medications: { name: string; dosage: string; frequency: string }[];
+  notes: string;
+}
+
 const statusStyles: Record<string, { bg: string; text: string }> = {
   active: { bg: 'bg-green-100', text: 'text-green-800' },
   completed: { bg: 'bg-gray-100', text: 'text-gray-700' },
@@ -18,13 +26,71 @@ const statusStyles: Record<string, { bg: string; text: string }> = {
 };
 
 const Prescriptions: React.FC = () => {
+  const { prescriptions: apiPrescriptions = [], loading, refetch } = usePrescriptions();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | string>('all');
+  const [showNewPrescription, setShowNewPrescription] = useState(false);
+  const [formData, setFormData] = useState<NewPrescriptionForm>({
+    patientName: '',
+    medications: [{ name: '', dosage: '', frequency: '' }],
+    notes: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
 
-  const prescriptions: Prescription[] = [
+  // Fallback data for development
+  const fallbackPrescriptions: Prescription[] = [
     { id: 'RX-001', patientName: 'Jean de Dieu', date: '2024-01-15', medications: [{ name: 'Amoxicillin', dosage: '500mg', frequency: '3 times daily' }, { name: 'Paracetamol', dosage: '500mg', frequency: 'As needed' }], status: 'active', doctor: 'Dr. Sandra' },
     { id: 'RX-002', patientName: 'Marie Claire', date: '2024-01-10', medications: [{ name: 'Metformin', dosage: '850mg', frequency: '2 times daily' }], status: 'completed', doctor: 'Dr. Sandra' },
   ];
+
+  const prescriptions = apiPrescriptions.length ? apiPrescriptions : fallbackPrescriptions;
+
+  const addMedication = () => {
+    setFormData({
+      ...formData,
+      medications: [...formData.medications, { name: '', dosage: '', frequency: '' }]
+    });
+  };
+
+  const removeMedication = (index: number) => {
+    setFormData({
+      ...formData,
+      medications: formData.medications.filter((_, i) => i !== index)
+    });
+  };
+
+  const updateMedication = (index: number, field: string, value: string) => {
+    const updatedMedications = formData.medications.map((med, i) => 
+      i === index ? { ...med, [field]: value } : med
+    );
+    setFormData({ ...formData, medications: updatedMedications });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    
+    try {
+      await api.createPrescription({
+        patientName: formData.patientName,
+        medications: formData.medications.filter(med => med.name && med.dosage),
+        notes: formData.notes
+      });
+      
+      // Reset form
+      setFormData({
+        patientName: '',
+        medications: [{ name: '', dosage: '', frequency: '' }],
+        notes: ''
+      });
+      setShowNewPrescription(false);
+      refetch();
+    } catch (error) {
+      console.error('Failed to create prescription:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     return prescriptions.filter(p => {
@@ -44,7 +110,10 @@ const Prescriptions: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded text-sm">
+          <button 
+            onClick={() => setShowNewPrescription(true)}
+            className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded text-sm"
+          >
             <Plus size={16} /> New Prescription
           </button>
         </div>
@@ -113,6 +182,130 @@ const Prescriptions: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* New Prescription Modal */}
+      {showNewPrescription && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">New Prescription</h2>
+              <button 
+                onClick={() => setShowNewPrescription(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Patient Name *</label>
+                <input
+                  type="text"
+                  value={formData.patientName}
+                  onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">Medications *</label>
+                  <button
+                    type="button"
+                    onClick={addMedication}
+                    className="text-blue-600 text-sm hover:text-blue-800"
+                  >
+                    + Add Medication
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  {formData.medications.map((medication, index) => (
+                    <div key={index} className="grid grid-cols-3 gap-3 p-3 border rounded">
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="Medication name"
+                          value={medication.name}
+                          onChange={(e) => updateMedication(index, 'name', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="Dosage (e.g., 500mg)"
+                          value={medication.dosage}
+                          onChange={(e) => updateMedication(index, 'dosage', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <select
+                          value={medication.frequency}
+                          onChange={(e) => updateMedication(index, 'frequency', e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        >
+                          <option value="">Select frequency</option>
+                          <option value="Once daily">Once daily</option>
+                          <option value="Twice daily">Twice daily</option>
+                          <option value="3 times daily">3 times daily</option>
+                          <option value="4 times daily">4 times daily</option>
+                          <option value="As needed">As needed</option>
+                          <option value="Before meals">Before meals</option>
+                          <option value="After meals">After meals</option>
+                        </select>
+                        {formData.medications.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeMedication(index)}
+                            className="px-2 py-2 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Special instructions, warnings, etc..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowNewPrescription(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {submitting ? 'Creating...' : 'Create Prescription'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

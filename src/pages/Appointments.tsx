@@ -1,8 +1,20 @@
 import React, { useMemo, useState } from 'react';
-import { Clock, User, Search, Plus, CheckCircle, AlertCircle, Calendar as CalendarIcon, Phone, Mail, MoreHorizontal } from 'lucide-react';
+import { Clock, User, Search, Plus, CheckCircle, AlertCircle, Calendar as CalendarIcon, Phone, Mail, MoreHorizontal, X } from 'lucide-react';
 import { useAppointments } from '../hooks/useApiData';
+import { api } from '../services/api';
 
 type Status = 'confirmed' | 'waiting' | 'in-progress' | 'pending' | string;
+
+interface NewAppointmentForm {
+  patientName: string;
+  patientPhone: string;
+  patientEmail: string;
+  date: string;
+  time: string;
+  type: string;
+  doctor: string;
+  notes: string;
+}
 
 const statusStyles: Record<string, { bg: string; text: string }> = {
   confirmed: { bg: 'bg-green-100', text: 'text-green-700' },
@@ -12,12 +24,65 @@ const statusStyles: Record<string, { bg: string; text: string }> = {
 };
 
 const Appointments: React.FC = () => {
-  const { appointments = [], loading } = useAppointments();
+  const { appointments = [], loading, refetch } = useAppointments();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | Status>('all');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [showNewAppointment, setShowNewAppointment] = useState(false);
+  const [formData, setFormData] = useState<NewAppointmentForm>({
+    patientName: '',
+    patientPhone: '',
+    patientEmail: '',
+    date: '',
+    time: '',
+    type: '',
+    doctor: '',
+    notes: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
 
-  // Fallback mock if hook returns empty (keeps page useful in dev)
+  const appointmentTypes = ['Consultation', 'Follow-up', 'Check-up', 'Vaccination', 'Emergency', 'Routine'];
+  const doctors = ['Dr. Sandra', 'Dr. Paul', 'Dr. Alice', 'Dr. John'];
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    
+    try {
+      await api.createAppointment({
+        patientName: formData.patientName,
+        patientPhone: formData.patientPhone,
+        patientEmail: formData.patientEmail,
+        date: formData.date,
+        time: formData.time,
+        type: formData.type,
+        doctor: formData.doctor,
+        notes: formData.notes
+      });
+      
+      // Reset form and close modal
+      setFormData({
+        patientName: '',
+        patientPhone: '',
+        patientEmail: '',
+        date: '',
+        time: '',
+        type: '',
+        doctor: '',
+        notes: ''
+      });
+      setShowNewAppointment(false);
+      refetch(); // Refresh appointments list
+    } catch (error) {
+      console.error('Failed to create appointment:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
   const fallback = [
     { id: '1', time: '09:00 AM', patientName: 'Jean de Dieu', patientPhone: '078 123 4567', patientEmail: 'jean@example.com', type: 'Consultation', status: 'confirmed', doctor: 'Dr. Sandra', room: 'Room 101' },
     { id: '2', time: '10:30 AM', patientName: 'Marie Claire', patientPhone: '073 987 6543', patientEmail: 'marie@example.com', type: 'Follow-up', status: 'waiting', doctor: 'Dr. Sandra', room: 'Room 102' },
@@ -47,7 +112,10 @@ const Appointments: React.FC = () => {
           <button className="hidden sm:inline-flex items-center gap-2 px-3 py-2 bg-white border rounded shadow-sm text-sm">
             <CalendarIcon size={16} /> Calendar View
           </button>
-          <button className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded shadow-sm text-sm">
+          <button 
+            onClick={() => setShowNewAppointment(true)}
+            className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded shadow-sm text-sm"
+          >
             <Plus size={16} /> New Appointment
           </button>
         </div>
@@ -184,6 +252,148 @@ const Appointments: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* New Appointment Modal */}
+      {showNewAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">New Appointment</h2>
+              <button 
+                onClick={() => setShowNewAppointment(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Patient Name *</label>
+                <input
+                  type="text"
+                  name="patientName"
+                  value={formData.patientName}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                  <input
+                    type="tel"
+                    name="patientPhone"
+                    value={formData.patientPhone}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    name="patientEmail"
+                    value={formData.patientEmail}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time *</label>
+                  <input
+                    type="time"
+                    name="time"
+                    value={formData.time}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select type</option>
+                    {appointmentTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Doctor *</label>
+                  <select
+                    name="doctor"
+                    value={formData.doctor}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select doctor</option>
+                    {doctors.map(doctor => (
+                      <option key={doctor} value={doctor}>{doctor}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Additional notes..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowNewAppointment(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {submitting ? 'Creating...' : 'Create Appointment'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

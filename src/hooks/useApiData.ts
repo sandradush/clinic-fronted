@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Patient, Doctor, Appointment, Prescription } from '../services/api';
+import type { Patient, Doctor, Appointment, Prescription, DoctorRequest } from '../services/api';
 import { api } from '../services/api';
 
 export const usePatients = () => {
@@ -100,4 +100,29 @@ export const usePrescriptions = () => {
   }, []);
 
   return { prescriptions, loading, error, refetch: fetchPrescriptions };
+};
+
+export const useDoctorRequests = () => {
+  const [doctorRequests, setDoctorRequests] = useState<DoctorRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchDoctorRequests = async () => {
+    try {
+      setLoading(true);
+      const data = await api.getDoctorRequests();
+      setDoctorRequests(data);
+      setError(null);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDoctorRequests();
+  }, []);
+
+  return { doctorRequests, loading, error, refetch: fetchDoctorRequests };
 };

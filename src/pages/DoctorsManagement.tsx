@@ -43,7 +43,7 @@ const Doctors: React.FC = () => {
       </div>
 
       {/* Tab Content */}
-      <div>
+      <div className="bg-white rounded-lg shadow-sm">
         <ActiveComponent />
       </div>
     </div>
