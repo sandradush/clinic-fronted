@@ -8,7 +8,7 @@ const Sidebar: React.FC = () => {
   const { logout } = useAuth();
 
   const menuItems = [
-    { path: '/', icon: Home, label: 'Dashboard' },
+    { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/appointments', icon: Calendar, label: 'Appointments' },
     { path: '/doctors', icon: UserCheck, label: 'Doctors' },
     { path: '/consultation', icon: Users, label: 'Consultation' },

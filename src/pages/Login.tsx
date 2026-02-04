@@ -20,11 +20,7 @@ const Login: React.FC = () => {
   const { login, register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
+  // Redirect logic is now handled in the login submit handler only
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -67,7 +63,7 @@ const Login: React.FC = () => {
         const result = await login(formData.email, formData.password);
         if (result.success) {
           setSuccess('Login successful! Redirecting...');
-          navigate('/dashboard', { replace: true });
+          navigate(result.redirectPath || '/dashboard', { replace: true });
         } else {
           setErrors({ general: result.message || 'Invalid email or password. Please try again.' });
         }

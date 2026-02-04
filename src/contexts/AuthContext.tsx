@@ -8,7 +8,7 @@ interface User {
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; redirectPath?: string }>;
   register: (name: string, email: string, password: string, role: 'admin' | 'doctor') => Promise<boolean>;
   logout: () => void;
   user: User | null;
@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; message?: string; redirectPath?: string }> => {
     try {
       const res = await fetch('https://clinic-backend-s2lx.onrender.com/api/auth/signin', {
         method: 'POST',
@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.setItem('user', JSON.stringify(userData));
           setIsAuthenticated(true);
           setUser(userData);
-          return { success: true };
+          return { success: true, redirectPath: userData.role === 'admin' ? '/admin-dashboard' : '/dashboard' };
         }
         const msg = data?.message || textBody || 'Invalid server response';
         console.error('Auth signin: unexpected ok response', { status: res.status, data, textBody });

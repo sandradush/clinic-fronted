@@ -10,6 +10,7 @@ import OfflineIndicator from './components/common/OfflineIndicator';
 
 // Pages
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import Appointments from './pages/Appointments';
 import Prescriptions from './pages/Prescriptions';
 import NewAppointment from './pages/NewAppointment';
@@ -49,15 +50,16 @@ const ProtectedRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="appointments" element={<Appointments />} />
-        <Route path="appointments/new" element={<NewAppointment />} />
-        <Route path="consultation" element={<Consultation />} />
-        <Route path="prescriptions" element={<Prescriptions />} />
-        <Route path="doctors" element={<Doctors />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="*" element={<Navigate to="dashboard" replace />} />
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/appointments" element={<Appointments />} />
+        <Route path="/appointments/new" element={<NewAppointment />} />
+        <Route path="/consultation" element={<Consultation />} />
+        <Route path="/prescriptions" element={<Prescriptions />} />
+        <Route path="/doctors" element={<Doctors />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>
   );
