@@ -99,7 +99,7 @@ const Consultation: React.FC = () => {
 
             {selectedAppointment && (
               (() => {
-                const a = appointments.find(x => x.id === selectedAppointment)!;
+                const a = filtered.find(x => x.id === selectedAppointment)!;
                 return (
                   <div className="h-full flex flex-col">
                     <div className="flex items-start justify-between">

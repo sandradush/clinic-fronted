@@ -197,7 +197,7 @@ const Appointments: React.FC = () => {
                       {a.status === 'confirmed' && <CheckCircle size={14} />}
                       {a.status === 'in-progress' && <AlertCircle size={14} />}
                       {a.status === 'waiting' && <Clock size={14} />}
-                      <span className="capitalize">{a.status.replace('-', ' ')}</span>
+                      <span className="capitalize">{a.status?.replace('-', ' ') || 'Unknown'}</span>
                     </div>
                   </td>
                   <td className="py-3 px-3 align-top text-sm relative">

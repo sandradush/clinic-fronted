@@ -54,7 +54,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      // Try parse JSON, fall back to text for better error messages
       let data: any = null;
       let textBody = '';
       try {
@@ -83,7 +82,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { success: false, message: String(msg) };
       }
 
-      // Non-OK responses
       const serverMessage = (data && data.message) ? String(data.message) : (textBody || `Request failed (${res.status})`);
       console.warn('Auth signin failed', { status: res.status, serverMessage, data, textBody });
       return { success: false, message: serverMessage };
