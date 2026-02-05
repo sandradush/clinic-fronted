@@ -3,7 +3,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package.json package-lock.json* yarn.lock* ./
-RUN if [ -f yarn.lock ]; then yarn --frozen-lockfile --production=false || true; else npm install; fi
+RUN if [ -f yarn.lock ]; then yarn --frozen-lockfile --production=false || true; else npm install --legacy-peer-deps; fi
 
 # Copy source and build
 COPY . .
