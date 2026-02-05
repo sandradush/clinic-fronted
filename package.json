@@ -12,7 +12,7 @@
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "date-fns": "^4.1.0",
-    "i18next": "25.5.0",
+    "i18next": "^25.5.2",
     "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -28,6 +28,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "engines": {
+    "node": "18.x"
   },
   "eslintConfig": {
     "extends": [
