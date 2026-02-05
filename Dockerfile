@@ -1,9 +1,9 @@
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json* yarn.lock* ./
-RUN if [ -f yarn.lock ]; then yarn --frozen-lockfile --production=false || true; else npm install --legacy-peer-deps; fi
+COPY package.json ./
+RUN npm install --legacy-peer-deps
 
 # Copy source and build
 COPY . .
