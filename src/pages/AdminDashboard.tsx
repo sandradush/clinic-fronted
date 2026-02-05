@@ -4,8 +4,8 @@ import { useAppointments, useDoctors } from '../hooks/useApiData';
 import { api } from '../services/api';
 
 const AdminDashboard: React.FC = () => {
-  const { appointments = [], loading: appointmentsLoading } = useAppointments();
-  const { doctors = [], loading: doctorsLoading } = useDoctors();
+  const { appointments = [] } = useAppointments();
+  const { doctors = [] } = useDoctors();
   const [transferring, setTransferring] = useState<string | null>(null);
 
   const handleTransferAppointment = async (appointmentId: string, newDoctorId: string) => {
@@ -17,15 +17,6 @@ const AdminDashboard: React.FC = () => {
       console.error('Transfer failed:', error);
     } finally {
       setTransferring(null);
-    }
-  };
-
-  const handleUpdateDoctorStatus = async (doctorId: string, availability: 'available' | 'busy' | 'offline') => {
-    try {
-      await api.updateDoctorAvailability(doctorId, availability);
-      // Refresh data would happen here
-    } catch (error) {
-      console.error('Status update failed:', error);
     }
   };
 

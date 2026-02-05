@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { Search, CheckCircle, XCircle, Clock, Mail, Phone, User, GraduationCap } from 'lucide-react';
 import { api } from '../services/api';
 import { useDoctorRequests } from '../hooks/useApiData';
-import type { DoctorRequest } from '../services/api';
 
 const DoctorRequests: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');

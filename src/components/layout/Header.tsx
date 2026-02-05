@@ -1,10 +1,8 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Bell } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Header: React.FC = () => {
-  const { t } = useTranslation();
   const { user } = useAuth();
 
   return (

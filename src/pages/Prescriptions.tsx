@@ -26,7 +26,7 @@ const statusStyles: Record<string, { bg: string; text: string }> = {
 };
 
 const Prescriptions: React.FC = () => {
-  const { prescriptions: apiPrescriptions = [], loading, refetch } = usePrescriptions();
+  const { prescriptions: apiPrescriptions = [], refetch } = usePrescriptions();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | string>('all');
   const [showNewPrescription, setShowNewPrescription] = useState(false);

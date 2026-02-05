@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Video, Phone, User, MessageCircle, Clock, MapPin, MoreHorizontal } from 'lucide-react';
+import { Video, Phone, User, MessageCircle, MapPin, MoreHorizontal } from 'lucide-react';
 
 type Method = 'video' | 'phone' | 'in-person' | string;
 
@@ -14,20 +14,19 @@ const Consultation: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filterMethod, setFilterMethod] = useState<'all' | Method>('all');
 
-  const appointments = [
-    { id: '1', patientName: 'Jean de Dieu', time: '09:00 AM', type: 'Consultation', method: 'video', phone: '078 123 4567', email: 'jean@example.com', notes: 'Patient prefers video call due to mobility issues', status: 'confirmed' },
-    { id: '2', patientName: 'Marie Claire', time: '10:30 AM', type: 'Follow-up', method: 'phone', phone: '073 987 6543', email: 'marie@example.com', notes: 'Phone consultation requested - diabetes follow-up', status: 'waiting' },
-    { id: '3', patientName: 'Eric Ndayishimiye', time: '02:00 PM', type: 'Check-up', method: 'in-person', phone: '072 555 1234', email: 'eric@example.com', notes: 'Physical examination required', status: 'confirmed' },
-  ];
-
   const filtered = useMemo(() => {
+    const appointments = [
+      { id: '1', patientName: 'Jean de Dieu', time: '09:00 AM', type: 'Consultation', method: 'video', phone: '078 123 4567', email: 'jean@example.com', notes: 'Patient prefers video call due to mobility issues', status: 'confirmed' },
+      { id: '2', patientName: 'Marie Claire', time: '10:30 AM', type: 'Follow-up', method: 'phone', phone: '073 987 6543', email: 'marie@example.com', notes: 'Phone consultation requested - diabetes follow-up', status: 'waiting' },
+      { id: '3', patientName: 'Eric Ndayishimiye', time: '02:00 PM', type: 'Check-up', method: 'in-person', phone: '072 555 1234', email: 'eric@example.com', notes: 'Physical examination required', status: 'confirmed' },
+    ];
     return appointments.filter(a => {
       const hay = [a.patientName, a.phone, a.type, a.notes].join(' ').toLowerCase();
       const matchesSearch = hay.includes(search.toLowerCase());
       const matchesMethod = filterMethod === 'all' || a.method === filterMethod;
       return matchesSearch && matchesMethod;
     });
-  }, [appointments, search, filterMethod]);
+  }, [search, filterMethod]);
 
   const getMethodIcon = (m: Method) => {
     if (m === 'video') return <Video size={16} />;

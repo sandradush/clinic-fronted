@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Clock, User, Search, Plus, CheckCircle, AlertCircle, Calendar as CalendarIcon, Phone, Mail, MoreHorizontal, X } from 'lucide-react';
+import { Clock, User, Search, Plus, CheckCircle, AlertCircle, Calendar as CalendarIcon, MoreHorizontal, X } from 'lucide-react';
 import { useAppointments } from '../hooks/useApiData';
 import { api } from '../services/api';
 

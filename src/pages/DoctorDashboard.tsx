@@ -6,7 +6,7 @@ import { api } from '../services/api';
 
 const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { appointments = [], loading } = useAppointments();
+  const { appointments = [] } = useAppointments();
   const [availability, setAvailability] = useState<'available' | 'busy' | 'offline'>('available');
   const [selectedAppointment, setSelectedAppointment] = useState<string | null>(null);
 
