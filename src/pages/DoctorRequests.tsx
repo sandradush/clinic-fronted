@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, CheckCircle, XCircle, Clock, Mail, Phone, User, GraduationCap, Edit } from 'lucide-react';
 import { api } from '../services/api';
 import { useDoctorRequests } from '../hooks/useApiData';
+import toast from 'react-hot-toast';
 
 const DoctorRequests: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,9 +25,11 @@ const DoctorRequests: React.FC = () => {
     setProcessing(requestId);
     try {
       await api.approveDoctorRequest(requestId);
+      toast.success('Doctor request approved successfully!');
       refetch();
     } catch (error) {
       console.error('Approval failed:', error);
+      toast.error('Failed to approve request. Please try again.');
     } finally {
       setProcessing(null);
     }
@@ -36,9 +39,11 @@ const DoctorRequests: React.FC = () => {
     setProcessing(requestId);
     try {
       await api.rejectDoctorRequest(requestId);
+      toast.success('Doctor request rejected.');
       refetch();
     } catch (error) {
       console.error('Rejection failed:', error);
+      toast.error('Failed to reject request. Please try again.');
     } finally {
       setProcessing(null);
     }
@@ -60,10 +65,12 @@ const DoctorRequests: React.FC = () => {
   const handleUpdate = async () => {
     try {
       await api.updateDoctorRequest(editingDoctor.id, editForm);
+      toast.success('Doctor information updated successfully!');
       setEditingDoctor(null);
       refetch();
     } catch (error) {
       console.error('Update failed:', error);
+      toast.error('Failed to update doctor information.');
     }
   };
 

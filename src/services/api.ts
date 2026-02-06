@@ -147,6 +147,44 @@ class ApiService {
     });
   }
 
+  async updatePrescription(prescriptionId: string, data: any) {
+    return this.request(`/prescriptions/${prescriptionId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async cancelPrescription(prescriptionId: string) {
+    return this.request(`/prescriptions/${prescriptionId}/cancel`, {
+      method: 'PUT',
+    });
+  }
+
+  async deletePrescription(prescriptionId: string) {
+    return this.request(`/prescriptions/${prescriptionId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async updateProfile(data: any) {
+    try {
+      return await this.request('/profile', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    } catch (error: any) {
+      console.error('API updateProfile error:', error);
+      throw error;
+    }
+  }
+
+  async changePassword(data: any) {
+    return this.request('/profile/change-password', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
   // Doctor Requests
   async getDoctorRequests() {
     return this.request('/doctor-requests');

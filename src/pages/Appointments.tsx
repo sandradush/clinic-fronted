@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Clock, User, Search, Plus, CheckCircle, AlertCircle, Calendar as CalendarIcon, MoreHorizontal, X } from 'lucide-react';
-import { useAppointments } from '../hooks/useApiData';
+import { useAppointments, useDoctors } from '../hooks/useApiData';
 import { api } from '../services/api';
+import toast from 'react-hot-toast';
 
 type Status = 'confirmed' | 'waiting' | 'in-progress' | 'pending' | string;
 
@@ -25,6 +26,7 @@ const statusStyles: Record<string, { bg: string; text: string }> = {
 
 const Appointments: React.FC = () => {
   const { appointments = [], loading, refetch } = useAppointments();
+  const { doctors: dbDoctors = [] } = useDoctors();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | Status>('all');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -42,7 +44,6 @@ const Appointments: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const appointmentTypes = ['Consultation', 'Follow-up', 'Check-up', 'Vaccination', 'Emergency', 'Routine'];
-  const doctors = ['Dr. Sandra', 'Dr. Paul', 'Dr. Alice', 'Dr. John'];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -64,7 +65,8 @@ const Appointments: React.FC = () => {
         notes: formData.notes
       });
       
-      // Reset form and close modal
+      toast.success('Appointment created successfully!');
+      
       setFormData({
         patientName: '',
         patientPhone: '',
@@ -76,21 +78,15 @@ const Appointments: React.FC = () => {
         notes: ''
       });
       setShowNewAppointment(false);
-      refetch(); // Refresh appointments list
+      refetch();
     } catch (error) {
       console.error('Failed to create appointment:', error);
+      toast.error('Failed to create appointment. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
-  const fallback = [
-    { id: '1', time: '09:00 AM', patientName: 'Jean de Dieu', patientPhone: '078 123 4567', patientEmail: 'jean@example.com', type: 'Consultation', status: 'confirmed', doctor: 'Dr. Sandra', room: 'Room 101' },
-    { id: '2', time: '10:30 AM', patientName: 'Marie Claire', patientPhone: '073 987 6543', patientEmail: 'marie@example.com', type: 'Follow-up', status: 'waiting', doctor: 'Dr. Sandra', room: 'Room 102' },
-    { id: '3', time: '02:00 PM', patientName: 'Eric Ndayishimiye', patientPhone: '072 555 1234', patientEmail: 'eric@example.com', type: 'Check-up', status: 'in-progress', doctor: 'Dr. Sandra', room: 'Room 101' },
-    { id: '4', time: '03:30 PM', patientName: 'Alice Mukamana', patientPhone: '071 444 5678', patientEmail: 'alice@example.com', type: 'Vaccination', status: 'pending', doctor: 'Dr. Sandra', room: 'Room 103' },
-  ];
-
-  const rows = (appointments.length ? appointments : fallback) as any[];
+  const rows = appointments as any[];
 
   const filtered = useMemo(() => {
     return rows.filter(r => {
@@ -109,9 +105,6 @@ const Appointments: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="hidden sm:inline-flex items-center gap-2 px-3 py-2 bg-white border rounded shadow-sm text-sm">
-            <CalendarIcon size={16} /> Calendar View
-          </button>
           <button 
             onClick={() => setShowNewAppointment(true)}
             className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded shadow-sm text-sm"
@@ -355,8 +348,8 @@ const Appointments: React.FC = () => {
                     required
                   >
                     <option value="">Select doctor</option>
-                    {doctors.map(doctor => (
-                      <option key={doctor} value={doctor}>{doctor}</option>
+                    {dbDoctors.filter(d => d.status === 'approved' || !d.status).map(doctor => (
+                      <option key={doctor.id} value={doctor.id}>{doctor.name}</option>
                     ))}
                   </select>
                 </div>

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Search, Clock, Phone, Mail, MapPin } from 'lucide-react';
+import { useDoctors } from '../hooks/useApiData';
 
 interface Doctor {
   id: string;
@@ -26,22 +27,43 @@ const availabilityStyles: Record<string, { bg: string; text: string }> = {
 const ApprovedDoctors: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | string>('all');
+  const { doctors, loading } = useDoctors();
 
   const filtered = useMemo(() => {
-    const doctors: Doctor[] = [
-      { id: '1', name: 'Dr. Sarah Johnson', specialty: 'Cardiology', email: 'sarah.johnson@clinic.com', phone: '+1 (555) 123-4567', location: 'Room 201', availability: 'available', nextAvailable: 'Now', experience: '12 years', rating: 4.9, todayAppointments: 8, totalAppointments: 1247 },
-      { id: '2', name: 'Dr. Michael Chen', specialty: 'Pediatrics', email: 'michael.chen@clinic.com', phone: '+1 (555) 234-5678', location: 'Room 105', availability: 'busy', nextAvailable: '2:30 PM', experience: '8 years', rating: 4.8, todayAppointments: 12, totalAppointments: 892 },
-      { id: '3', name: 'Dr. Emily Rodriguez', specialty: 'Dermatology', email: 'emily.rodriguez@clinic.com', phone: '+1 (555) 345-6789', location: 'Room 303', availability: 'available', nextAvailable: 'Now', experience: '15 years', rating: 4.7, todayAppointments: 6, totalAppointments: 1456 },
-      { id: '4', name: 'Dr. James Wilson', specialty: 'Orthopedics', email: 'james.wilson@clinic.com', phone: '+1 (555) 456-7890', location: 'Room 208', availability: 'offline', nextAvailable: 'Tomorrow 9:00 AM', experience: '20 years', rating: 4.9, todayAppointments: 0, totalAppointments: 2134 },
-      { id: '5', name: 'Dr. Lisa Thompson', specialty: 'Internal Medicine', email: 'lisa.thompson@clinic.com', phone: '+1 (555) 567-8901', location: 'Room 150', availability: 'available', nextAvailable: 'Now', experience: '10 years', rating: 4.6, todayAppointments: 9, totalAppointments: 1089 }
-    ];
-    return doctors.filter(d => {
+    // Only show approved doctors (filter out pending ones)
+    const approvedDoctors = doctors.filter(d => d.status === 'approved' || !d.status);
+    return approvedDoctors.filter(d => {
       const hay = [d.name, d.specialty, d.location, d.email, d.phone].join(' ').toLowerCase();
       const matchesSearch = hay.includes(searchTerm.toLowerCase());
       const matchesStatus = filterStatus === 'all' || d.availability === filterStatus;
       return matchesSearch && matchesStatus;
     });
-  }, [searchTerm, filterStatus]);
+  }, [doctors, searchTerm, filterStatus]);
+
+  if (loading) {
+    return (
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-6">
+          <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-10 w-40 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-white rounded-lg shadow-sm p-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4">
@@ -73,7 +95,12 @@ const ApprovedDoctors: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-        {filtered.map((d) => (
+        {filtered.length === 0 ? (
+          <div className="col-span-full text-center py-8 text-gray-500">
+            No approved doctors found
+          </div>
+        ) : (
+          filtered.map((d) => (
           <div key={d.id} className="bg-white rounded-lg shadow-sm p-4 flex flex-col">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-semibold">{d.name.split(' ').map(n => n[0]).slice(0,2).join('')}</div>
@@ -120,7 +147,8 @@ const ApprovedDoctors: React.FC = () => {
               </div>
             </div>
           </div>
-        ))}
+        )))
+        }
       </div>
     </div>
   );

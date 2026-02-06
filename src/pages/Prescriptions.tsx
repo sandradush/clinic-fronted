@@ -3,6 +3,7 @@ import { FileText, Search, Plus, Printer, Edit, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '../services/api';
 import { usePrescriptions } from '../hooks/useApiData';
+import toast from 'react-hot-toast';
 
 type Prescription = {
   id: string;
@@ -36,6 +37,95 @@ const Prescriptions: React.FC = () => {
     notes: ''
   });
   const [submitting, setSubmitting] = useState(false);
+  const [editingPrescription, setEditingPrescription] = useState<Prescription | null>(null);
+  const [editForm, setEditForm] = useState<NewPrescriptionForm>({
+    patientName: '',
+    medications: [{ name: '', dosage: '', frequency: '' }],
+    notes: ''
+  });
+
+  const handlePrint = (prescription: Prescription) => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Prescription - ${prescription.id}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 40px; }
+              h1 { color: #2563eb; }
+              .header { border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-bottom: 20px; }
+              .medication { background: #f3f4f6; padding: 10px; margin: 10px 0; border-radius: 5px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>Medical Prescription</h1>
+              <p><strong>Prescription ID:</strong> ${prescription.id}</p>
+              <p><strong>Patient:</strong> ${prescription.patientName}</p>
+              <p><strong>Date:</strong> ${format(new Date(prescription.date), 'MMMM dd, yyyy')}</p>
+              <p><strong>Doctor:</strong> ${prescription.doctor || 'N/A'}</p>
+            </div>
+            <h2>Medications:</h2>
+            ${prescription.medications.map(m => `
+              <div class="medication">
+                <strong>${m.name}</strong><br/>
+                Dosage: ${m.dosage}<br/>
+                Frequency: ${m.frequency}
+              </div>
+            `).join('')}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const handleEdit = (prescription: Prescription) => {
+    setEditingPrescription(prescription);
+    setEditForm({
+      patientName: prescription.patientName,
+      medications: prescription.medications,
+      notes: ''
+    });
+  };
+
+  const handleUpdatePrescription = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPrescription) return;
+    setSubmitting(true);
+    
+    try {
+      await api.updatePrescription(editingPrescription.id, {
+        patientName: editForm.patientName,
+        medications: editForm.medications.filter(med => med.name && med.dosage),
+        notes: editForm.notes
+      });
+      
+      toast.success('Prescription updated successfully!');
+      setEditingPrescription(null);
+      refetch();
+    } catch (error) {
+      console.error('Failed to update prescription:', error);
+      toast.error('Failed to update prescription. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancel = async (prescriptionId: string) => {
+    if (!window.confirm('Are you sure you want to delete this prescription?')) return;
+    
+    try {
+      await api.deletePrescription(prescriptionId);
+      toast.success('Prescription deleted successfully!');
+      refetch();
+    } catch (error) {
+      console.error('Failed to delete prescription:', error);
+      toast.error('Failed to delete prescription. Please try again.');
+    }
+  };
 
   // Fallback data for development
   const fallbackPrescriptions: Prescription[] = [
@@ -77,7 +167,8 @@ const Prescriptions: React.FC = () => {
         notes: formData.notes
       });
       
-      // Reset form
+      toast.success('Prescription created successfully!');
+      
       setFormData({
         patientName: '',
         medications: [{ name: '', dosage: '', frequency: '' }],
@@ -87,6 +178,7 @@ const Prescriptions: React.FC = () => {
       refetch();
     } catch (error) {
       console.error('Failed to create prescription:', error);
+      toast.error('Failed to create prescription. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -175,9 +267,24 @@ const Prescriptions: React.FC = () => {
 
             <div className="mt-4 md:mt-0 flex items-center gap-2">
               <div className="text-sm text-gray-600 mr-4">{p.doctor}</div>
-              <button className="px-3 py-2 bg-white border rounded text-sm flex items-center gap-2"><Printer size={14} /> Print</button>
-              <button className="px-3 py-2 bg-white border rounded text-sm flex items-center gap-2"><Edit size={14} /> Edit</button>
-              <button className="px-3 py-2 bg-red-600 text-white rounded text-sm flex items-center gap-2"><Trash2 size={14} /> Cancel</button>
+              <button 
+                onClick={() => handlePrint(p)}
+                className="px-3 py-2 bg-white border rounded text-sm flex items-center gap-2 hover:bg-gray-50"
+              >
+                <Printer size={14} /> Print
+              </button>
+              <button 
+                onClick={() => handleEdit(p)}
+                className="px-3 py-2 bg-white border rounded text-sm flex items-center gap-2 hover:bg-gray-50"
+              >
+                <Edit size={14} /> Edit
+              </button>
+              <button 
+                onClick={() => handleCancel(p.id)}
+                className="px-3 py-2 bg-red-600 text-white rounded text-sm flex items-center gap-2 hover:bg-red-700"
+              >
+                <Trash2 size={14} /> Cancel
+              </button>
             </div>
           </div>
         ))}
@@ -300,6 +407,126 @@ const Prescriptions: React.FC = () => {
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                 >
                   {submitting ? 'Creating...' : 'Create Prescription'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Prescription Modal */}
+      {editingPrescription && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Edit Prescription</h2>
+              <button 
+                onClick={() => setEditingPrescription(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdatePrescription} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Patient Name *</label>
+                <input
+                  type="text"
+                  value={editForm.patientName}
+                  onChange={(e) => setEditForm({ ...editForm, patientName: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">Medications *</label>
+                  <button
+                    type="button"
+                    onClick={() => setEditForm({...editForm, medications: [...editForm.medications, { name: '', dosage: '', frequency: '' }]})}
+                    className="text-blue-600 text-sm hover:text-blue-800"
+                  >
+                    + Add Medication
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  {editForm.medications.map((medication, index) => (
+                    <div key={index} className="grid grid-cols-3 gap-3 p-3 border rounded">
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="Medication name"
+                          value={medication.name}
+                          onChange={(e) => {
+                            const updated = editForm.medications.map((m, i) => i === index ? {...m, name: e.target.value} : m);
+                            setEditForm({...editForm, medications: updated});
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="Dosage"
+                          value={medication.dosage}
+                          onChange={(e) => {
+                            const updated = editForm.medications.map((m, i) => i === index ? {...m, dosage: e.target.value} : m);
+                            setEditForm({...editForm, medications: updated});
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <select
+                          value={medication.frequency}
+                          onChange={(e) => {
+                            const updated = editForm.medications.map((m, i) => i === index ? {...m, frequency: e.target.value} : m);
+                            setEditForm({...editForm, medications: updated});
+                          }}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        >
+                          <option value="">Select frequency</option>
+                          <option value="Once daily">Once daily</option>
+                          <option value="Twice daily">Twice daily</option>
+                          <option value="3 times daily">3 times daily</option>
+                          <option value="4 times daily">4 times daily</option>
+                          <option value="As needed">As needed</option>
+                        </select>
+                        {editForm.medications.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => setEditForm({...editForm, medications: editForm.medications.filter((_, i) => i !== index)})}
+                            className="px-2 py-2 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditingPrescription(null)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {submitting ? 'Updating...' : 'Update Prescription'}
                 </button>
               </div>
             </form>

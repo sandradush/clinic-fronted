@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { User, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../services/api';
+import toast from 'react-hot-toast';
 
 const Settings: React.FC = () => {
   const { user } = useAuth();
@@ -16,19 +18,49 @@ const Settings: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleProfileSave = (e: React.FormEvent) => {
+  const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: wire to API
-    alert('Profile updated');
+    try {
+      const response = await api.updateProfile({ name, email, phone });
+      console.log('Profile update response:', response);
+      toast.success('Profile updated successfully!');
+      // Update local user data
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      userData.name = name;
+      userData.email = email;
+      localStorage.setItem('user', JSON.stringify(userData));
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      console.error('Error details:', error.message);
+      toast.error('Failed to update profile. Please try again.');
+    }
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentPassword || !newPassword) return alert('Please fill all fields');
-    if (newPassword !== confirmPassword) return alert('Passwords do not match');
-    // TODO: call change-password API
-    setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
-    alert('Password changed');
+    if (!currentPassword || !newPassword) {
+      toast.error('Please fill all fields');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    
+    try {
+      await api.changePassword({ currentPassword, newPassword });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      toast.success('Password changed successfully!');
+    } catch (error) {
+      console.error('Failed to change password:', error);
+      toast.error('Failed to change password. Please check your current password.');
+    }
   };
 
   return (

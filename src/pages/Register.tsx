@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X } from 'lucide-react';
 import { api } from '../services/api';
+import toast from 'react-hot-toast';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -71,10 +72,12 @@ const Register: React.FC = () => {
         documents: documents.map(file => file.name)
       }, formData.password);
       
+      toast.success('Registration submitted! Awaiting admin approval.');
       setSuccessMessage('Account created successfully! Please wait for admin approval before logging in.');
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
       setError('Registration failed. Please try again.');
+      toast.error('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

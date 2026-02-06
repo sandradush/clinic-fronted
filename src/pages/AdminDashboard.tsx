@@ -61,24 +61,46 @@ const AdminDashboard: React.FC = () => {
       {/* Doctors Status */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
         <h2 className="text-lg font-semibold mb-4">Doctors Status</h2>
-        <div className="space-y-3">
-          {doctors.map(doctor => (
-            <div key={doctor.id} className="flex items-center justify-between p-3 border rounded">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium">{doctor.name}</h3>
-                <p className="text-sm text-gray-600">{doctor.specialty}</p>
+                <p className="text-sm text-gray-500">Available</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {doctors.filter(d => d.availability === 'available').length}
+                </p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 rounded text-xs ${
-                  doctor.availability === 'available' ? 'bg-green-100 text-green-700' :
-                  doctor.availability === 'busy' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
-                  {doctor.availability}
-                </span>
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                <UserCheck className="text-green-600" size={24} />
               </div>
             </div>
-          ))}
+          </div>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Busy</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {doctors.filter(d => d.availability === 'busy').length}
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                <Users className="text-yellow-600" size={24} />
+              </div>
+            </div>
+          </div>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Offline</p>
+                <p className="text-2xl font-bold text-gray-600">
+                  {doctors.filter(d => d.availability === 'offline' || !d.availability).length}
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                <Users className="text-gray-600" size={24} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

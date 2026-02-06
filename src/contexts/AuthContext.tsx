@@ -34,12 +34,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const session = localStorage.getItem('session');
-    if (session) {
+    const userData = localStorage.getItem('user');
+    if (session && userData) {
       setIsAuthenticated(true);
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        setUser(JSON.parse(userData));
-      }
+      setUser(JSON.parse(userData));
     }
   }, []);
 
@@ -113,8 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('session');
-    localStorage.removeItem('user');
+    localStorage.clear();
     setIsAuthenticated(false);
     setUser(null);
   };
