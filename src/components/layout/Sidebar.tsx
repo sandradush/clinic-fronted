@@ -1,11 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, Calendar, FileText, UserCheck, Settings, LogOut } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import { Home, Users, Calendar, FileText, UserCheck } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
-  const { logout } = useAuth();
 
   const menuItems = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -35,30 +33,7 @@ const Sidebar: React.FC = () => {
             <span>{item.label}</span>
           </Link>
         ))}
-        
-        {/* Settings */}
-        <Link
-          to="/settings"
-          className={`flex items-center gap-3 px-6 py-3 text-gray-700 transition-all duration-200 border-l-3 border-transparent mx-1 ${
-            location.pathname === '/settings'
-              ? 'bg-blue-50 text-blue-600 border-l-blue-600 font-semibold'
-              : 'hover:bg-gray-50 hover:text-blue-600 hover:border-l-blue-300'
-          }`}
-        >
-          <Settings size={20} />
-          <span>Settings</span>
-        </Link>
       </nav>
-      
-      <div className="p-4 border-t border-gray-200">
-        <button 
-          onClick={logout} 
-          className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-red-600 rounded-md transition-all duration-200"
-        >
-          <LogOut size={20} />
-          <span>Sign Out</span>
-        </button>
-      </div>
     </div>
   );
 };

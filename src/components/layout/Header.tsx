@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import { Bell, X, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
+import { Bell, X, UserPlus, AlertCircle, CheckCircle, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDoctorRequests, useDoctors } from '../../hooks/useApiData';
 import { useNavigate } from 'react-router-dom';
 
 const Header: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { doctorRequests = [] } = useDoctorRequests();
   const { doctors = [] } = useDoctors();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const userInitials = (user?.name || user?.email || 'U').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
   const pendingRequests = doctorRequests.filter(r => r.status === 'pending');
   const offlineDoctors = doctors.filter(d => d.availability === 'offline');
@@ -48,24 +56,64 @@ const Header: React.FC = () => {
   const unreadCount = notifications.length;
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm z-40">
-      <div className="flex items-center">
-        <span className="text-gray-600">Welcome, {user?.name || user?.email}</span>
+    <header className="fixed top-0 left-64 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-center px-8 shadow-sm z-40">
+      <div className="absolute left-1/2 transform -translate-x-1/2">
+        <h1 className="text-xl font-semibold text-gray-800">{user?.name || user?.email || 'User'}</h1>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 ml-auto">
         <div className="relative">
-          <button 
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative flex items-center justify-center w-11 h-11 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 rounded-md transition-all duration-200 hover:-translate-y-0.5"
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className="flex items-center gap-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
           >
-            <Bell size={20} />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
+            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+              {userInitials}
+            </div>
+            <div className="text-left">
+              <div className="text-sm font-medium text-gray-900">{user?.name || 'User'}</div>
+              <div className="text-xs text-gray-500">{user?.email}</div>
+            </div>
+            <ChevronDown size={16} className="text-gray-400" />
           </button>
+
+          {showProfileMenu && (
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200">
+              <button
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                }}
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 text-left border-b"
+              >
+                <div className="flex items-center gap-3">
+                  <Bell size={18} className="text-gray-600" />
+                  <span className="text-sm text-gray-700">Notifications</span>
+                </div>
+                {unreadCount > 0 && (
+                  <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/settings');
+                  setShowProfileMenu(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left border-b"
+              >
+                <Settings size={18} className="text-gray-600" />
+                <span className="text-sm text-gray-700">Settings</span>
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left text-red-600"
+              >
+                <LogOut size={18} />
+                <span className="text-sm">Sign Out</span>
+              </button>
+            </div>
+          )}
 
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[500px] overflow-hidden">
@@ -78,7 +126,6 @@ const Header: React.FC = () => {
                   <X size={18} />
                 </button>
               </div>
-
               <div className="overflow-y-auto max-h-[400px]">
                 {notifications.length === 0 ? (
                   <div className="p-8 text-center text-gray-500">
@@ -92,6 +139,7 @@ const Header: React.FC = () => {
                       onClick={() => {
                         notif.action();
                         setShowNotifications(false);
+                        setShowProfileMenu(false);
                       }}
                       className="w-full p-4 hover:bg-gray-50 border-b last:border-b-0 text-left transition-colors"
                     >
