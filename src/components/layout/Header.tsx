@@ -56,38 +56,34 @@ const Header: React.FC = () => {
   const unreadCount = notifications.length;
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-center px-8 shadow-sm z-40">
-      <div className="absolute left-1/2 transform -translate-x-1/2">
-        <h1 className="text-xl font-semibold text-gray-800">{user?.name || user?.email || 'User'}</h1>
-      </div>
-
-      <div className="flex items-center gap-4 ml-auto">
+    <header className="fixed top-0 left-64 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-end px-8 shadow-sm z-40">
+      <div className="flex items-center gap-4">
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
+            className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition-colors"
           >
             <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
               {userInitials}
             </div>
             <div className="text-left">
-              <div className="text-sm font-medium text-gray-900">{user?.name || 'User'}</div>
-              <div className="text-xs text-gray-500">{user?.email}</div>
+              <div className="text-sm font-medium text-gray-900 dark:text-white">{user?.name || 'User'}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</div>
             </div>
-            <ChevronDown size={16} className="text-gray-400" />
+            <ChevronDown size={16} className="text-gray-400 dark:text-gray-500" />
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200">
+            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => {
                   setShowNotifications(!showNotifications);
                 }}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 text-left border-b"
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left border-b dark:border-gray-700"
               >
                 <div className="flex items-center gap-3">
-                  <Bell size={18} className="text-gray-600" />
-                  <span className="text-sm text-gray-700">Notifications</span>
+                  <Bell size={18} className="text-gray-600 dark:text-gray-400" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Notifications</span>
                 </div>
                 {unreadCount > 0 && (
                   <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
@@ -100,14 +96,14 @@ const Header: React.FC = () => {
                   navigate('/settings');
                   setShowProfileMenu(false);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left border-b"
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left border-b dark:border-gray-700"
               >
-                <Settings size={18} className="text-gray-600" />
-                <span className="text-sm text-gray-700">Settings</span>
+                <Settings size={18} className="text-gray-600 dark:text-gray-400" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Settings</span>
               </button>
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left text-red-600"
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left text-red-600 dark:text-red-400"
               >
                 <LogOut size={18} />
                 <span className="text-sm">Sign Out</span>
@@ -116,20 +112,20 @@ const Header: React.FC = () => {
           )}
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[500px] overflow-hidden">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="font-semibold text-gray-900">Notifications</h3>
+            <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-[500px] overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                 <button 
                   onClick={() => setShowNotifications(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <X size={18} />
                 </button>
               </div>
               <div className="overflow-y-auto max-h-[400px]">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">
-                    <CheckCircle size={48} className="mx-auto mb-2 text-gray-300" />
+                  <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                    <CheckCircle size={48} className="mx-auto mb-2 text-gray-300 dark:text-gray-600" />
                     <p>No new notifications</p>
                   </div>
                 ) : (
@@ -141,14 +137,14 @@ const Header: React.FC = () => {
                         setShowNotifications(false);
                         setShowProfileMenu(false);
                       }}
-                      className="w-full p-4 hover:bg-gray-50 border-b last:border-b-0 text-left transition-colors"
+                      className="w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-700 border-b dark:border-gray-700 last:border-b-0 text-left transition-colors"
                     >
                       <div className="flex items-start gap-3">
                         <div className="mt-1">{notif.icon}</div>
                         <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 text-sm">{notif.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{notif.message}</p>
-                          <p className="text-xs text-gray-400 mt-1">
+                          <h4 className="font-medium text-gray-900 dark:text-white text-sm">{notif.title}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{notif.message}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                             {new Date(notif.time).toLocaleDateString()}
                           </p>
                         </div>

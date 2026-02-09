@@ -17,7 +17,6 @@ const Doctors: React.FC = () => {
     <div className="p-4">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold mb-2">Doctors Management</h1>
-        <p className="text-gray-600">Manage doctor applications and approved doctors</p>
       </div>
 
       {/* Tab Navigation */}

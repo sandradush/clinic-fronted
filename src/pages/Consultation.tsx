@@ -39,8 +39,7 @@ const Consultation: React.FC = () => {
     <div className="p-4">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold">Consultation Management</h1>
-          <p className="text-sm text-gray-600">Start consultations and manage patient preferences</p>
+          <h1 className="text-2xl font-semibold">Consultation</h1>
         </div>
       </div>
 
@@ -81,7 +80,6 @@ const Consultation: React.FC = () => {
                       </div>
                       <div className="text-xs text-gray-400">{a.status}</div>
                     </div>
-                    <div className="mt-2 text-sm text-gray-600 truncate">{a.notes}</div>
                   </div>
                 </button>
               ))}
@@ -93,7 +91,6 @@ const Consultation: React.FC = () => {
             {!selectedAppointment && (
               <div className="h-full flex flex-col items-center justify-center text-gray-500">
                 <div className="text-xl font-medium mb-2">Select an appointment</div>
-                <div className="text-sm">Choose an appointment to view details and start the consultation.</div>
               </div>
             )}
 

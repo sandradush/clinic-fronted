@@ -116,6 +116,13 @@ class ApiService {
     });
   }
 
+  async updateDoctorAvailability(doctorId: string, availability: 'available' | 'busy' | 'offline') {
+    return this.request(`/doctors/${doctorId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ availability }),
+    });
+  }
+
   // Appointments
   async getAppointments() {
     return this.request('/appointments');

@@ -258,7 +258,7 @@ const Login: React.FC = () => {
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button
               type="button"
-              onClick={toggleMode}
+              onClick={() => isLogin ? navigate('/register') : toggleMode()}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
               {isLogin ? 'Sign up' : 'Sign in'}

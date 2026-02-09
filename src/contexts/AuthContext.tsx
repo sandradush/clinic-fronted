@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface User {
+  id?: string;
   email: string;
   name?: string;
   role: 'admin' | 'doctor';
+  profileCompleted?: boolean;
 }
 
 interface AuthContextType {
@@ -73,7 +75,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.setItem('user', JSON.stringify(userData));
           setIsAuthenticated(true);
           setUser(userData);
-          return { success: true, redirectPath: userData.role === 'admin' ? '/admin-dashboard' : '/dashboard' };
+          
+          console.log('Login successful. User data:', userData);
+          
+          // Check if doctor needs to complete profile
+          if (userData.role === 'doctor' && userData.profileCompleted === false) {
+            console.log('Doctor profile not completed, redirecting to profile-setup');
+            return { success: true, redirectPath: '/profile-setup' };
+          }
+          
+          const dashboardPath = userData.role === 'admin' ? '/admin-dashboard' : '/dashboard';
+          console.log('Redirecting to:', dashboardPath);
+          return { success: true, redirectPath: dashboardPath };
         }
         const msg = data?.message || textBody || 'Invalid server response';
         console.error('Auth signin: unexpected ok response', { status: res.status, data, textBody });

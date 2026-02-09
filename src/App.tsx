@@ -18,6 +18,10 @@ import Consultation from './pages/Consultation';
 import Doctors from './pages/Doctors';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import DoctorProfileSetup from './pages/DoctorProfileSetup';
+import DoctorRequestsPage from './pages/DoctorRequests';
+import DoctorHistory from './pages/DoctorHistory';
 
 // Context & Config
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -42,6 +46,7 @@ const ProtectedRoutes = () => {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
@@ -49,6 +54,7 @@ const ProtectedRoutes = () => {
 
   return (
     <Routes>
+      <Route path="/profile-setup" element={<DoctorProfileSetup />} />
       <Route path="/" element={<MainLayout />}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -58,6 +64,8 @@ const ProtectedRoutes = () => {
         <Route path="/consultation" element={<Consultation />} />
         <Route path="/prescriptions" element={<Prescriptions />} />
         <Route path="/doctors" element={<Doctors />} />
+        <Route path="/doctor/requests" element={<DoctorRequestsPage />} />
+        <Route path="/doctor/history" element={<DoctorHistory />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
@@ -67,12 +75,22 @@ const ProtectedRoutes = () => {
 
 // Main App Component
 const App: React.FC = () => {
+  // Initialize theme on app load
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
   return (
     <I18nextProvider i18n={i18n}>
       <OfflineProvider>
         <AuthProvider>
           <Router>
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
               <OfflineIndicator />
               <Toaster position="top-right" />
               
