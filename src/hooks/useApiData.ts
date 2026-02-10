@@ -11,6 +11,11 @@ interface Patient {
 }
 
 interface Doctor {
+  location: any;
+  nextAvailable: string;
+  totalAppointments: number;
+  rating: string;
+  todayAppointments: number;
   id: string;
   name: string;
   specialty: string;

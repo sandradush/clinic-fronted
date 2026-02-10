@@ -2,6 +2,7 @@ services:
   - type: web
     name: clinic-frontend
     env: docker
+    runtime: docker
     branch: main
     plan: free
     dockerfilePath: Dockerfile
