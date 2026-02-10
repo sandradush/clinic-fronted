@@ -1,6 +1,61 @@
 import { useState, useEffect } from 'react';
-import type { Patient, Doctor, Appointment, Prescription, DoctorRequest } from '../services/api';
-import { api } from '../services/api';
+import { makeApiRequest } from '../utils/api';
+
+interface Patient {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  address: string;
+}
+
+interface Doctor {
+  id: string;
+  name: string;
+  specialty: string;
+  email: string;
+  phone: string;
+  experience: number;
+  availability: 'available' | 'busy' | 'offline';
+  status?: string;
+  password?: string;
+}
+
+interface Appointment {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  date: string;
+  time: string;
+  duration: number;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  type: string;
+  notes?: string;
+}
+
+interface Prescription {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  medications: { name: string; dosage: string; frequency: string }[];
+  date: string;
+  status: 'active' | 'completed';
+}
+
+interface DoctorRequest {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  specialty: string;
+  experience: number;
+  qualifications: string;
+  licenseNumber: string;
+  requestDate: string;
+  status: 'pending' | 'approved' | 'rejected';
+  documents: string[];
+}
 
 export const usePatients = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -10,7 +65,7 @@ export const usePatients = () => {
   const fetchPatients = async () => {
     try {
       setLoading(true);
-      const data = await api.getPatients();
+      const data = await makeApiRequest('/patients');
       setPatients(data);
       setError(null);
     } catch (err) {
@@ -35,7 +90,7 @@ export const useDoctors = () => {
   const fetchDoctors = async () => {
     try {
       setLoading(true);
-      const data = await api.getDoctors();
+      const data = await makeApiRequest('/doctors');
       setDoctors(data);
       setError(null);
     } catch (err) {
@@ -60,7 +115,7 @@ export const useAppointments = () => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await api.getAppointments();
+      const data = await makeApiRequest('/appointments');
       setAppointments(data);
       setError(null);
     } catch (err) {
@@ -85,7 +140,7 @@ export const usePrescriptions = () => {
   const fetchPrescriptions = async () => {
     try {
       setLoading(true);
-      const data = await api.getPrescriptions();
+      const data = await makeApiRequest('/prescriptions');
       setPrescriptions(data);
       setError(null);
     } catch (err) {
@@ -102,7 +157,7 @@ export const usePrescriptions = () => {
   return { prescriptions, loading, error, refetch: fetchPrescriptions };
 };
 
-export const useDoctorRequests = () => {
+export const useDoctorRequests = (doctorId?: string) => {
   const [doctorRequests, setDoctorRequests] = useState<DoctorRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -110,7 +165,8 @@ export const useDoctorRequests = () => {
   const fetchDoctorRequests = async () => {
     try {
       setLoading(true);
-      const data = await api.getDoctorRequests();
+      const endpoint = doctorId ? `/doctor-requests/doctor/${doctorId}` : '/doctor-requests';
+      const data = await makeApiRequest(endpoint);
       setDoctorRequests(data);
       setError(null);
     } catch (err) {
@@ -122,7 +178,7 @@ export const useDoctorRequests = () => {
 
   useEffect(() => {
     fetchDoctorRequests();
-  }, []);
+  }, [doctorId]);
 
   return { doctorRequests, loading, error, refetch: fetchDoctorRequests };
 };

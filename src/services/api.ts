@@ -55,7 +55,9 @@ interface DoctorRequest {
   documents: string[];
 }
 
-const API_BASE_URL = 'https://clinic-backend-s2lx.onrender.com/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://clinic-backend-s2lx.onrender.com/api';
+
+console.log('Using API Base URL:', API_BASE_URL);
 
 class ApiService {
   private async request(endpoint: string, options: RequestInit = {}) {
@@ -79,7 +81,7 @@ class ApiService {
 
   // Auth
   async login(email: string, password: string) {
-    return this.request('/auth/signin', {
+    return this.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -99,7 +101,7 @@ class ApiService {
 
   // Doctors
   async getDoctors() {
-    return this.request('/doctors');
+    return this.request('/auth/doctors');
   }
 
   async createDoctor(doctorData: any) {
@@ -220,6 +222,15 @@ class ApiService {
     return this.request(`/doctor-requests/${requestId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
+    });
+  }
+
+  async getAvailableDoctors() {
+    return this.request('/auth/doctors', {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+      },
     });
   }
 }

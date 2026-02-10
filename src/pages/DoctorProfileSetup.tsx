@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X } from 'lucide-react';
-import { api } from '../services/api';
+import { makeApiRequest } from '../utils/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -52,16 +52,20 @@ const DoctorProfileSetup: React.FC = () => {
     }
 
     try {
-      await api.submitDoctorRequest({
-        name: user?.name || '',
-        email: user?.email || '',
-        phone: formData.phone,
-        specialty: formData.specialty,
-        experience: parseInt(formData.experience),
-        qualifications: formData.qualifications,
-        licenseNumber: formData.licenseNumber,
-        documents: documents.map(file => file.name)
-      }, '');
+      await makeApiRequest('/doctor-requests', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: user?.name || '',
+          email: user?.email || '',
+          phone: formData.phone,
+          specialty: formData.specialty,
+          experience: parseInt(formData.experience),
+          qualifications: formData.qualifications,
+          licenseNumber: formData.licenseNumber,
+          documents: documents.map(file => file.name),
+          password: ''
+        })
+      });
       
       toast.success('Profile submitted! Awaiting admin approval.');
       navigate('/dashboard');

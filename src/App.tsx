@@ -12,9 +12,9 @@ import OfflineIndicator from './components/common/OfflineIndicator';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Appointments from './pages/Appointments';
-import Prescriptions from './pages/Prescriptions';
 import NewAppointment from './pages/NewAppointment';
 import Consultation from './pages/Consultation';
+import Perception from './pages/Perception';
 import Doctors from './pages/Doctors';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
@@ -22,6 +22,7 @@ import Register from './pages/Register';
 import DoctorProfileSetup from './pages/DoctorProfileSetup';
 import DoctorRequestsPage from './pages/DoctorRequests';
 import DoctorHistory from './pages/DoctorHistory';
+import CreateDoctorProfile from './pages/CreateDoctorProfile';
 
 // Context & Config
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -61,9 +62,10 @@ const ProtectedRoutes = () => {
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/appointments/new" element={<NewAppointment />} />
-        <Route path="/consultation" element={<Consultation />} />
-        <Route path="/prescriptions" element={<Prescriptions />} />
+        <Route path="/consultation/:appointmentId" element={<Consultation />} />
+        <Route path="/perception" element={<Perception />} />
         <Route path="/doctors" element={<Doctors />} />
+        <Route path="/doctors/create" element={<CreateDoctorProfile />} />
         <Route path="/doctor/requests" element={<DoctorRequestsPage />} />
         <Route path="/doctor/history" element={<DoctorHistory />} />
         <Route path="/settings" element={<Settings />} />

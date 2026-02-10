@@ -1,147 +1,441 @@
-import React, { useMemo, useState } from 'react';
-import { Video, Phone, User, MessageCircle, MapPin, MoreHorizontal } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  Video, 
+  Phone, 
+  MessageCircle, 
+  User, 
+  Calendar, 
+  Clock, 
+  FileText, 
+  Mic, 
+  MicOff, 
+  VideoOff, 
+  PhoneCall, 
+  Send,
+  Save,
+  ArrowLeft,
+  Activity,
+  Thermometer,
+  Heart,
+  Stethoscope
+} from 'lucide-react';
+import { makeApiRequest } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
-type Method = 'video' | 'phone' | 'in-person' | string;
-
-const methodStyles: Record<string, { bg: string; text: string; icon?: JSX.Element }> = {
-  video: { bg: 'bg-blue-50', text: 'text-blue-700' },
-  phone: { bg: 'bg-green-50', text: 'text-green-700' },
-  'in-person': { bg: 'bg-yellow-50', text: 'text-yellow-700' },
-};
+interface Appointment {
+  id: number;
+  date: string;
+  time: string;
+  description: string;
+  status: string;
+  created_at: string;
+  patient_id: number;
+  patient_name: string;
+  doctor_id: number;
+  doctor_name: string;
+}
 
 const Consultation: React.FC = () => {
-  const [selectedAppointment, setSelectedAppointment] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
-  const [filterMethod, setFilterMethod] = useState<'all' | Method>('all');
+  const { appointmentId } = useParams<{ appointmentId: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'video' | 'voice' | 'chat'>('video');
+  const [chatMessage, setChatMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState<Array<{id: number, message: string, sender: string, time: string}>>([]);
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isCallActive, setIsCallActive] = useState(false);
+  
+  // Symptoms form state
+  const [showSymptomsForm, setShowSymptomsForm] = useState(false);
+  const [symptomsLoading, setSymptomsLoading] = useState(false);
+  const [symptoms, setSymptoms] = useState({
+    name: '',
+    value: '',
+    description: ''
+  });
 
-  const filtered = useMemo(() => {
-    const appointments = [
-      { id: '1', patientName: 'Jean de Dieu', time: '09:00 AM', type: 'Consultation', method: 'video', phone: '078 123 4567', email: 'jean@example.com', notes: 'Patient prefers video call due to mobility issues', status: 'confirmed' },
-      { id: '2', patientName: 'Marie Claire', time: '10:30 AM', type: 'Follow-up', method: 'phone', phone: '073 987 6543', email: 'marie@example.com', notes: 'Phone consultation requested - diabetes follow-up', status: 'waiting' },
-      { id: '3', patientName: 'Eric Ndayishimiye', time: '02:00 PM', type: 'Check-up', method: 'in-person', phone: '072 555 1234', email: 'eric@example.com', notes: 'Physical examination required', status: 'confirmed' },
-    ];
-    return appointments.filter(a => {
-      const hay = [a.patientName, a.phone, a.type, a.notes].join(' ').toLowerCase();
-      const matchesSearch = hay.includes(search.toLowerCase());
-      const matchesMethod = filterMethod === 'all' || a.method === filterMethod;
-      return matchesSearch && matchesMethod;
-    });
-  }, [search, filterMethod]);
+  useEffect(() => {
+    const fetchAppointment = async () => {
+      if (!appointmentId) return;
+      
+      try {
+        setLoading(true);
+        const data = await makeApiRequest(`/appointments/${appointmentId}`);
+        setAppointment(data);
+      } catch (error) {
+        console.error('Failed to fetch appointment:', error);
+        toast.error('Failed to load appointment details');
+        navigate('/doctor-dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getMethodIcon = (m: Method) => {
-    if (m === 'video') return <Video size={16} />;
-    if (m === 'phone') return <Phone size={16} />;
-    if (m === 'in-person') return <User size={16} />;
-    return <MessageCircle size={16} />;
+    fetchAppointment();
+  }, [appointmentId, navigate]);
+
+  const handleSendMessage = () => {
+    if (chatMessage.trim()) {
+      const newMessage = {
+        id: Date.now(),
+        message: chatMessage,
+        sender: user?.name || 'Doctor',
+        time: new Date().toLocaleTimeString()
+      };
+      setChatHistory([...chatHistory, newMessage]);
+      setChatMessage('');
+    }
   };
 
+  const handleSaveSymptoms = async () => {
+    if (symptomsLoading) return;
+    
+    try {
+      if (!symptoms.name.trim() || !symptoms.value.trim() || !symptoms.description.trim()) {
+        toast.error('Please fill in all symptom fields');
+        return;
+      }
+
+      setSymptomsLoading(true);
+
+      const symptomData = {
+        appointment_id: parseInt(appointmentId!),
+        symptom_name: symptoms.name.trim(),
+        value: symptoms.value.trim(),
+        description: symptoms.description.trim()
+      };
+
+      const response = await makeApiRequest('/symptoms', {
+        method: 'POST',
+        body: JSON.stringify(symptomData)
+      });
+
+      console.log('Symptom saved:', response);
+      toast.success('Symptoms recorded successfully');
+      setShowSymptomsForm(false);
+      setSymptoms({
+        name: '',
+        value: '',
+        description: ''
+      });
+    } catch (error) {
+      console.error('Failed to save symptoms:', error);
+      toast.error('Failed to save symptoms');
+    } finally {
+      setSymptomsLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!appointment) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-600 mb-2">Appointment not found</h2>
+          <button
+            onClick={() => navigate('/doctor-dashboard')}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Consultation</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/doctor-dashboard')}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Consultation Session</h1>
+                <p className="text-sm text-gray-600">Appointment #{appointment.id}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                appointment.status === 'approved' ? 'bg-green-100 text-green-700' :
+                appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-red-100 text-red-700'
+              }`}>
+                {appointment.status}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Left: list */}
-          <div className="md:w-1/2 lg:w-1/3">
-            <div className="flex items-center gap-2 mb-3">
-              <input
-                className="flex-1 px-3 py-2 border rounded focus:outline-none"
-                placeholder="Search patient, phone, or notes"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <select className="px-2 py-2 border rounded" value={filterMethod} onChange={(e) => setFilterMethod(e.target.value as any)}>
-                <option value="all">All</option>
-                <option value="video">Video</option>
-                <option value="phone">Phone</option>
-                <option value="in-person">In-person</option>
-              </select>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Appointment Info & Symptoms */}
+          <div className="space-y-6">
+            {/* Appointment Information Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <User className="text-blue-500" size={20} />
+                Patient Information
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    {appointment.patient_name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{appointment.patient_name}</h3>
+                    <p className="text-sm text-gray-600">Patient ID: {appointment.patient_id}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="text-green-500" size={16} />
+                    <span>{new Date(appointment.date).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="text-blue-500" size={16} />
+                    <span>{appointment.time}</span>
+                  </div>
+                </div>
+                
+                {appointment.description && (
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">Description</h4>
+                    <p className="text-sm text-gray-600">{appointment.description}</p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="divide-y border rounded overflow-hidden max-h-[60vh] overflow-auto">
-              {filtered.map(a => (
+            {/* Symptoms Recording Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <Activity className="text-red-500" size={20} />
+                  Record Symptoms
+                </h2>
                 <button
-                  key={a.id}
-                  onClick={() => setSelectedAppointment(a.id)}
-                  className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-start gap-3 ${selectedAppointment === a.id ? 'bg-gray-100' : ''}`}
+                  onClick={() => setShowSymptomsForm(!showSymptomsForm)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${methodStyles[a.method]?.bg || 'bg-gray-100'} ${methodStyles[a.method]?.text || 'text-gray-700'}`}>
-                    {getMethodIcon(a.method)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">{a.patientName}</div>
-                        <div className="text-xs text-gray-500">{a.type} • {a.time}</div>
-                      </div>
-                      <div className="text-xs text-gray-400">{a.status}</div>
-                    </div>
-                  </div>
+                  {showSymptomsForm ? 'Hide Form' : 'Add Symptoms'}
                 </button>
-              ))}
+              </div>
+
+              {showSymptomsForm && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Symptom Name</label>
+                    <input
+                      type="text"
+                      value={symptoms.name}
+                      onChange={(e) => setSymptoms({...symptoms, name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      placeholder="e.g. Headache, Fever, Cough..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
+                    <input
+                      type="text"
+                      value={symptoms.value}
+                      onChange={(e) => setSymptoms({...symptoms, value: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      placeholder="e.g. 38.5°C, Severe, 2 days..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={symptoms.description}
+                      onChange={(e) => setSymptoms({...symptoms, description: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      rows={4}
+                      placeholder="Describe the symptom in detail..."
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleSaveSymptoms}
+                    disabled={symptomsLoading}
+                    className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  >
+                    {symptomsLoading ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Save size={16} />
+                    )}
+                    {symptomsLoading ? 'Saving...' : 'Save Symptoms'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right: detail panel */}
-          <div className="flex-1 bg-gray-50 rounded p-4">
-            {!selectedAppointment && (
-              <div className="h-full flex flex-col items-center justify-center text-gray-500">
-                <div className="text-xl font-medium mb-2">Select an appointment</div>
+          {/* Right Column - Communication Interface */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-full flex flex-col">
+              {/* Communication Tabs */}
+              <div className="border-b border-gray-200 p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Stethoscope className="text-blue-500" size={20} />
+                  <h2 className="text-lg font-semibold text-gray-800">Consultation Interface</h2>
+                </div>
+                <div className="flex gap-2">
+                  {(['video', 'voice', 'chat'] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                        activeTab === tab
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {tab === 'video' && <Video size={16} />}
+                      {tab === 'voice' && <Phone size={16} />}
+                      {tab === 'chat' && <MessageCircle size={16} />}
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
 
-            {selectedAppointment && (
-              (() => {
-                const a = filtered.find(x => x.id === selectedAppointment)!;
-                return (
+              {/* Communication Content */}
+              <div className="flex-1 p-4">
+                {activeTab === 'video' && (
                   <div className="h-full flex flex-col">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h2 className="text-xl font-semibold">{a.patientName}</h2>
-                        <div className="text-sm text-gray-500">{a.type} • {a.time}</div>
-                      </div>
-                      <div className="text-sm text-gray-500">{a.status}</div>
-                    </div>
-
-                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="bg-white p-3 rounded shadow-sm">
-                        <div className="text-xs text-gray-500">Contact</div>
-                        <div className="mt-2 text-sm text-gray-700 flex flex-col gap-1">
-                          <div className="flex items-center gap-2"><Phone size={14} /> <span>{a.phone}</span></div>
-                          <div className="flex items-center gap-2"><MessageCircle size={14} /> <span>{a.email}</span></div>
+                    <div className="flex-1 bg-gray-900 rounded-lg relative mb-4 min-h-[400px]">
+                      <div className="absolute inset-0 flex items-center justify-center text-white">
+                        <div className="text-center">
+                          <Video size={48} className="mx-auto mb-4 opacity-50" />
+                          <p className="text-lg">Video call interface</p>
+                          <p className="text-sm opacity-75">Camera feed would appear here</p>
                         </div>
                       </div>
-
-                      <div className="bg-white p-3 rounded shadow-sm">
-                        <div className="text-xs text-gray-500">Location & Notes</div>
-                        <div className="mt-2 text-sm text-gray-700">
-                          <div className="flex items-center gap-2"><MapPin size={14} /><span>{a.method === 'in-person' ? 'Clinic' : 'Remote'}</span></div>
-                          <div className="mt-2 text-sm text-gray-600">{a.notes}</div>
+                      {/* Small self-view */}
+                      <div className="absolute top-4 right-4 w-32 h-24 bg-gray-800 rounded-lg border-2 border-white">
+                        <div className="w-full h-full flex items-center justify-center text-white text-xs">
+                          Self View
                         </div>
                       </div>
                     </div>
-
-                    <div className="mt-6 flex items-center gap-3">
-                      {a.method === 'video' && (
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded">Start Video Call</button>
-                      )}
-                      {a.method === 'phone' && (
-                        <button className="px-4 py-2 bg-green-600 text-white rounded">Call Patient</button>
-                      )}
-                      {a.method === 'in-person' && (
-                        <button className="px-4 py-2 bg-yellow-600 text-white rounded">Mark Arrived</button>
-                      )}
-
-                      <button className="ml-auto p-2 text-gray-600 bg-white rounded shadow-sm"><MoreHorizontal /></button>
+                    <div className="flex justify-center gap-4">
+                      <button
+                        onClick={() => setIsMicOn(!isMicOn)}
+                        className={`p-3 rounded-full ${isMicOn ? 'bg-gray-200' : 'bg-red-500 text-white'}`}
+                      >
+                        {isMicOn ? <Mic size={20} /> : <MicOff size={20} />}
+                      </button>
+                      <button
+                        onClick={() => setIsVideoOn(!isVideoOn)}
+                        className={`p-3 rounded-full ${isVideoOn ? 'bg-gray-200' : 'bg-red-500 text-white'}`}
+                      >
+                        {isVideoOn ? <Video size={20} /> : <VideoOff size={20} />}
+                      </button>
+                      <button
+                        onClick={() => setIsCallActive(!isCallActive)}
+                        className={`p-3 rounded-full ${isCallActive ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}
+                      >
+                        <PhoneCall size={20} />
+                      </button>
                     </div>
                   </div>
-                );
-              })()
-            )}
+                )}
+
+                {activeTab === 'voice' && (
+                  <div className="h-full flex flex-col items-center justify-center">
+                    <div className="text-center mb-8">
+                      <div className="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Phone size={48} className="text-green-600" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-800 mb-2">Voice Call</h3>
+                      <p className="text-gray-600">Audio consultation with {appointment.patient_name}</p>
+                    </div>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => setIsMicOn(!isMicOn)}
+                        className={`p-4 rounded-full ${isMicOn ? 'bg-gray-200' : 'bg-red-500 text-white'}`}
+                      >
+                        {isMicOn ? <Mic size={24} /> : <MicOff size={24} />}
+                      </button>
+                      <button
+                        onClick={() => setIsCallActive(!isCallActive)}
+                        className={`p-4 rounded-full ${isCallActive ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}
+                      >
+                        <PhoneCall size={24} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'chat' && (
+                  <div className="h-full flex flex-col">
+                    <div className="flex-1 border border-gray-200 rounded-lg p-4 mb-4 overflow-y-auto min-h-[400px] bg-gray-50">
+                      {chatHistory.length === 0 ? (
+                        <div className="text-center text-gray-500 mt-8">
+                          <MessageCircle size={48} className="mx-auto mb-4 opacity-50" />
+                          <p>No messages yet. Start the conversation!</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {chatHistory.map((msg) => (
+                            <div key={msg.id} className="flex flex-col">
+                              <div className="bg-white p-3 rounded-lg shadow-sm">
+                                <div className="flex justify-between items-start mb-1">
+                                  <span className="font-medium text-sm text-gray-700">{msg.sender}</span>
+                                  <span className="text-xs text-gray-500">{msg.time}</span>
+                                </div>
+                                <p className="text-gray-800">{msg.message}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={chatMessage}
+                        onChange={(e) => setChatMessage(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Type your message..."
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={!chatMessage.trim()}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        <Send size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

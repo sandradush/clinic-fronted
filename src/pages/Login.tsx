@@ -17,7 +17,7 @@ const Login: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { login, register } = useAuth();
+  const { login, register, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -60,8 +60,13 @@ const Login: React.FC = () => {
       if (isLogin) {
         const result = await login(formData.email, formData.password);
         if (result.success) {
-          setSuccess('Login successful! Redirecting...');
-          navigate(result.redirectPath || '/dashboard', { replace: true });
+          if (result.redirectPath === '/profile-setup') {
+            setSuccess('Login successful! Please complete your profile setup...');
+          } else {
+            const roleLabel = result.role === 'admin' ? 'Admin Dashboard' : (result.role === 'doctor' ? 'Doctor Dashboard' : 'Dashboard');
+            setSuccess(`Login successful! Redirecting to ${roleLabel}...`);
+          }
+          // navigation will occur when AuthContext updates `isAuthenticated` and `user`
         } else {
           setErrors({ general: result.message || 'Invalid email or password. Please try again.' });
         }
@@ -103,6 +108,21 @@ const Login: React.FC = () => {
     setErrors({});
     setSuccess('');
   };
+
+  // Navigate when auth context updates
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'doctor' && user.status === 'pending') {
+        navigate('/profile-setup', { replace: true });
+        return;
+      }
+      if (user.role === 'admin') {
+        navigate('/admin-dashboard', { replace: true });
+        return;
+      }
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
@@ -258,7 +278,7 @@ const Login: React.FC = () => {
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button
               type="button"
-              onClick={() => isLogin ? navigate('/register') : toggleMode()}
+              onClick={toggleMode}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
               {isLogin ? 'Sign up' : 'Sign in'}

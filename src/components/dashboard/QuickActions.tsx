@@ -29,14 +29,6 @@ const QuickActions: React.FC = () => {
       shortcut: 'Ctrl+S'
     },
     {
-      icon: Pill,
-      label: 'Write Prescription',
-      description: 'Create new prescription',
-      path: '/prescriptions/new',
-      color: 'warning',
-      shortcut: 'Ctrl+P'
-    },
-    {
       icon: FileText,
       label: 'Medical Records',
       description: 'View patient records',

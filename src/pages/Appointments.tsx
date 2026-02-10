@@ -1,18 +1,15 @@
-import React, { useMemo, useState } from 'react';
-import { Clock, User, Search, Plus, CheckCircle, AlertCircle, Calendar as CalendarIcon, MoreHorizontal, X } from 'lucide-react';
-import { useAppointments, useDoctors } from '../hooks/useApiData';
-import { api } from '../services/api';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Clock, User, Search, Plus, CheckCircle, AlertCircle, MoreHorizontal, X } from 'lucide-react';
+import { useAppointments } from '../hooks/useApiData';
 import toast from 'react-hot-toast';
+import { makeApiRequest } from '../utils/api';
 
 type Status = 'confirmed' | 'waiting' | 'in-progress' | 'pending' | string;
 
 interface NewAppointmentForm {
-  patientName: string;
-  patientPhone: string;
-  patientEmail: string;
+  patientId: string;
   date: string;
   time: string;
-  type: string;
   doctor: string;
   notes: string;
 }
@@ -26,24 +23,51 @@ const statusStyles: Record<string, { bg: string; text: string }> = {
 
 const Appointments: React.FC = () => {
   const { appointments = [], loading, refetch } = useAppointments();
-  const { doctors: dbDoctors = [] } = useDoctors();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | Status>('all');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showNewAppointment, setShowNewAppointment] = useState(false);
   const [formData, setFormData] = useState<NewAppointmentForm>({
-    patientName: '',
-    patientPhone: '',
-    patientEmail: '',
+    patientId: '',
     date: '',
     time: '',
-    type: '',
     doctor: '',
     notes: ''
   });
   const [submitting, setSubmitting] = useState(false);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [patients, setPatients] = useState<any[]>([]);
 
   const appointmentTypes = ['Consultation', 'Follow-up', 'Check-up', 'Vaccination', 'Emergency', 'Routine'];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch doctors
+        const doctors = await makeApiRequest('/auth/doctors', {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+        setDoctors(doctors);
+
+        // Fetch patients
+        const patients = await makeApiRequest('/auth/patients', {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json'
+          }
+        });
+        setPatients(patients);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        toast.error('Failed to load data. Please try again later.');
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -54,26 +78,28 @@ const Appointments: React.FC = () => {
     setSubmitting(true);
     
     try {
-      await api.createAppointment({
-        patientName: formData.patientName,
-        patientPhone: formData.patientPhone,
-        patientEmail: formData.patientEmail,
+      // Build body matching curl example expected by backend
+      const body = {
+        id: 0,
+        patient_id: Number(formData.patientId),
+        doctor_id: Number(formData.doctor),
         date: formData.date,
         time: formData.time,
-        type: formData.type,
-        doctor: formData.doctor,
-        notes: formData.notes
+        description: formData.notes,
+        created_at: new Date().toISOString(),
+      };
+
+      await makeApiRequest('/appointments', {
+        method: 'POST',
+        body: JSON.stringify(body),
       });
-      
+
       toast.success('Appointment created successfully!');
-      
+
       setFormData({
-        patientName: '',
-        patientPhone: '',
-        patientEmail: '',
+        patientId: '',
         date: '',
         time: '',
-        type: '',
         doctor: '',
         notes: ''
       });
@@ -90,8 +116,10 @@ const Appointments: React.FC = () => {
 
   const filtered = useMemo(() => {
     return rows.filter(r => {
-      const matchesSearch = [r.patientName, r.patientPhone, r.type, r.doctor].join(' ').toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = filterStatus === 'all' || r.status === filterStatus;
+      const hay = [r.patient_name, r.doctor_name, r.description, r.time].join(' ').toLowerCase();
+      const matchesSearch = hay.includes(searchTerm.toLowerCase());
+      // backend does not provide status in this response; keep filter pass-through
+      const matchesStatus = filterStatus === 'all' || (r.status && r.status === filterStatus);
       return matchesSearch && matchesStatus;
     });
   }, [rows, searchTerm, filterStatus]);
@@ -101,6 +129,7 @@ const Appointments: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold">Appointments</h1>
+          <p className="text-sm text-gray-600">Manage today's appointments and patient visits</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -153,12 +182,10 @@ const Appointments: React.FC = () => {
             <thead>
               <tr className="text-left text-xs text-gray-500 border-b">
                 <th className="py-3 px-3">Time</th>
+                <th className="py-3 px-3">Date</th>
                 <th className="py-3 px-3">Patient</th>
-                <th className="py-3 px-3">Contact</th>
-                <th className="py-3 px-3">Type</th>
                 <th className="py-3 px-3">Doctor</th>
-                <th className="py-3 px-3">Room</th>
-                <th className="py-3 px-3">Status</th>
+                <th className="py-3 px-3">Description</th>
                 <th className="py-3 px-3">Actions</th>
               </tr>
             </thead>
@@ -166,32 +193,18 @@ const Appointments: React.FC = () => {
               {filtered.map((a) => (
                 <tr key={a.id} className="hover:bg-gray-50">
                   <td className="py-3 px-3 align-top w-28 text-sm text-gray-700">{a.time}</td>
+                  <td className="py-3 px-3 align-top text-sm text-gray-700">{new Date(a.date).toLocaleDateString()}</td>
                   <td className="py-3 px-3 align-top">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><User size={16} /></div>
                       <div>
-                        <div className="font-medium text-sm">{a.patientName}</div>
-                        <div className="text-xs text-gray-500">{a.notes || ''}</div>
+                        <div className="font-medium text-sm">{a.patient_name}</div>
+                        <div className="text-xs text-gray-500">&nbsp;</div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-3 align-top text-sm text-gray-600">
-                    <div className="flex flex-col">
-                      <span className="truncate">{a.patientPhone}</span>
-                      <span className="truncate text-xs text-gray-400">{a.patientEmail}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-3 align-top text-sm text-gray-700">{a.type}</td>
-                  <td className="py-3 px-3 align-top text-sm text-gray-700">{a.doctor}</td>
-                  <td className="py-3 px-3 align-top text-sm text-gray-700">{a.room}</td>
-                  <td className="py-3 px-3 align-top">
-                    <div className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-semibold ${statusStyles[a.status]?.bg || 'bg-gray-100'} ${statusStyles[a.status]?.text || 'text-gray-700'}`}>
-                      {a.status === 'confirmed' && <CheckCircle size={14} />}
-                      {a.status === 'in-progress' && <AlertCircle size={14} />}
-                      {a.status === 'waiting' && <Clock size={14} />}
-                      <span className="capitalize">{a.status?.replace('-', ' ') || 'Unknown'}</span>
-                    </div>
-                  </td>
+                  <td className="py-3 px-3 align-top text-sm text-gray-700">{a.doctor_name}</td>
+                  <td className="py-3 px-3 align-top text-sm text-gray-700">{a.description}</td>
                   <td className="py-3 px-3 align-top text-sm relative">
                     <div className="flex items-center gap-2">
                       <div className="relative">
@@ -260,42 +273,41 @@ const Appointments: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* 1. Select Patient */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Patient Name *</label>
-                <input
-                  type="text"
-                  name="patientName"
-                  value={formData.patientName}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Patient *</label>
+                <select
+                  name="patientId"
+                  value={formData.patientId}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
-                />
+                >
+                  <option value="">Select patient</option>
+                  {patients.map(patient => (
+                    <option key={patient.id} value={patient.id}>{patient.name}</option>
+                  ))}
+                </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
-                  <input
-                    type="tel"
-                    name="patientPhone"
-                    value={formData.patientPhone}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    name="patientEmail"
-                    value={formData.patientEmail}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+              {/* 2. Select Doctor */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Doctor *</label>
+                <select
+                  name="doctor"
+                  value={formData.doctor}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">Select doctor</option>
+                  {doctors.map(doctor => (
+                    <option key={doctor.id} value={doctor.id}>{doctor.name}</option>
+                  ))}
+                </select>
               </div>
 
+              {/* 3. Date and Time */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
@@ -321,48 +333,16 @@ const Appointments: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="">Select type</option>
-                    {appointmentTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Doctor *</label>
-                  <select
-                    name="doctor"
-                    value={formData.doctor}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="">Select doctor</option>
-                    {dbDoctors.filter(d => d.status === 'approved' || !d.status).map(doctor => (
-                      <option key={doctor.id} value={doctor.id}>{doctor.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
+              {/* 4. Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   name="notes"
                   value={formData.notes}
                   onChange={handleInputChange}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Additional notes..."
+                  placeholder="Appointment description or notes..."
                 />
               </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, Calendar, FileText, UserCheck, ClipboardList, History } from 'lucide-react';
+import { Home, Users, Calendar, FileText, UserCheck, ClipboardList, History, Activity } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
@@ -11,13 +11,13 @@ const Sidebar: React.FC = () => {
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/appointments', icon: Calendar, label: 'Appointments' },
     { path: '/consultation', icon: Users, label: 'Consultation' },
-    { path: '/prescriptions', icon: FileText, label: 'Prescriptions' },
     { path: '/doctors', icon: UserCheck, label: 'Doctors' },
   ];
 
   const doctorMenuItems = [
     { path: '/dashboard', icon: Home, label: 'Overview' },
     { path: '/doctor/requests', icon: ClipboardList, label: 'Requests' },
+    { path: '/perception', icon: Activity, label: 'Perception' },
     { path: '/doctor/history', icon: History, label: 'History' },
   ];
 

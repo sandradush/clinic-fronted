@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Users, Calendar, UserCheck, ArrowRight } from 'lucide-react';
 import { useAppointments, useDoctors } from '../hooks/useApiData';
-import { api } from '../services/api';
+import { makeApiRequest } from '../utils/api';
 
 const AdminDashboard: React.FC = () => {
   const { appointments = [] } = useAppointments();
@@ -11,7 +11,10 @@ const AdminDashboard: React.FC = () => {
   const handleTransferAppointment = async (appointmentId: string, newDoctorId: string) => {
     setTransferring(appointmentId);
     try {
-      await api.transferAppointment(appointmentId, newDoctorId);
+      await makeApiRequest(`/appointments/${appointmentId}/transfer`, {
+        method: 'PUT',
+        body: JSON.stringify({ newDoctorId })
+      });
       // Refresh data would happen here
     } catch (error) {
       console.error('Transfer failed:', error);

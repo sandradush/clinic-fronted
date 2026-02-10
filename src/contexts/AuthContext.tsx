@@ -1,16 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { makeApiRequest } from '../utils/api';
 
 interface User {
   id?: string;
   email: string;
   name?: string;
-  role: 'admin' | 'doctor';
+  role: string;
+  status?: string;
   profileCompleted?: boolean;
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; redirectPath?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; redirectPath?: string; role?: string }>;
   register: (name: string, email: string, password: string, role: 'admin' | 'doctor') => Promise<boolean>;
   logout: () => void;
   user: User | null;
@@ -43,82 +45,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; message?: string; redirectPath?: string }> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; message?: string; redirectPath?: string; role?: string }> => {
     try {
-      const res = await fetch('https://clinic-backend-s2lx.onrender.com/api/auth/signin', {
+      const data: any = await makeApiRequest('/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          accept: 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password })
       });
 
-      let data: any = null;
-      let textBody = '';
-      try {
-        data = await res.json();
-      } catch (e) {
-        try {
-          textBody = await res.text();
-        } catch (_) {
-          textBody = '';
+      // Handle successful response with user data
+      const userData = data?.user;
+      if (userData) {
+        // Check if role is supported in web app
+        if (userData.role !== 'admin' && userData.role !== 'doctor') {
+          return { 
+            success: false, 
+            message: 'Please use our mobile application to access your account.',
+            role: userData.role 
+          };
         }
-        data = null;
+
+        // Create a token if not provided (for compatibility)
+        const token = data?.token || `session-${Date.now()}`;
+        
+        localStorage.setItem('session', JSON.stringify({ token }));
+        localStorage.setItem('user', JSON.stringify(userData));
+        setIsAuthenticated(true);
+        setUser(userData);
+
+        // Check if doctor has pending status and needs to complete profile
+        if (userData.role === 'doctor' && userData.status === 'pending') {
+          return { success: true, redirectPath: '/profile-setup', role: userData.role };
+        }
+
+        const dashboardPath = userData.role === 'admin' ? '/admin-dashboard' : '/dashboard';
+        return { success: true, redirectPath: dashboardPath, role: userData.role };
       }
 
-      if (res.ok) {
-        const token = data?.token;
-        const userData = data?.user;
-        if (token && userData) {
-          localStorage.setItem('session', JSON.stringify({ token }));
-          localStorage.setItem('user', JSON.stringify(userData));
-          setIsAuthenticated(true);
-          setUser(userData);
-          
-          console.log('Login successful. User data:', userData);
-          
-          // Check if doctor needs to complete profile
-          if (userData.role === 'doctor' && userData.profileCompleted === false) {
-            console.log('Doctor profile not completed, redirecting to profile-setup');
-            return { success: true, redirectPath: '/profile-setup' };
-          }
-          
-          const dashboardPath = userData.role === 'admin' ? '/admin-dashboard' : '/dashboard';
-          console.log('Redirecting to:', dashboardPath);
-          return { success: true, redirectPath: dashboardPath };
-        }
-        const msg = data?.message || textBody || 'Invalid server response';
-        console.error('Auth signin: unexpected ok response', { status: res.status, data, textBody });
-        return { success: false, message: String(msg) };
-      }
-
-      const serverMessage = (data && data.message) ? String(data.message) : (textBody || `Request failed (${res.status})`);
-      console.warn('Auth signin failed', { status: res.status, serverMessage, data, textBody });
-      return { success: false, message: serverMessage };
+      const serverMessage = data?.message || 'Invalid server response';
+      return { success: false, message: String(serverMessage) };
     } catch (err: any) {
-      console.error('Auth signin network error', err);
-      return { success: false, message: 'Network error. Please check your connection or CORS settings.' };
+      console.error('Auth signin error', err);
+      return { success: false, message: err?.message || 'Network error. Please check your connection or CORS settings.' };
     }
   };
 
   const register = async (name: string, email: string, password: string, role: 'admin' | 'doctor'): Promise<boolean> => {
     try {
-      const res = await fetch('https://clinic-backend-s2lx.onrender.com/api/auth/signup', {
+      const res = await makeApiRequest('/auth/signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          accept: 'application/json',
-        },
-        body: JSON.stringify({ email, password, name, role }),
+        body: JSON.stringify({ name, email, password, role })
       });
-
-      if (res.status === 201) {
-        return true;
-      }
-
-      return false;
+      return Boolean(res);
     } catch (err) {
+      console.error('Register error', err);
       return false;
     }
   };
