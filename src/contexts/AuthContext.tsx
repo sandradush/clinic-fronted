@@ -72,9 +72,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setIsAuthenticated(true);
         setUser(userData);
 
-        // Check if doctor has pending status and needs to complete profile
-        if (userData.role === 'doctor' && userData.status === 'pending') {
-          return { success: true, redirectPath: '/profile-setup', role: userData.role };
+        // Check if doctor needs to complete profile (INCOMPLETE status)
+        if (userData.role === 'doctor' && userData.status === 'INCOMPLETE') {
+          return { success: true, redirectPath: '/doctor/profile-completion', role: userData.role };
+        }
+
+        // Check if doctor is pending approval
+        if (userData.role === 'doctor' && userData.status === 'PENDING') {
+          return { 
+            success: false, 
+            message: 'Your profile is pending admin approval. Please wait for verification.',
+            role: userData.role 
+          };
+        }
+
+        // Check if doctor is approved
+        if (userData.role === 'doctor' && userData.status !== 'APPROVED') {
+          return { 
+            success: false, 
+            message: 'Your account is not approved. Please contact admin.',
+            role: userData.role 
+          };
         }
 
         const dashboardPath = userData.role === 'admin' ? '/admin-dashboard' : '/dashboard';
@@ -91,7 +109,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (name: string, email: string, password: string, role: 'admin' | 'doctor'): Promise<boolean> => {
     try {
-      const res = await makeApiRequest('/auth/signup', {
+      const res = await makeApiRequest('/auth/Re', {
         method: 'POST',
         body: JSON.stringify({ name, email, password, role })
       });

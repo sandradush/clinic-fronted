@@ -17,7 +17,7 @@ interface AppointmentItem {
   doctor_name?: string;
 }
 
-const Perception: React.FC = () => {
+const Prescription: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -25,15 +25,15 @@ const Perception: React.FC = () => {
   const [selectedSymptoms, setSelectedSymptoms] = useState<any[] | null>(null);
   const [symptomsModalOpen, setSymptomsModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [perceptionTitle, setPerceptionTitle] = useState('');
-  const [perceptionNotes, setPerceptionNotes] = useState('');
+  const [prescriptionTitle, setPrescriptionTitle] = useState('');
+  const [prescriptionNotes, setPrescriptionNotes] = useState('');
   const [activeAppointment, setActiveAppointment] = useState<AppointmentItem | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [medModalOpen, setMedModalOpen] = useState(false);
   const [medForm, setMedForm] = useState({ name: '', dosage: '', frequency: '', notes: '' });
   const [medSubmitting, setMedSubmitting] = useState(false);
-  const [perceptionsModalOpen, setPerceptionsModalOpen] = useState(false);
-  const [perceptions, setPerceptions] = useState<any[] | null>(null);
+  const [prescriptionsModalOpen, setPrescriptionsModalOpen] = useState(false);
+  const [prescriptions, setPrescriptions] = useState<any[] | null>(null);
   const [medicalsModalOpen, setMedicalsModalOpen] = useState(false);
   const [medicals, setMedicals] = useState<any[] | null>(null);
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
@@ -49,7 +49,7 @@ const Perception: React.FC = () => {
         const data = await makeApiRequest(`/symptoms/doctor/${user.id}/appointments/today`);
         setAppointments(data || []);
       } catch (err) {
-        console.error('Failed to load perception data', err);
+        console.error('Failed to load prescription data', err);
         toast.error('Failed to load data');
       } finally {
         setLoading(false);
@@ -73,16 +73,16 @@ const Perception: React.FC = () => {
     }
   };
 
-  const openAddPerception = (appt: AppointmentItem) => {
+  const openAddPrescription = (appt: AppointmentItem) => {
     setActiveAppointment(appt);
-    setPerceptionTitle('');
-    setPerceptionNotes('');
+    setPrescriptionTitle('');
+    setPrescriptionNotes('');
     setAddModalOpen(true);
   };
 
-  const submitPerception = async () => {
+  const submitPrescription = async () => {
     if (!activeAppointment) return;
-    if (!perceptionTitle.trim() || !perceptionNotes.trim()) {
+    if (!prescriptionTitle.trim() || !prescriptionNotes.trim()) {
       toast.error('Please provide title and notes');
       return;
     }
@@ -90,31 +90,31 @@ const Perception: React.FC = () => {
     try {
       const payload = {
         appointment_id: activeAppointment.id,
-        title: perceptionTitle.trim(),
-        note: perceptionNotes.trim()
+        title: prescriptionTitle.trim(),
+        note: prescriptionNotes.trim()
       };
-      await makeApiRequest('/perceptions', { method: 'POST', body: JSON.stringify(payload) });
-      toast.success('Perception saved');
+      await makeApiRequest('/prescriptions', { method: 'POST', body: JSON.stringify(payload) });
+      toast.success('Prescription saved');
       setAddModalOpen(false);
     } catch (err) {
-      console.error('Failed to save perception', err);
-      toast.error('Failed to save perception');
+      console.error('Failed to save prescription', err);
+      toast.error('Failed to save prescription');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const openPerceptions = async (appt: AppointmentItem) => {
+  const openPrescriptions = async (appt: AppointmentItem) => {
     setActiveAppointment(appt);
-    setPerceptions(null);
-    setPerceptionsModalOpen(true);
+    setPrescriptions(null);
+    setPrescriptionsModalOpen(true);
     try {
-      const resp = await makeApiRequest(`/perceptions/appointment/${appt.id}`);
-      setPerceptions(resp || []);
+      const resp = await makeApiRequest(`/prescriptions/appointment/${appt.id}`);
+      setPrescriptions(resp || []);
     } catch (err) {
-      console.error('Failed to load perceptions', err);
-      toast.error('Failed to load perceptions');
-      setPerceptions([]);
+      console.error('Failed to load prescriptions', err);
+      toast.error('Failed to load prescriptions');
+      setPrescriptions([]);
     }
   };
 
@@ -341,7 +341,7 @@ const Perception: React.FC = () => {
           <button onClick={() => navigate(-1)} className="p-2 rounded hover:bg-gray-100">
             <ArrowLeft size={18} />
           </button>
-          <h1 className="text-2xl font-semibold">Perception</h1>
+          <h1 className="text-2xl font-semibold">Prescription</h1>
         </div>
         <div>
           <button onClick={() => navigate('/dashboard')} className="px-3 py-2 bg-blue-600 text-white rounded text-sm">
@@ -401,11 +401,11 @@ const Perception: React.FC = () => {
                     <button onClick={() => { setActiveAppointment(appt); setMedForm({ name: '', dosage: '', frequency: '', notes: '' }); setMedModalOpen(true); }} className="px-3 py-2 bg-emerald-500 text-white rounded-lg flex items-center gap-2 hover:bg-emerald-600">
                       <Plus size={16} /> Add Med
                     </button>
-                    <button onClick={() => openAddPerception(appt)} className="px-3 py-2 bg-green-500 text-white rounded-lg flex items-center gap-2 hover:bg-green-600">
-                      <Plus size={16} /> Add Perception
+                    <button onClick={() => openAddPrescription(appt)} className="px-3 py-2 bg-green-500 text-white rounded-lg flex items-center gap-2 hover:bg-green-600">
+                      <Plus size={16} /> Add Prescription
                     </button>
-                    <button onClick={() => openPerceptions(appt)} className="px-3 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg flex items-center gap-2 hover:bg-yellow-100">
-                      View Perceptions
+                    <button onClick={() => openPrescriptions(appt)} className="px-3 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg flex items-center gap-2 hover:bg-yellow-100">
+                      View Prescriptions
                     </button>
                     <button onClick={() => { openMedicals(appt); }} className="px-3 py-2 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg flex items-center gap-2 hover:bg-purple-100">
                       View Meds
@@ -453,28 +453,28 @@ const Perception: React.FC = () => {
         </div>
       )}
 
-      {/* Add Perception Modal */}
+      {/* Add Prescription Modal */}
       {addModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Add Perception for #{activeAppointment?.id}</h3>
+              <h3 className="text-lg font-semibold">Add Prescription for #{activeAppointment?.id}</h3>
               <button onClick={() => setAddModalOpen(false)} className="text-gray-500">Close</button>
             </div>
 
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium mb-1">Title</label>
-                <input value={perceptionTitle} onChange={(e) => setPerceptionTitle(e.target.value)} className="w-full px-3 py-2 border rounded" />
+                <input value={prescriptionTitle} onChange={(e) => setPrescriptionTitle(e.target.value)} className="w-full px-3 py-2 border rounded" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Notes</label>
-                <textarea value={perceptionNotes} onChange={(e) => setPerceptionNotes(e.target.value)} className="w-full px-3 py-2 border rounded" rows={4} />
+                <textarea value={prescriptionNotes} onChange={(e) => setPrescriptionNotes(e.target.value)} className="w-full px-3 py-2 border rounded" rows={4} />
               </div>
 
               <div className="flex items-center gap-2">
-                <button onClick={submitPerception} disabled={actionLoading} className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-50">
-                  {actionLoading ? 'Saving...' : 'Save Perception'}
+                <button onClick={submitPrescription} disabled={actionLoading} className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-50">
+                  {actionLoading ? 'Saving...' : 'Save Prescription'}
                 </button>
                 <button onClick={() => setAddModalOpen(false)} className="px-4 py-2 border rounded">Cancel</button>
               </div>
@@ -483,22 +483,22 @@ const Perception: React.FC = () => {
         </div>
       )}
 
-      {/* View Perceptions Modal */}
-      {perceptionsModalOpen && (
+      {/* View Prescriptions Modal */}
+      {prescriptionsModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Perceptions for Appointment #{activeAppointment?.id}</h3>
-              <button onClick={() => setPerceptionsModalOpen(false)} className="text-gray-500">Close</button>
+              <h3 className="text-lg font-semibold">Prescriptions for Appointment #{activeAppointment?.id}</h3>
+              <button onClick={() => setPrescriptionsModalOpen(false)} className="text-gray-500">Close</button>
             </div>
 
-            {perceptions === null ? (
+            {prescriptions === null ? (
               <div>Loading...</div>
-            ) : perceptions.length === 0 ? (
-              <div className="text-gray-500">No perceptions recorded.</div>
+            ) : prescriptions.length === 0 ? (
+              <div className="text-gray-500">No prescriptions recorded.</div>
             ) : (
               <div className="space-y-3">
-                {perceptions.map((p: any) => (
+                {prescriptions.map((p: any) => (
                   <div key={p.id} className="border p-3 rounded">
                     <div className="font-medium">{p.title}</div>
                     <div className="text-sm text-gray-700 mt-1">{p.note}</div>
@@ -753,4 +753,4 @@ const Perception: React.FC = () => {
   );
 };
 
-export default Perception;
+export default Prescription;

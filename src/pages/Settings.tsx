@@ -1,149 +1,239 @@
-import React, { useState } from 'react';
-import { User, Shield } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { Building2, Clock, Settings as SettingsIcon, Upload } from 'lucide-react';
 import { makeApiRequest } from '../utils/api';
 import toast from 'react-hot-toast';
 
 const Settings: React.FC = () => {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
+  const [activeTab, setActiveTab] = useState<'clinic' | 'hours' | 'preferences'>('clinic');
+  const [clinicInfo, setClinicInfo] = useState({ name: '', address: '', logo: '' });
+  const [workingHours, setWorkingHours] = useState({ start: '09:00', end: '17:00' });
+  const [preferences, setPreferences] = useState({ language: 'en', theme: 'light' });
 
-  // Profile state
-  const [name, setName] = useState(user?.name || 'David Johnson');
-  const [email, setEmail] = useState(user?.email || 'david@gmail.com');
-  const [phone, setPhone] = useState('+1 234 567 8900');
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await makeApiRequest('/settings');
+        if (data.clinicInfo) setClinicInfo(data.clinicInfo);
+        if (data.workingHours) setWorkingHours(data.workingHours);
+        if (data.preferences) setPreferences(data.preferences);
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
-  // Password state
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
-  const handleProfileSave = async (e: React.FormEvent) => {
+  const handleSaveClinicInfo = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await makeApiRequest('/profile', {
+      await makeApiRequest('/settings/clinic', {
         method: 'PUT',
-        body: JSON.stringify({ name, email, phone })
+        body: JSON.stringify(clinicInfo),
       });
-      console.log('Profile update response:', response);
-      toast.success('Profile updated successfully!');
-      // Update local user data
-      const userData = JSON.parse(localStorage.getItem('user') || '{}');
-      userData.name = name;
-      userData.email = email;
-      localStorage.setItem('user', JSON.stringify(userData));
-    } catch (error: any) {
-      console.error('Failed to update profile:', error);
-      console.error('Error details:', error.message);
-      toast.error('Failed to update profile. Please try again.');
+      toast.success('Clinic information updated successfully!');
+    } catch {
+      toast.error('Failed to update clinic information');
     }
   };
 
-  const handleChangePassword = async (e: React.FormEvent) => {
+  const handleSaveWorkingHours = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentPassword || !newPassword) {
-      toast.error('Please fill all fields');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-    if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-    
     try {
-      await makeApiRequest('/profile/change-password', {
+      await makeApiRequest('/settings/working-hours', {
         method: 'PUT',
-        body: JSON.stringify({ currentPassword, newPassword })
+        body: JSON.stringify(workingHours),
       });
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      toast.success('Password changed successfully!');
-    } catch (error) {
-      console.error('Failed to change password:', error);
-      toast.error('Failed to change password. Please check your current password.');
+      toast.success('Working hours updated successfully!');
+    } catch {
+      toast.error('Failed to update working hours');
+    }
+  };
+
+  const handleSavePreferences = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await makeApiRequest('/settings/preferences', {
+        method: 'PUT',
+        body: JSON.stringify(preferences),
+      });
+      toast.success('System preferences updated successfully!');
+    } catch {
+      toast.error('Failed to update preferences');
     }
   };
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Settings</h1>
-          <p className="text-sm text-gray-600">Profile and security</p>
+    <div className="p-6">
+      <h1 className="text-2xl font-semibold mb-6">Settings</h1>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab('clinic')}
+            className={`flex items-center gap-2 px-4 py-2 rounded ${
+              activeTab === 'clinic' ? 'bg-blue-500 text-white' : 'bg-gray-100'
+            }`}
+          >
+            <Building2 size={18} />
+            Clinic Information
+          </button>
+
+          <button
+            onClick={() => setActiveTab('hours')}
+            className={`flex items-center gap-2 px-4 py-2 rounded ${
+              activeTab === 'hours' ? 'bg-blue-500 text-white' : 'bg-gray-100'
+            }`}
+          >
+            <Clock size={18} />
+            Working Hours
+          </button>
+
+          <button
+            onClick={() => setActiveTab('preferences')}
+            className={`flex items-center gap-2 px-4 py-2 rounded ${
+              activeTab === 'preferences' ? 'bg-blue-500 text-white' : 'bg-gray-100'
+            }`}
+          >
+            <SettingsIcon size={18} />
+            System Preferences
+          </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-4 flex gap-6">
-        <aside className="w-48 border-r pr-4">
-          <button className={`w-full text-left px-3 py-2 rounded ${activeTab === 'profile' ? 'bg-blue-50 font-semibold' : 'hover:bg-gray-50'}`} onClick={() => setActiveTab('profile')}>
-            <div className="flex items-center gap-2"><User size={16} /> Profile</div>
-          </button>
-          <button className={`w-full text-left px-3 py-2 rounded mt-2 ${activeTab === 'password' ? 'bg-blue-50 font-semibold' : 'hover:bg-gray-50'}`} onClick={() => setActiveTab('password')}>
-            <div className="flex items-center gap-2"><Shield size={16} /> Change Password</div>
-          </button>
-        </aside>
+      {/* Clinic Info */}
+      {activeTab === 'clinic' && (
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-4">Clinic Information</h2>
 
-        <div className="flex-1">
-          {activeTab === 'profile' && (
-            <form onSubmit={handleProfileSave} className="space-y-4 max-w-2xl">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-xl font-semibold">{(name || 'U').split(' ').map(n=>n[0]).slice(0,2).join('')}</div>
-                <div>
-                  <div className="text-lg font-medium">{name}</div>
-                  <div className="text-sm text-gray-500">{email}</div>
-                </div>
-              </div>
+          <form onSubmit={handleSaveClinicInfo} className="space-y-4 max-w-2xl">
+            <div>
+              <label className="text-sm font-medium">Clinic Name</label>
+              <input
+                type="text"
+                value={clinicInfo.name}
+                onChange={(e) => setClinicInfo({ ...clinicInfo, name: e.target.value })}
+                className="mt-1 block w-full border rounded px-3 py-2"
+              />
+            </div>
 
-              <div>
-                <label className="text-sm font-medium">Full name</label>
-                <input className="mt-1 block w-full border rounded px-3 py-2" value={name} onChange={e=>setName(e.target.value)} />
-              </div>
+            <div>
+              <label className="text-sm font-medium">Address</label>
+              <textarea
+                value={clinicInfo.address}
+                onChange={(e) => setClinicInfo({ ...clinicInfo, address: e.target.value })}
+                rows={3}
+                className="mt-1 block w-full border rounded px-3 py-2"
+              />
+            </div>
 
-              <div>
-                <label className="text-sm font-medium">Email</label>
-                <input className="mt-1 block w-full border rounded px-3 py-2" value={email} onChange={e=>setEmail(e.target.value)} />
+            <div>
+              <label className="text-sm font-medium">Logo URL</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={clinicInfo.logo}
+                  onChange={(e) => setClinicInfo({ ...clinicInfo, logo: e.target.value })}
+                  className="mt-1 block w-full border rounded px-3 py-2"
+                  placeholder="https://example.com/logo.png"
+                />
+                <button
+                  type="button"
+                  className="mt-1 px-4 py-2 border rounded flex items-center gap-2"
+                >
+                  <Upload size={16} />
+                  Upload
+                </button>
               </div>
+            </div>
 
-              <div>
-                <label className="text-sm font-medium">Phone</label>
-                <input className="mt-1 block w-full border rounded px-3 py-2" value={phone} onChange={e=>setPhone(e.target.value)} />
-              </div>
-
-              <div className="pt-4">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded">Save profile</button>
-              </div>
-            </form>
-          )}
-
-          {activeTab === 'password' && (
-            <form onSubmit={handleChangePassword} className="max-w-md space-y-4">
-              <div>
-                <label className="text-sm font-medium">Current password</label>
-                <input type="password" className="mt-1 block w-full border rounded px-3 py-2" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)} />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">New password</label>
-                <input type="password" className="mt-1 block w-full border rounded px-3 py-2" value={newPassword} onChange={e=>setNewPassword(e.target.value)} />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Confirm new password</label>
-                <input type="password" className="mt-1 block w-full border rounded px-3 py-2" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} />
-              </div>
-
-              <div className="pt-2">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded">Change password</button>
-              </div>
-            </form>
-          )}
+            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
+              Save Clinic Information
+            </button>
+          </form>
         </div>
-      </div>
+      )}
+
+      {/* Working Hours */}
+      {activeTab === 'hours' && (
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-4">Working Hours</h2>
+
+          <form onSubmit={handleSaveWorkingHours} className="space-y-4 max-w-2xl">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Start Time</label>
+                <input
+                  type="time"
+                  value={workingHours.start}
+                  onChange={(e) =>
+                    setWorkingHours({ ...workingHours, start: e.target.value })
+                  }
+                  className="mt-1 block w-full border rounded px-3 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">End Time</label>
+                <input
+                  type="time"
+                  value={workingHours.end}
+                  onChange={(e) =>
+                    setWorkingHours({ ...workingHours, end: e.target.value })
+                  }
+                  className="mt-1 block w-full border rounded px-3 py-2"
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
+              Save Working Hours
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Preferences */}
+      {activeTab === 'preferences' && (
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-4">System Preferences</h2>
+
+          <form onSubmit={handleSavePreferences} className="space-y-4 max-w-2xl">
+            <div>
+              <label className="text-sm font-medium">Language</label>
+              <select
+                value={preferences.language}
+                onChange={(e) =>
+                  setPreferences({ ...preferences, language: e.target.value })
+                }
+                className="mt-1 block w-full border rounded px-3 py-2"
+              >
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Theme</label>
+              <select
+                value={preferences.theme}
+                onChange={(e) =>
+                  setPreferences({ ...preferences, theme: e.target.value })
+                }
+                className="mt-1 block w-full border rounded px-3 py-2"
+              >
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+
+            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
+              Save Preferences
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

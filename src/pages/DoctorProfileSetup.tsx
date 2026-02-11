@@ -63,11 +63,19 @@ const DoctorProfileSetup: React.FC = () => {
           qualifications: formData.qualifications,
           licenseNumber: formData.licenseNumber,
           documents: documents.map(file => file.name),
-          password: ''
+          password: '',
+          status: 'PENDING'
         })
       });
       
+      // Update user status in localStorage
+      const updatedUser = { ...user, status: 'PENDING' };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
       toast.success('Profile submitted! Awaiting admin approval.');
+      setTimeout(() => {
+        toast.info('Please wait for admin verification before accessing the system.');
+      }, 1000);
       navigate('/dashboard');
     } catch (err) {
       setError('Submission failed. Please try again.');

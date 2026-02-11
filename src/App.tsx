@@ -16,10 +16,14 @@ import NewAppointment from './pages/NewAppointment';
 import Consultation from './pages/Consultation';
 import Perception from './pages/Perception';
 import Doctors from './pages/Doctors';
+import Patients from './pages/Patients';
+import Schedules from './pages/Schedules';
+import AuditLogs from './pages/AuditLogs';
+import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import DoctorProfileSetup from './pages/DoctorProfileSetup';
+import DoctorProfileCompletion from './pages/DoctorProfileCompletion';
 import DoctorRequestsPage from './pages/DoctorRequests';
 import DoctorHistory from './pages/DoctorHistory';
 import CreateDoctorProfile from './pages/CreateDoctorProfile';
@@ -55,7 +59,7 @@ const ProtectedRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/profile-setup" element={<DoctorProfileSetup />} />
+      <Route path="/doctor/profile-completion" element={<DoctorProfileCompletion />} />
       <Route path="/" element={<MainLayout />}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -65,6 +69,10 @@ const ProtectedRoutes = () => {
         <Route path="/consultation/:appointmentId" element={<Consultation />} />
         <Route path="/perception" element={<Perception />} />
         <Route path="/doctors" element={<Doctors />} />
+        <Route path="/patients" element={<Patients />} />
+        <Route path="/schedules" element={<Schedules />} />
+        <Route path="/audit-logs" element={<AuditLogs />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/doctors/create" element={<CreateDoctorProfile />} />
         <Route path="/doctor/requests" element={<DoctorRequestsPage />} />
         <Route path="/doctor/history" element={<DoctorHistory />} />
