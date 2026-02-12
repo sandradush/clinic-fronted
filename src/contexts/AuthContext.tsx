@@ -8,6 +8,7 @@ interface User {
   role: string;
   status?: string;
   profileCompleted?: boolean;
+  doctorStatus?: string;
 }
 
 interface AuthContextType {
@@ -72,18 +73,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setIsAuthenticated(true);
         setUser(userData);
 
-        // Check if doctor needs to complete profile (INCOMPLETE status)
-        if (userData.role === 'doctor' && userData.status === 'INCOMPLETE') {
-          return { success: true, redirectPath: '/doctor/profile-completion', role: userData.role };
+        // Check if doctor has pending status - redirect to profile setup
+        if (userData.role === 'doctor' && (userData.status === 'pending' || userData.doctorStatus === 'pending')) {
+          return { success: true, redirectPath: '/profilesetup', role: userData.role };
         }
 
-        // Check if doctor is pending approval
-        if (userData.role === 'doctor' && userData.status === 'PENDING') {
-          return { 
-            success: false, 
-            message: 'Your profile is pending admin approval. Please wait for verification.',
-            role: userData.role 
-          };
+        // Check if doctor needs to complete profile (INCOMPLETE status)
+        if (userData.role === 'doctor' && userData.status === 'INCOMPLETE') {
+          return { success: true, redirectPath: '/profilesetup', role: userData.role };
         }
 
         // Check if doctor is approved

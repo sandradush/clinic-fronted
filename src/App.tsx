@@ -23,7 +23,7 @@ import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import DoctorProfileCompletion from './pages/DoctorProfileCompletion';
+import ProfileSetup from './pages/ProfileSetup';
 import DoctorRequestsPage from './pages/DoctorRequests';
 import DoctorHistory from './pages/DoctorHistory';
 import CreateDoctorProfile from './pages/CreateDoctorProfile';
@@ -52,6 +52,7 @@ const ProtectedRoutes = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profilesetup" element={<ProfileSetup />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
@@ -59,7 +60,7 @@ const ProtectedRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/doctor/profile-completion" element={<DoctorProfileCompletion />} />
+      <Route path="/profilesetup" element={<ProfileSetup />} />
       <Route path="/" element={<MainLayout />}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
