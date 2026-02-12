@@ -274,11 +274,7 @@ const Schedules: React.FC = () => {
         </>
       )}
 
-      {!selectedDoctor && (
-        <div className="bg-white rounded-lg shadow-sm p-12 text-center text-gray-500">
-          Please select a doctor to manage their schedule
-        </div>
-      )}
+
     </div>
   );
 };

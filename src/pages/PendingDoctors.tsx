@@ -15,7 +15,7 @@ interface PendingDoctor {
   created_at: string;
 }
 
-const DoctorRequests: React.FC = () => {
+const PendingDoctors: React.FC = () => {
   const [doctors, setDoctors] = useState<PendingDoctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<number | null>(null);
@@ -39,8 +39,10 @@ const DoctorRequests: React.FC = () => {
   const handleApprove = async (doctorId: number) => {
     setProcessing(doctorId);
     try {
-      const response = await fetch(`https://clinic-backend-s2lx.onrender.com/api/auth/doctors/${doctorId}/approve`, {
-        method: 'PATCH'
+      const response = await fetch(`https://clinic-backend-s2lx.onrender.com/api/auth/doctors/${doctorId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'approved' })
       });
       if (response.ok) {
         toast.success('Doctor approved successfully!');
@@ -56,8 +58,10 @@ const DoctorRequests: React.FC = () => {
   const handleReject = async (doctorId: number) => {
     setProcessing(doctorId);
     try {
-      const response = await fetch(`https://clinic-backend-s2lx.onrender.com/api/auth/doctors/${doctorId}/reject`, {
-        method: 'PATCH'
+      const response = await fetch(`https://clinic-backend-s2lx.onrender.com/api/auth/doctors/${doctorId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'rejected' })
       });
       if (response.ok) {
         toast.success('Doctor rejected');
@@ -87,7 +91,7 @@ const DoctorRequests: React.FC = () => {
           No pending doctor requests
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {doctors.map((doctor) => (
             <div key={doctor.doctor_id} className="bg-white border rounded-lg p-6">
               <div className="flex items-start justify-between">
@@ -153,4 +157,4 @@ const DoctorRequests: React.FC = () => {
   );
 };
 
-export default DoctorRequests;
+export default PendingDoctors;

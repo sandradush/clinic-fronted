@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { UserPlus, UserCheck } from 'lucide-react';
-import DoctorRequests from './DoctorRequests';
+import PendingDoctors from './PendingDoctors';
 import ApprovedDoctors from './ApprovedDoctors';
 
 const Doctors: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'requests' | 'approved'>('requests');
 
   const tabs = [
-    { id: 'requests', label: 'Doctor Requests', icon: UserPlus, component: DoctorRequests },
+    { id: 'requests', label: 'Doctor Requests', icon: UserPlus, component: PendingDoctors },
     { id: 'approved', label: 'Approved Doctors', icon: UserCheck, component: ApprovedDoctors },
   ];
 
-  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || DoctorRequests;
+  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || PendingDoctors;
 
   return (
     <div className="p-4">

@@ -1,27 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { Users, Calendar, UserCheck, Activity } from 'lucide-react';
-import { useAppointments, useDoctors } from '../hooks/useApiData';
-import { makeApiRequest } from '../utils/api';
+
+interface DashboardStats {
+  totalDoctors: number;
+  totalPatients: number;
+  pendingAppointments: number;
+  approvedAppointments: number;
+}
 
 const AdminDashboard: React.FC = () => {
-  const { appointments = [] } = useAppointments();
-  const { doctors = [] } = useDoctors();
-  const [patients, setPatients] = useState<any[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalDoctors: 0,
+    totalPatients: 0,
+    pendingAppointments: 0,
+    approvedAppointments: 0
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPatients = async () => {
+    const fetchDashboardStats = async () => {
       try {
-        const data = await makeApiRequest('/patients');
-        setPatients(data);
+        const response = await fetch('https://clinic-backend-s2lx.onrender.com/api/auth/dashboard');
+        const data = await response.json();
+        setStats(data);
       } catch (error) {
-        console.error('Failed to fetch patients:', error);
+        console.error('Failed to fetch dashboard stats:', error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchPatients();
+    fetchDashboardStats();
   }, []);
 
-  const pendingAppointments = appointments.filter(apt => apt.status === 'pending');
-  const confirmedAppointments = appointments.filter(apt => apt.status === 'confirmed');
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4">
@@ -33,7 +50,7 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-3">
             <Users className="text-blue-500" size={24} />
             <div>
-              <h3 className="text-lg font-semibold">{doctors.length}</h3>
+            <h3 className="text-lg font-semibold">{stats.totalDoctors}</h3>
               <p className="text-gray-600">Total Doctors</p>
             </div>
           </div>
@@ -42,7 +59,7 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-3">
             <Activity className="text-purple-500" size={24} />
             <div>
-              <h3 className="text-lg font-semibold">{patients.length}</h3>
+            <h3 className="text-lg font-semibold">{stats.totalPatients}</h3>
               <p className="text-gray-600">Total Patients</p>
             </div>
           </div>
@@ -51,7 +68,7 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-3">
             <Calendar className="text-yellow-500" size={24} />
             <div>
-              <h3 className="text-lg font-semibold">{pendingAppointments.length}</h3>
+            <h3 className="text-lg font-semibold">{stats.pendingAppointments}</h3>
               <p className="text-gray-600">Pending Appointments</p>
             </div>
           </div>
@@ -60,54 +77,8 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-3">
             <UserCheck className="text-green-500" size={24} />
             <div>
-              <h3 className="text-lg font-semibold">{confirmedAppointments.length}</h3>
-              <p className="text-gray-600">Confirmed Appointments</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Doctors Status */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Doctors Status</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Available</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {doctors.filter(d => d.availability === 'available').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                <UserCheck className="text-green-600" size={24} />
-              </div>
-            </div>
-          </div>
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Busy</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {doctors.filter(d => d.availability === 'busy').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
-                <Users className="text-yellow-600" size={24} />
-              </div>
-            </div>
-          </div>
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Offline</p>
-                <p className="text-2xl font-bold text-gray-600">
-                  {doctors.filter(d => d.availability === 'offline' || !d.availability).length}
-                </p>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                <Users className="text-gray-600" size={24} />
-              </div>
+            <h3 className="text-lg font-semibold">{stats.approvedAppointments}</h3>
+              <p className="text-gray-600">Approved Appointments</p>
             </div>
           </div>
         </div>
