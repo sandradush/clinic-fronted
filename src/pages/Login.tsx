@@ -60,13 +60,17 @@ const Login: React.FC = () => {
       if (isLogin) {
         const result = await login(formData.email, formData.password);
         if (result.success) {
-          if (result.redirectPath === '/profile-setup') {
+          if (result.message) {
+            setSuccess(result.message);
+          } else if (result.redirectPath === '/profilesetup') {
             setSuccess('Login successful! Please complete your profile setup...');
           } else {
             const roleLabel = result.role === 'admin' ? 'Admin Dashboard' : (result.role === 'doctor' ? 'Doctor Dashboard' : 'Dashboard');
             setSuccess(`Login successful! Redirecting to ${roleLabel}...`);
           }
-          // navigation will occur when AuthContext updates `isAuthenticated` and `user`
+          setTimeout(() => {
+            navigate(result.redirectPath || '/dashboard', { replace: true });
+          }, 1000);
         } else {
           setErrors({ general: result.message || 'Invalid email or password. Please try again.' });
         }
@@ -111,18 +115,14 @@ const Login: React.FC = () => {
 
   // Navigate when auth context updates
   React.useEffect(() => {
-    if (isAuthenticated && user) {
-      if (user.role === 'doctor' && user.status === 'pending') {
-        navigate('/profile-setup', { replace: true });
-        return;
-      }
+    if (isAuthenticated && user && !success) {
       if (user.role === 'admin') {
         navigate('/admin-dashboard', { replace: true });
         return;
       }
       navigate('/dashboard', { replace: true });
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, success]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">

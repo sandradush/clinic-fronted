@@ -73,18 +73,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setIsAuthenticated(true);
         setUser(userData);
 
-        // Check if doctor has pending status - redirect to profile setup
-        if (userData.role === 'doctor' && (userData.status === 'pending' || userData.doctorStatus === 'pending')) {
+        // Check if doctor profile doesn't exist - redirect to profile setup
+        if (userData.role === 'doctor' && userData.doctorStatus === 'not exist') {
           return { success: true, redirectPath: '/profilesetup', role: userData.role };
         }
 
-        // Check if doctor needs to complete profile (INCOMPLETE status)
-        if (userData.role === 'doctor' && userData.status === 'INCOMPLETE') {
-          return { success: true, redirectPath: '/profilesetup', role: userData.role };
+        // Check if doctor has pending status - show message and redirect to dashboard
+        if (userData.role === 'doctor' && userData.doctorStatus === 'pending') {
+          return { 
+            success: true, 
+            redirectPath: '/dashboard',
+            message: 'Your profile is pending admin approval. You will have limited access until approved.',
+            role: userData.role 
+          };
         }
 
         // Check if doctor is approved
-        if (userData.role === 'doctor' && userData.status !== 'APPROVED') {
+        if (userData.role === 'doctor' && userData.status !== 'APPROVED' && userData.doctorStatus !== 'pending') {
           return { 
             success: false, 
             message: 'Your account is not approved. Please contact admin.',

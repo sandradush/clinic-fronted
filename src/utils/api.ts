@@ -13,6 +13,9 @@ export const makeApiRequest = async (endpoint: string, options: RequestInit = {}
   });
 
   if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('Waiting for admin approval');
+    }
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
