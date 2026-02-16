@@ -130,6 +130,10 @@ class ApiService {
     return this.request('/appointments');
   }
 
+  async getWaitingAppointments() {
+    return this.request('/appointments/waiting');
+  }
+
   async createAppointment(appointmentData: any) {
     return this.request('/appointments', {
       method: 'POST',
@@ -142,6 +146,29 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify({ newDoctorId }),
     });
+  }
+
+  async assignDoctorToAppointment(appointmentId: number, doctorId: number) {
+    return this.request(`/appointments/${appointmentId}/doctor`, {
+      method: 'PATCH',
+      body: JSON.stringify({ doctor_id: doctorId }),
+    });
+  }
+
+  async approveAppointment(appointmentId: number) {
+    return this.request(`/appointments/${appointmentId}/approve`, {
+      method: 'PATCH',
+    });
+  }
+
+  async rejectAppointment(appointmentId: number) {
+    return this.request(`/appointments/${appointmentId}/reject`, {
+      method: 'PATCH',
+    });
+  }
+
+  async getDoctorAssignedAppointments(doctorId: number) {
+    return this.request(`/appointments/doctor/${doctorId}`);
   }
 
   // Prescriptions

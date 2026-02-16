@@ -27,6 +27,8 @@ import ProfileSetup from './pages/ProfileSetup';
 import DoctorRequestsPage from './pages/DoctorRequests';
 import DoctorHistory from './pages/DoctorHistory';
 import CreateDoctorProfile from './pages/CreateDoctorProfile';
+import WaitingPatients from './pages/WaitingPatients';
+import DoctorAppointmentRequests from './pages/DoctorAppointmentRequests';
 
 // Context & Config
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -71,11 +73,13 @@ const ProtectedRoutes = () => {
         <Route path="/perception" element={<Perception />} />
         <Route path="/doctors" element={<Doctors />} />
         <Route path="/patients" element={<Patients />} />
+        <Route path="/waiting-patients" element={<WaitingPatients />} />
         <Route path="/schedules" element={<Schedules />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/doctors/create" element={<CreateDoctorProfile />} />
         <Route path="/doctor/requests" element={<DoctorRequestsPage />} />
+        <Route path="/doctor/appointment-requests" element={<DoctorAppointmentRequests />} />
         <Route path="/doctor/history" element={<DoctorHistory />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

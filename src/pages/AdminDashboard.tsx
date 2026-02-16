@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Calendar, UserCheck, Activity } from 'lucide-react';
+import { Users, Calendar, UserCheck, Activity, Clock, User } from 'lucide-react';
 
 interface DashboardStats {
   totalDoctors: number;
   totalPatients: number;
   pendingAppointments: number;
   approvedAppointments: number;
+}
+
+interface WaitingPatient {
+  id: number;
+  patient_name: string;
+  doctor_name: string;
+  time: string;
+  date: string;
+  description: string;
 }
 
 const AdminDashboard: React.FC = () => {
@@ -15,6 +24,7 @@ const AdminDashboard: React.FC = () => {
     pendingAppointments: 0,
     approvedAppointments: 0
   });
+  const [waitingPatients, setWaitingPatients] = useState<WaitingPatient[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +39,19 @@ const AdminDashboard: React.FC = () => {
         setLoading(false);
       }
     };
+
+    const fetchWaitingPatients = async () => {
+      try {
+        const response = await fetch('https://clinic-backend-s2lx.onrender.com/api/appointments');
+        const data = await response.json();
+        setWaitingPatients(data || []);
+      } catch (error) {
+        console.error('Failed to fetch waiting patients:', error);
+      }
+    };
+
     fetchDashboardStats();
+    fetchWaitingPatients();
   }, []);
 
   if (loading) {
@@ -45,7 +67,7 @@ const AdminDashboard: React.FC = () => {
       <h1 className="text-2xl font-semibold mb-6">Admin Dashboard</h1>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <div className="bg-white p-4 rounded-lg shadow-sm">
           <div className="flex items-center gap-3">
             <Users className="text-blue-500" size={24} />
@@ -82,9 +104,16 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/waiting-patients'}>
+          <div className="flex items-center gap-3">
+            <Clock className="text-orange-500" size={24} />
+            <div>
+            <h3 className="text-lg font-semibold">{waitingPatients.length}</h3>
+              <p className="text-gray-600">Waiting Patients</p>
+            </div>
+          </div>
+        </div>
       </div>
-
-
     </div>
   );
 };

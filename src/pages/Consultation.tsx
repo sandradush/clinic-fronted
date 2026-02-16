@@ -49,7 +49,62 @@ const Consultation: React.FC = () => {
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCallActive, setIsCallActive] = useState(false);
-  
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [videoWs, setVideoWs] = useState<WebSocket | null>(null);
+  const [isVideoConnected, setIsVideoConnected] = useState(false);
+
+  // Video WebSocket connection handler
+  const handleVideoCallToggle = () => {
+    if (!isCallActive) {
+      // Starting a call - establish WebSocket connection
+      if (user?.id) {
+        const videoWebsocket = new WebSocket(`wss://call-app-backend-g992.onrender.com/ws/${user.id}`);
+        
+        videoWebsocket.onopen = () => {
+          console.log('Video WebSocket connected');
+          setIsVideoConnected(true);
+          toast.success('Video call connected');
+        };
+
+        videoWebsocket.onmessage = (event) => {
+          console.log('Video WebSocket message:', event.data);
+          try {
+            const data = JSON.parse(event.data);
+            // Handle incoming offer/answer messages
+            if (data.type === 'offer' || data.type === 'answer') {
+              console.log('Received signaling message:', data.type);
+            }
+          } catch (error) {
+            console.log('Received non-JSON message:', event.data);
+          }
+        };
+
+        videoWebsocket.onerror = (error) => {
+          console.error('Video WebSocket error:', error);
+          toast.error('Video connection error');
+        };
+
+        videoWebsocket.onclose = () => {
+          console.log('Video WebSocket disconnected');
+          setIsVideoConnected(false);
+          setIsCallActive(false);
+          toast.error('Video call disconnected');
+        };
+
+        setVideoWs(videoWebsocket);
+      }
+    } else {
+      // Ending the call - close WebSocket connection
+      if (videoWs) {
+        videoWs.close();
+        setVideoWs(null);
+      }
+      setIsVideoConnected(false);
+    }
+    setIsCallActive(!isCallActive);
+  };
+
   // Symptoms form state
   const [showSymptomsForm, setShowSymptomsForm] = useState(false);
   const [symptomsLoading, setSymptomsLoading] = useState(false);
@@ -79,16 +134,116 @@ const Consultation: React.FC = () => {
     fetchAppointment();
   }, [appointmentId, navigate]);
 
+  // WebSocket connection
+  useEffect(() => {
+    if (!appointment || !user) return;
+
+    const websocket = new WebSocket(`wss://chat.mababa.app/ws/${user?.id}`);
+    
+    websocket.onopen = () => {
+      console.log('WebSocket connected');
+      setIsConnected(true);
+      toast.success('Chat connected');
+    };
+
+    websocket.onmessage = (event) => {
+      try {
+        // First, try to parse as JSON
+        const data = JSON.parse(event.data);
+        
+        // Add received message to chat history
+        const newMessage = {
+          id: Date.now(),
+          message: data.content || data.message || event.data,
+          sender: data.sender === user.id?.toString() ? 'You' : appointment.patient_name,
+          time: new Date().toLocaleTimeString()
+        };
+        
+        setChatHistory(prev => [...prev, newMessage]);
+      } catch (error) {
+        // If JSON parsing fails, try to parse the "patient_id: message" format
+        const messageText = event.data;
+        const colonIndex = messageText.indexOf(':');
+        
+        if (colonIndex !== -1) {
+          // Extract patient_id and message from format "patient_id: message"
+          const patientIdStr = messageText.substring(0, colonIndex).trim();
+          const messageContent = messageText.substring(colonIndex + 1).trim();
+          
+          // Check if it's a valid number (patient_id)
+          const patientId = parseInt(patientIdStr, 10);
+          
+          if (!isNaN(patientId) && messageContent) {
+            // Check if the patient_id matches the current appointment's patient
+            if (patientId === appointment.patient_id) {
+              const newMessage = {
+                id: Date.now(),
+                message: messageContent,
+                sender: appointment.patient_name,
+                time: new Date().toLocaleTimeString()
+              };
+              setChatHistory(prev => [...prev, newMessage]);
+            }
+          }
+        } else {
+          // If no colon, treat as regular message from patient
+          const newMessage = {
+            id: Date.now(),
+            message: messageText,
+            sender: appointment.patient_name,
+            time: new Date().toLocaleTimeString()
+          };
+          setChatHistory(prev => [...prev, newMessage]);
+        }
+      }
+    };
+
+    websocket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      toast.error('Chat connection error');
+      setIsConnected(false);
+    };
+
+    websocket.onclose = () => {
+      console.log('WebSocket disconnected');
+      setIsConnected(false);
+      toast.error('Chat disconnected');
+    };
+
+    setWs(websocket);
+
+    return () => {
+      websocket.close();
+    };
+  }, [appointment, user]);
+
   const handleSendMessage = () => {
-    if (chatMessage.trim()) {
-      const newMessage = {
-        id: Date.now(),
-        message: chatMessage,
-        sender: user?.name || 'Doctor',
-        time: new Date().toLocaleTimeString()
+    if (chatMessage.trim() && ws && isConnected && appointment) {
+      // Send message via WebSocket
+      const messageData = {
+        sender: user?.id?.toString() || 'doctor',
+        receiver: appointment.patient_id.toString(),
+        content: chatMessage.trim()
       };
-      setChatHistory([...chatHistory, newMessage]);
-      setChatMessage('');
+      
+      try {
+        ws.send(JSON.stringify(messageData));
+        
+        // Add to local chat history
+        const newMessage = {
+          id: Date.now(),
+          message: chatMessage,
+          sender: 'You',
+          time: new Date().toLocaleTimeString()
+        };
+        setChatHistory([...chatHistory, newMessage]);
+        setChatMessage('');
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        toast.error('Failed to send message');
+      }
+    } else if (!isConnected) {
+      toast.error('Chat not connected. Please wait...');
     }
   };
 
@@ -393,6 +548,14 @@ const Consultation: React.FC = () => {
 
                 {activeTab === 'chat' && (
                   <div className="h-full flex flex-col">
+                    {/* Connection Status */}
+                    <div className={`mb-2 px-3 py-1 rounded-lg text-xs flex items-center gap-2 ${
+                      isConnected ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                    }`}>
+                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      {isConnected ? 'Connected' : 'Disconnected'}
+                    </div>
+                    
                     <div className="flex-1 border border-gray-200 rounded-lg p-4 mb-4 overflow-y-auto min-h-[400px] bg-gray-50">
                       {chatHistory.length === 0 ? (
                         <div className="text-center text-gray-500 mt-8">
@@ -402,13 +565,21 @@ const Consultation: React.FC = () => {
                       ) : (
                         <div className="space-y-3">
                           {chatHistory.map((msg) => (
-                            <div key={msg.id} className="flex flex-col">
-                              <div className="bg-white p-3 rounded-lg shadow-sm">
-                                <div className="flex justify-between items-start mb-1">
-                                  <span className="font-medium text-sm text-gray-700">{msg.sender}</span>
-                                  <span className="text-xs text-gray-500">{msg.time}</span>
+                            <div key={msg.id} className={`flex flex-col ${msg.sender === 'You' ? 'items-end' : 'items-start'}`}>
+                              <div className={`p-3 rounded-lg shadow-sm max-w-[80%] ${
+                                msg.sender === 'You' 
+                                  ? 'bg-blue-500 text-white' 
+                                  : 'bg-white'
+                              }`}>
+                                <div className="flex justify-between items-start mb-1 gap-3">
+                                  <span className={`font-medium text-sm ${
+                                    msg.sender === 'You' ? 'text-blue-100' : 'text-gray-700'
+                                  }`}>{msg.sender}</span>
+                                  <span className={`text-xs ${
+                                    msg.sender === 'You' ? 'text-blue-100' : 'text-gray-500'
+                                  }`}>{msg.time}</span>
                                 </div>
-                                <p className="text-gray-800">{msg.message}</p>
+                                <p className={msg.sender === 'You' ? 'text-white' : 'text-gray-800'}>{msg.message}</p>
                               </div>
                             </div>
                           ))}
@@ -423,10 +594,11 @@ const Consultation: React.FC = () => {
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Type your message..."
+                        disabled={!isConnected}
                       />
                       <button
                         onClick={handleSendMessage}
-                        disabled={!chatMessage.trim()}
+                        disabled={!chatMessage.trim() || !isConnected}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         <Send size={16} />

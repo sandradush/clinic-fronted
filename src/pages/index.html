@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>User 45 - WebRTC</title>
+  <style>body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:20px}.videos{display:flex;gap:12px;align-items:start}video{width:480px;height:360px;background:#000;object-fit:cover}#localVideo{width:240px;height:180px}label{display:block;margin-bottom:8px}input[type=text]{width:420px}</style>
+</head>
+<body>
+  <h1>User 45 — WebRTC</h1>
+  <p>Connected as <strong>45</strong>. This page targets peer <strong>55</strong>.</p>
+  <label>WebSocket URL: <input id="wsUrl" type="text" value="wss://call-app-backend-g992.onrender.com/ws/45"></label>
+  <button id="startBtn">Start Call</button>
+  <button id="hangupBtn" disabled>Hang Up</button>
+
+  <div class="videos">
+    <div>
+      <h3>Local</h3>
+      <video id="localVideo" autoplay playsinline muted></video>
+    </div>
+    <div>
+      <h3>Remote</h3>
+      <video id="remoteVideo" autoplay playsinline></video>
+    </div>
+  </div>
+
+  <script>
+  const myId = '45';
+  const remoteId = '55';
+  const startBtn = document.getElementById('startBtn');
+  const hangupBtn = document.getElementById('hangupBtn');
+  const wsUrlInput = document.getElementById('wsUrl');
+  const localVideo = document.getElementById('localVideo');
+  const remoteVideo = document.getElementById('remoteVideo');
+
+  let pc = null; let ws = null; let localStream = null;
+  const config = {iceServers:[{urls:'stun:stun.l.google.com:19302'}]};
+
+  startBtn.onclick = async () => {
+    startBtn.disabled = true;
+    const wsUrl = wsUrlInput.value.trim();
+    try { localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true}); localVideo.srcObject = localStream; }
+    catch(e){ console.error('getUserMedia failed',e); alert('Camera/mic access denied'); startBtn.disabled=false; return; }
+
+    pc = new RTCPeerConnection(config);
+    pc.onicecandidate = e => { if(e.candidate && ws && ws.readyState === WebSocket.OPEN){ ws.send(JSON.stringify({to: remoteId, from: myId, type:'ice', candidate:e.candidate})); }};
+    pc.ontrack = e => { remoteVideo.srcObject = e.streams[0]; };
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+    ws = new WebSocket(wsUrl);
+    ws.addEventListener('open', async () => {
+      console.log('ws open');
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      ws.send(JSON.stringify({to: remoteId, from: myId, type:'offer', sdp: pc.localDescription}));
+    });
+
+    ws.addEventListener('message', async (ev) => {
+      try{
+        const msg = JSON.parse(ev.data);
+        console.log('ws msg', msg);
+        // only handle messages intended for me (some servers forward correctly)
+        if(msg.to && msg.to !== myId) return;
+        if(msg.type === 'answer'){
+          await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+        } else if(msg.type === 'offer'){
+          await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          ws.send(JSON.stringify({to: msg.from || remoteId, from: myId, type:'answer', sdp: pc.localDescription}));
+        } else if(msg.type === 'ice' && msg.candidate){
+          try{ await pc.addIceCandidate(msg.candidate); } catch(e){ console.warn('addIceCandidate failed', e); }
+        }
+      }catch(e){ console.error('failed to handle message', e); }
+    });
+    ws.addEventListener('close', ()=>console.log('ws closed'));
+    ws.addEventListener('error', (e)=>console.error('ws error', e));
+    hangupBtn.disabled = false;
+  };
+
+  hangupBtn.onclick = () => {
+    if(ws){ ws.close(); ws=null; }
+    if(pc){ try{ pc.getSenders().forEach(s=>pc.removeTrack(s)); }catch(e){}; pc.close(); pc=null; }
+    if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; localVideo.srcObject=null; remoteVideo.srcObject=null; }
+    startBtn.disabled = false; hangupBtn.disabled = true;
+  };
+  </script>
+</body>
+</html>
