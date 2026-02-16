@@ -86,13 +86,8 @@ const PendingDoctors: React.FC = () => {
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Pending Doctor Approvals</h2>
       
-      {doctors.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          No pending doctor requests
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {doctors.map((doctor) => (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {doctors.map((doctor) => (
             <div key={doctor.doctor_id} className="bg-white border rounded-lg p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -151,8 +146,7 @@ const PendingDoctors: React.FC = () => {
               </div>
             </div>
           ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 };

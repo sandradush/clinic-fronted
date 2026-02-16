@@ -9,7 +9,6 @@ const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [statistics, setStatistics] = useState<any>(null);
-  const [availability, setAvailability] = useState<'available' | 'busy' | 'offline'>('available');
   const [selectedAppointment, setSelectedAppointment] = useState<string | null>(null);
 
   // Fetch appointment statistics for current doctor from backend
@@ -29,48 +28,12 @@ const DoctorDashboard: React.FC = () => {
 
   const todayAppointments = statistics?.todayAppointments || [];
 
-  const handleUpdateAvailability = async (newAvailability: 'available' | 'busy' | 'offline') => {
-    try {
-      await makeApiRequest(`/doctors/${user?.id || '1'}`, {
-        method: 'PUT',
-        body: JSON.stringify({ availability: newAvailability })
-      });
-      setAvailability(newAvailability);
-    } catch (error) {
-      console.error('Failed to update availability:', error);
-    }
-  };
-
   const handleStartConsultation = (appointmentId: string) => {
     navigate(`/consultation/${appointmentId}`);
   };
 
   return (
     <div className="p-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Doctor Dashboard</h1>
-          <p className="text-gray-600">Welcome, Dr. {user?.name}</p>
-        </div>
-        
-        {/* Availability Status */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium">Status:</span>
-          <select
-            value={availability}
-            onChange={(e) => handleUpdateAvailability(e.target.value as any)}
-            className={`px-3 py-1 rounded border text-sm font-medium ${
-              availability === 'available' ? 'bg-green-100 text-green-700 border-green-300' :
-              availability === 'busy' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-              'bg-red-100 text-red-700 border-red-300'
-            }`}
-          >
-            <option value="available">Available</option>
-            <option value="busy">Busy</option>
-            <option value="offline">Offline</option>
-          </select>
-        </div>
-      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -203,8 +166,6 @@ const DoctorDashboard: React.FC = () => {
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Calendar size={32} className="text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-600 mb-2">No appointments today</h3>
-              <p className="text-gray-500">Take a break! You have no scheduled appointments for today.</p>
             </div>
           )}
         </div>
