@@ -70,7 +70,7 @@ const ProtectedRoutes = () => {
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/appointments/new" element={<NewAppointment />} />
         <Route path="/consultation/:appointmentId" element={<Consultation />} />
-        <Route path="/perception" element={<Perception />} />
+        <Route path="/prescription" element={<Perception />} />
         <Route path="/doctors" element={<Doctors />} />
         <Route path="/patients" element={<Patients />} />
         <Route path="/waiting-patients" element={<WaitingPatients />} />

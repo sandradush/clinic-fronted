@@ -76,6 +76,12 @@ const Prescription: React.FC = () => {
     }
   };
 
+  const openAddPrescription = (appt: AppointmentItem) => {
+    setActiveAppointment(appt);
+    setPrescriptionTitle('');
+    setPrescriptionNotes('');
+    setAddModalOpen(true);
+  };
 
   const submitPrescription = async () => {
     if (!activeAppointment) return;
@@ -345,7 +351,6 @@ const Prescription: React.FC = () => {
             printWindow.close();
           }, 100);
         };
-        
         toast.success('PDF generation started');
       } else {
         toast.error('Unable to open print window. Please check popup settings.');
@@ -355,7 +360,6 @@ const Prescription: React.FC = () => {
       toast.error('Failed to generate PDF');
     }
   };
-
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between gap-4 mb-6">
@@ -365,7 +369,6 @@ const Prescription: React.FC = () => {
           </button>
           <h1 className="text-2xl font-semibold">Prescription</h1>
         </div>
-       
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -373,12 +376,11 @@ const Prescription: React.FC = () => {
           <Activity className="text-indigo-600" size={20} />
           <h2 className="text-lg font-medium">Today's Appointments</h2>
         </div>
-
         {loading ? (
           <div className="text-center py-8">Loading...</div>
         ) : (
           <div className="space-y-3">
-            {appointments.map((appt) => (
+            {appointments.map((appt) => (    
               <div key={appt.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                 <div className="p-4">
                   <div className="flex items-start justify-between">
@@ -419,8 +421,17 @@ const Prescription: React.FC = () => {
                     <button onClick={() => { setActiveAppointment(appt); setMedForm({ name: '', dosage: '', frequency: '', notes: '' }); setMedModalOpen(true); }} className="px-3 py-2 bg-emerald-500 text-white rounded-lg flex items-center gap-2 hover:bg-emerald-600">
                       <Plus size={16} /> Add Med
                     </button>
+                    <button onClick={() => openAddPrescription(appt)} className="px-3 py-2 bg-green-500 text-white rounded-lg flex items-center gap-2 hover:bg-green-600">
+                      <Plus size={16} /> Add Prescription
+                    </button>
                     <button onClick={() => { setActiveAppointment(appt); setPerceptionForm({ title: '', note: '' }); setPerceptionModalOpen(true); }} className="px-3 py-2 bg-orange-500 text-white rounded-lg flex items-center gap-2 hover:bg-orange-600">
-                      <Plus size={16} /> Add prescrition
+                      <Plus size={16} /> Add Perception
+                    </button>
+                    <button onClick={() => openPrescriptions(appt)} className="px-3 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg flex items-center gap-2 hover:bg-yellow-100">
+                      View Prescriptions
+                    </button>
+                    <button onClick={() => { openMedicals(appt); }} className="px-3 py-2 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg flex items-center gap-2 hover:bg-purple-100">
+                      View Meds
                     </button>
                     <button onClick={() => openSymptoms(appt)} className="px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg flex items-center gap-2 hover:bg-blue-100">
                       <Eye size={16} /> View Symptoms
