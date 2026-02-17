@@ -14,7 +14,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Appointments from './pages/Appointments';
 import NewAppointment from './pages/NewAppointment';
 import Consultation from './pages/Consultation';
-import Perception from './pages/Perception';
+import Perception from './pages/prescription';
 import Doctors from './pages/Doctors';
 import Patients from './pages/Patients';
 import Schedules from './pages/Schedules';

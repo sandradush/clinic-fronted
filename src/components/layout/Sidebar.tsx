@@ -19,7 +19,7 @@ const Sidebar: React.FC = () => {
   const doctorMenuItems = [
     { path: '/dashboard', icon: Home, label: 'Overview' },
     { path: '/doctor/appointment-requests', icon: ClipboardList, label: 'Requests' },
-    { path: '/perception', icon: Activity, label: 'Perception' },
+    { path: '/prescription', icon: Activity, label: 'Prescription' },
     { path: '/doctor/history', icon: History, label: 'History' },
   ];
 

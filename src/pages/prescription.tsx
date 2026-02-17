@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Activity, User, Clock, Calendar, Plus, Eye, Download, Printer, QrCode } from 'lucide-react';
+import { ArrowLeft, Activity, User, Clock, Calendar, Plus, Eye, Download, Printer } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { makeApiRequest } from '../utils/api';
 import toast from 'react-hot-toast';
@@ -33,13 +33,14 @@ const Prescription: React.FC = () => {
   const [medForm, setMedForm] = useState({ name: '', dosage: '', frequency: '', notes: '' });
   const [medSubmitting, setMedSubmitting] = useState(false);
   const [prescriptionsModalOpen, setPrescriptionsModalOpen] = useState(false);
-  const [prescriptions, setPrescriptions] = useState<any[] | null>(null);
+  const [prescriptions] = useState<any[] | null>(null);
   const [medicalsModalOpen, setMedicalsModalOpen] = useState(false);
-  const [medicals, setMedicals] = useState<any[] | null>(null);
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
   const [summaryData, setSummaryData] = useState<any>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
-  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [perceptionModalOpen, setPerceptionModalOpen] = useState(false);
+  const [perceptionForm, setPerceptionForm] = useState({ title: '', note: '' });
+  const [perceptionSubmitting, setPerceptionSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,12 +74,6 @@ const Prescription: React.FC = () => {
     }
   };
 
-  const openAddPrescription = (appt: AppointmentItem) => {
-    setActiveAppointment(appt);
-    setPrescriptionTitle('');
-    setPrescriptionNotes('');
-    setAddModalOpen(true);
-  };
 
   const submitPrescription = async () => {
     if (!activeAppointment) return;
@@ -104,33 +99,32 @@ const Prescription: React.FC = () => {
     }
   };
 
-  const openPrescriptions = async (appt: AppointmentItem) => {
-    setActiveAppointment(appt);
-    setPrescriptions(null);
-    setPrescriptionsModalOpen(true);
+  const submitPerception = async () => {
+    if (!activeAppointment) return;
+    if (!perceptionForm.title.trim() || !perceptionForm.note.trim()) {
+      toast.error('Please provide title and note');
+      return;
+    }
+    setPerceptionSubmitting(true);
     try {
-      const resp = await makeApiRequest(`/prescriptions/appointment/${appt.id}`);
-      setPrescriptions(resp || []);
+      const payload = {
+        appointment_id: activeAppointment.id,
+        title: perceptionForm.title.trim(),
+        note: perceptionForm.note.trim()
+      };
+      await makeApiRequest('/perceptions', { method: 'POST', body: JSON.stringify(payload) });
+      toast.success('Perception saved');
+      setPerceptionModalOpen(false);
+      setPerceptionForm({ title: '', note: '' });
     } catch (err) {
-      console.error('Failed to load prescriptions', err);
-      toast.error('Failed to load prescriptions');
-      setPrescriptions([]);
+      console.error('Failed to save perception', err);
+      toast.error('Failed to save perception');
+    } finally {
+      setPerceptionSubmitting(false);
     }
   };
 
-  const openMedicals = async (appt: AppointmentItem) => {
-    setActiveAppointment(appt);
-    setMedicals(null);
-    setMedicalsModalOpen(true);
-    try {
-      const resp = await makeApiRequest(`/medicals/appointment/${appt.id}`);
-      setMedicals(resp || []);
-    } catch (err) {
-      console.error('Failed to load medicals', err);
-      toast.error('Failed to load medicals');
-      setMedicals([]);
-    }
-  };
+  
 
   const openSummary = async (appt: AppointmentItem) => {
     setActiveAppointment(appt);
@@ -142,10 +136,7 @@ const Prescription: React.FC = () => {
       const resp = await makeApiRequest(`/appointments/${appt.id}/summary`);
       setSummaryData(resp);
       
-      // Generate QR code URL
-      const baseUrl = window.location.origin;
-      const summaryUrl = `${baseUrl}/appointment-summary/${appt.id}`;
-      setQrCodeUrl(summaryUrl);
+
     } catch (err) {
       console.error('Failed to load summary', err);
       toast.error('Failed to load summary');
@@ -155,24 +146,7 @@ const Prescription: React.FC = () => {
     }
   };
 
-  const generateQRCode = (text: string) => {
-    const canvas = document.createElement('canvas');
-    const size = 150;
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    
-    if (ctx) {
-      // Simple QR code placeholder - you'd typically use a QR library here
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, size, size);
-      ctx.fillStyle = '#fff';
-      ctx.font = '12px Arial';
-      ctx.fillText('QR', size/2 - 10, size/2);
-    }
-    
-    return canvas.toDataURL();
-  };
+
 
   const handlePrint = () => {
     window.print();
@@ -343,11 +317,7 @@ const Prescription: React.FC = () => {
           </button>
           <h1 className="text-2xl font-semibold">Prescription</h1>
         </div>
-        <div>
-          <button onClick={() => navigate('/dashboard')} className="px-3 py-2 bg-blue-600 text-white rounded text-sm">
-            Dashboard
-          </button>
-        </div>
+       
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -401,14 +371,8 @@ const Prescription: React.FC = () => {
                     <button onClick={() => { setActiveAppointment(appt); setMedForm({ name: '', dosage: '', frequency: '', notes: '' }); setMedModalOpen(true); }} className="px-3 py-2 bg-emerald-500 text-white rounded-lg flex items-center gap-2 hover:bg-emerald-600">
                       <Plus size={16} /> Add Med
                     </button>
-                    <button onClick={() => openAddPrescription(appt)} className="px-3 py-2 bg-green-500 text-white rounded-lg flex items-center gap-2 hover:bg-green-600">
-                      <Plus size={16} /> Add Prescription
-                    </button>
-                    <button onClick={() => openPrescriptions(appt)} className="px-3 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg flex items-center gap-2 hover:bg-yellow-100">
-                      View Prescriptions
-                    </button>
-                    <button onClick={() => { openMedicals(appt); }} className="px-3 py-2 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg flex items-center gap-2 hover:bg-purple-100">
-                      View Meds
+                    <button onClick={() => { setActiveAppointment(appt); setPerceptionForm({ title: '', note: '' }); setPerceptionModalOpen(true); }} className="px-3 py-2 bg-orange-500 text-white rounded-lg flex items-center gap-2 hover:bg-orange-600">
+                      <Plus size={16} /> Add prescrition
                     </button>
                     <button onClick={() => openSymptoms(appt)} className="px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg flex items-center gap-2 hover:bg-blue-100">
                       <Eye size={16} /> View Symptoms
@@ -520,13 +484,13 @@ const Prescription: React.FC = () => {
               <button onClick={() => setMedicalsModalOpen(false)} className="text-gray-500">Close</button>
             </div>
 
-            {medicals === null ? (
+            {!summaryData ? (
               <div>Loading...</div>
-            ) : medicals.length === 0 ? (
+            ) : !summaryData.medicals || summaryData.medicals.length === 0 ? (
               <div className="text-gray-500">No medicals recorded.</div>
             ) : (
               <div className="space-y-3">
-                {medicals.map((m: any) => (
+                {summaryData.medicals.map((m: any) => (
                   <div key={m.id} className="border p-3 rounded">
                     <div className="font-medium">{m.medical_name}</div>
                     <div className="text-sm text-gray-700 mt-1">Dosage: {m.dosage} • {m.frequency}</div>
@@ -569,16 +533,6 @@ const Prescription: React.FC = () => {
                 </div>
               ) : summaryData ? (
                 <div className="p-6 space-y-6">
-                  {/* QR Code Section */}
-                  <div className="flex justify-end">
-                    <div className="text-center">
-                      <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
-                        <QrCode size={80} className="text-gray-500" />
-                      </div>
-                      <p className="text-xs text-gray-600">Scan to view online</p>
-                    </div>
-                  </div>
-
                   {/* Appointment Details */}
                   <div className="bg-blue-50 rounded-lg p-4">
                     <h3 className="text-lg font-semibold mb-3 text-blue-800">Appointment Information</h3>
@@ -645,7 +599,7 @@ const Prescription: React.FC = () => {
 
                   {/* Medications Section */}
                   <div className="bg-green-50 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold mb-3 text-green-800">Prescribed Medications ({summaryData.medicals?.length || 0})</h3>
+                    <h3 className="text-lg font-semibold mb-3 text-green-800"> Medications ({summaryData.medicals?.length || 0})</h3>
                     {summaryData.medicals?.length ? (
                       <div className="space-y-3">
                         {summaryData.medicals.map((medical: any) => (
@@ -743,6 +697,53 @@ const Prescription: React.FC = () => {
                   className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded disabled:opacity-50"
                 >
                   {medSubmitting ? 'Saving...' : 'Add Medication'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Perception Modal */}
+      {perceptionModalOpen && activeAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Add Perception for {activeAppointment.patient_name}</h2>
+              <button onClick={() => setPerceptionModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <input 
+                  value={perceptionForm.title} 
+                  onChange={(e) => setPerceptionForm({...perceptionForm, title: e.target.value})} 
+                  className="w-full px-3 py-2 border rounded" 
+                  placeholder="e.g., fever, cough, etc."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes *</label>
+                <textarea 
+                  value={perceptionForm.note} 
+                  onChange={(e) => setPerceptionForm({...perceptionForm, note: e.target.value})} 
+                  className="w-full px-3 py-2 border rounded" 
+                  rows={4}
+                  placeholder="e.g., drink malaria tabs and sleep under mosquito net"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setPerceptionModalOpen(false)} className="flex-1 px-4 py-2 border rounded">Cancel</button>
+                <button
+                  onClick={submitPerception}
+                  disabled={perceptionSubmitting}
+                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded disabled:opacity-50"
+                >
+                  {perceptionSubmitting ? 'Saving...' : 'Add Perception'}
                 </button>
               </div>
             </div>
