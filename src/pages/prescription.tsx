@@ -420,7 +420,7 @@ const Prescription: React.FC = () => {
                       <Plus size={16} /> Add Med
                     </button>
                     <button onClick={() => { setActiveAppointment(appt); setPerceptionForm({ title: '', note: '' }); setPerceptionModalOpen(true); }} className="px-3 py-2 bg-orange-500 text-white rounded-lg flex items-center gap-2 hover:bg-orange-600">
-                      <Plus size={16} /> Add prescrition
+                      <Plus size={16} /> Add prescription
                     </button>
                     <button onClick={() => openSymptoms(appt)} className="px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg flex items-center gap-2 hover:bg-blue-100">
                       <Eye size={16} /> View Symptoms

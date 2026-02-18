@@ -46,11 +46,11 @@ const ApprovedDoctors: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Approved Doctors</h2>
+      <h2 className="text-xl font-semibold mb-4">Approved</h2>
       
       {doctors.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          No approved doctors
+          No doctors found
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

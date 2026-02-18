@@ -38,12 +38,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const session = localStorage.getItem('session');
-    const userData = localStorage.getItem('user');
-    if (session && userData) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(userData));
-    }
+    const validateSession = async () => {
+      const session = localStorage.getItem('session');
+      const userData = localStorage.getItem('user');
+      if (session && userData) {
+        try {
+          // validate stored token by calling a protected endpoint
+          await makeApiRequest('/profile');
+          setIsAuthenticated(true);
+          setUser(JSON.parse(userData));
+        } catch (err) {
+          // invalid/expired token - clear session
+          console.warn('Session validation failed, clearing local session', err);
+          localStorage.removeItem('session');
+          localStorage.removeItem('user');
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      }
+    };
+
+    validateSession();
   }, []);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; message?: string; redirectPath?: string; role?: string }> => {

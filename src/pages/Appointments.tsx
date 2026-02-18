@@ -1,10 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Clock, User, Search, Plus, CheckCircle, AlertCircle, MoreHorizontal, X } from 'lucide-react';
+import { Clock, User, Search, Plus, X } from 'lucide-react';
 import { useAppointments } from '../hooks/useApiData';
 import toast from 'react-hot-toast';
 import { makeApiRequest } from '../utils/api';
-
-type Status = 'confirmed' | 'waiting' | 'in-progress' | 'pending' | string;
 
 interface NewAppointmentForm {
   patientId: string;
@@ -14,18 +12,9 @@ interface NewAppointmentForm {
   notes: string;
 }
 
-const statusStyles: Record<string, { bg: string; text: string }> = {
-  confirmed: { bg: 'bg-green-100', text: 'text-green-700' },
-  waiting: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-  'in-progress': { bg: 'bg-blue-100', text: 'text-blue-700' },
-  pending: { bg: 'bg-gray-100', text: 'text-gray-700' },
-};
-
 const Appointments: React.FC = () => {
   const { appointments = [], loading, refetch } = useAppointments();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | Status>('all');
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showNewAppointment, setShowNewAppointment] = useState(false);
   const [formData, setFormData] = useState<NewAppointmentForm>({
     patientId: '',
@@ -38,7 +27,6 @@ const Appointments: React.FC = () => {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [patients, setPatients] = useState<any[]>([]);
 
-  const appointmentTypes = ['Consultation', 'Follow-up', 'Check-up', 'Vaccination', 'Emergency', 'Routine'];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,11 +106,9 @@ const Appointments: React.FC = () => {
     return rows.filter(r => {
       const hay = [r.patient_name, r.doctor_name, r.description, r.time].join(' ').toLowerCase();
       const matchesSearch = hay.includes(searchTerm.toLowerCase());
-      // backend does not provide status in this response; keep filter pass-through
-      const matchesStatus = filterStatus === 'all' || (r.status && r.status === filterStatus);
-      return matchesSearch && matchesStatus;
+      return matchesSearch;
     });
-  }, [rows, searchTerm, filterStatus]);
+  }, [rows, searchTerm]);
 
   return (
     <div className="p-4">
@@ -151,18 +137,7 @@ const Appointments: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-
-            <select
-              className="ml-2 px-3 py-2 border rounded bg-white text-sm"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
-            >
-              <option value="all">All statuses</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="waiting">Waiting</option>
-              <option value="in-progress">In Progress</option>
-              <option value="pending">Pending</option>
-            </select>
+            {/* status filter removed — statuses are optional */}
           </div>
 
           <div className="flex items-center gap-3 text-sm text-gray-600">
@@ -183,7 +158,7 @@ const Appointments: React.FC = () => {
                 <th className="py-3 px-3">Patient</th>
                 <th className="py-3 px-3">Doctor</th>
                 <th className="py-3 px-3">Description</th>
-                <th className="py-3 px-3">Actions</th>
+                
               </tr>
             </thead>
             <tbody>
@@ -202,48 +177,7 @@ const Appointments: React.FC = () => {
                   </td>
                   <td className="py-3 px-3 align-top text-sm text-gray-700">{a.doctor_name}</td>
                   <td className="py-3 px-3 align-top text-sm text-gray-700">{a.description}</td>
-                  <td className="py-3 px-3 align-top text-sm relative">
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <button
-                          onClick={() => setOpenMenu(openMenu === a.id ? null : a.id)}
-                          className="p-2 text-gray-500 hover:bg-gray-100 rounded"
-                          aria-haspopup="true"
-                          aria-expanded={openMenu === a.id}
-                        >
-                          <MoreHorizontal size={16} />
-                        </button>
-
-                        {openMenu === a.id && (
-                          <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md z-40">
-                            <ul className="py-1">
-                              {a.status === 'confirmed' && (
-                                <li>
-                                  <button onClick={() => { alert('Check In: ' + a.id); setOpenMenu(null); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50">Check In</button>
-                                </li>
-                              )}
-                              {a.status === 'waiting' && (
-                                <li>
-                                  <button onClick={() => { alert('Start Consultation: ' + a.id); setOpenMenu(null); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50">Start Consultation</button>
-                                </li>
-                              )}
-                              {a.status === 'in-progress' && (
-                                <li>
-                                  <button onClick={() => { alert('Complete: ' + a.id); setOpenMenu(null); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50">Complete</button>
-                                </li>
-                              )}
-                              <li>
-                                <button onClick={() => { alert('Reschedule: ' + a.id); setOpenMenu(null); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50">Reschedule</button>
-                              </li>
-                              <li>
-                                <button onClick={() => { alert('Contact: ' + a.id); setOpenMenu(null); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50">Contact</button>
-                              </li>
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
+                  {/* actions column removed */}
                 </tr>
               ))}
             </tbody>

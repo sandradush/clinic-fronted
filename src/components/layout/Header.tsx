@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, X, UserPlus, AlertCircle, CheckCircle, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { Bell, X, UserPlus, AlertCircle, CheckCircle, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDoctorRequests, useDoctors } from '../../hooks/useApiData';
 import { useNavigate } from 'react-router-dom';
@@ -75,16 +75,7 @@ const Header: React.FC = () => {
 
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => {
-                  navigate('/settings');
-                  setShowProfileMenu(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left border-b dark:border-gray-700"
-              >
-                <Settings size={18} className="text-gray-600 dark:text-gray-400" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Settings</span>
-              </button>
+              {/* Settings removed from header menu */}
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left text-red-600 dark:text-red-400"

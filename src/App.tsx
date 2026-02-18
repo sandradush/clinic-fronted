@@ -16,9 +16,7 @@ import NewAppointment from './pages/NewAppointment';
 import Consultation from './pages/Consultation';
 import Perception from './pages/prescription';
 import Doctors from './pages/Doctors';
-import Patients from './pages/Patients';
 import Schedules from './pages/Schedules';
-import AuditLogs from './pages/AuditLogs';
 import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
@@ -72,10 +70,8 @@ const ProtectedRoutes = () => {
         <Route path="/consultation/:appointmentId" element={<Consultation />} />
         <Route path="/prescription" element={<Perception />} />
         <Route path="/doctors" element={<Doctors />} />
-        <Route path="/patients" element={<Patients />} />
         <Route path="/waiting-patients" element={<WaitingPatients />} />
         <Route path="/schedules" element={<Schedules />} />
-        <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/doctors/create" element={<CreateDoctorProfile />} />
         <Route path="/doctor/requests" element={<DoctorRequestsPage />} />

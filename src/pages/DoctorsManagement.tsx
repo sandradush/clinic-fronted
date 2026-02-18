@@ -8,7 +8,7 @@ const Doctors: React.FC = () => {
 
   const tabs = [
     { id: 'requests', label: 'Doctor Requests', icon: UserPlus, component: DoctorRequests },
-    { id: 'approved', label: 'Approved Doctors', icon: UserCheck, component: ApprovedDoctors },
+    { id: 'approved', label: 'Approved', icon: UserCheck, component: ApprovedDoctors },
   ];
 
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || DoctorRequests;

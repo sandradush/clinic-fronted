@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X } from 'lucide-react';
-import { makeApiRequest } from '../utils/api';
+import { Upload, X, User } from 'lucide-react';
+import { makeApiRequest, uploadProfileImage } from '../utils/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -15,6 +15,8 @@ const DoctorProfileSetup: React.FC = () => {
     licenseNumber: ''
   });
   const [documents, setDocuments] = useState<File[]>([]);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -36,23 +38,6 @@ const DoctorProfileSetup: React.FC = () => {
     }
   };
 
-  const removeFile = (index: number) => {
-    setDocuments(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    if (documents.length === 0) {
-      setError('Please upload at least one document (license required)');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      await makeApiRequest('/doctor-requests', {
         method: 'POST',
         body: JSON.stringify({
           name: user?.name || '',

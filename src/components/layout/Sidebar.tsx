@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, Calendar, UserCheck, ClipboardList, History, Activity, Clock, Bell } from 'lucide-react';
+import { Home, Calendar, UserCheck, ClipboardList, History, Activity, Clock, Bell, Settings } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
@@ -11,8 +11,8 @@ const Sidebar: React.FC = () => {
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/appointments', icon: Calendar, label: 'Appointments' },
     { path: '/doctors', icon: UserCheck, label: 'Doctors' },
-    { path: '/patients', icon: Users, label: 'Patients' },
     { path: '/waiting-patients', icon: Clock, label: 'Waiting Patients' },
+    { path: '/settings', icon: Settings, label: 'Settings' },
     { path: '/notifications', icon: Bell, label: 'Notifications' },
   ];
 

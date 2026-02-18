@@ -1,53 +1,77 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, User, FileText } from 'lucide-react';
-import { useAppointments } from '../hooks/useApiData';
 import { useAuth } from '../contexts/AuthContext';
+import { makeApiRequest } from '../utils/api';
+import toast from 'react-hot-toast';
+
+interface Appointment {
+  id: number;
+  date: string;
+  time: string;
+  description: string;
+  status: string;
+  created_at: string;
+  patient_id: number;
+  patient_name: string;
+  doctor_id: number;
+  doctor_name: string;
+}
 
 const DoctorHistory: React.FC = () => {
-  const { appointments = [], loading } = useAppointments();
   const { user } = useAuth();
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const completedAppointments = appointments.filter(
-    apt => apt.doctorId === user?.id && apt.status === 'completed'
-  ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  useEffect(() => {
+    const fetchTodayAppointments = async () => {
+      if (!user?.id) return;
+      try {
+        setLoading(true);
+        const data = await makeApiRequest(`/symptoms/doctor/${user.id}/appointments/today`);
+        setAppointments(data || []);
+      } catch (error) {
+        console.error('Failed to load today\'s appointments:', error);
+        toast.error('Failed to load appointments');
+        setAppointments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (loading) {
-    return (
-      <div className="p-6">
+    fetchTodayAppointments();
+  }, [user]);
+
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold">Today's Appointments</h1>
+      </div>
+
+      {loading ? (
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map(i => (
             <div key={i} className="h-32 bg-gray-200 rounded"></div>
           ))}
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Consultation History</h1>
-      </div>
-
-      {completedAppointments.length === 0 ? (
+      ) : appointments.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center">
           <FileText size={48} className="mx-auto text-gray-300 mb-4" />
-          <p className="text-gray-500">No consultation history yet</p>
+          <p className="text-gray-500">No appointments for today</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {completedAppointments.map(appointment => (
+          {appointments.map(appointment => (
             <div key={appointment.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                      <User size={24} className="text-green-600" />
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                      <User size={24} className="text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Patient ID: {appointment.patientId}</h3>
-                      <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                        Completed
+                      <h3 className="font-semibold text-lg">{appointment.patient_name}</h3>
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 capitalize">
+                        {appointment.status}
                       </span>
                     </div>
                   </div>
@@ -63,13 +87,13 @@ const DoctorHistory: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <FileText size={16} />
-                      <span className="text-sm">{appointment.type}</span>
+                      <span className="text-sm">Patient ID: {appointment.patient_id}</span>
                     </div>
                   </div>
 
-                  {appointment.notes && (
+                  {appointment.description && (
                     <div className="mt-4 ml-15 p-3 bg-gray-50 rounded">
-                      <p className="text-sm text-gray-700"><strong>Notes:</strong> {appointment.notes}</p>
+                      <p className="text-sm text-gray-700"><strong>Description:</strong> {appointment.description}</p>
                     </div>
                   )}
                 </div>
