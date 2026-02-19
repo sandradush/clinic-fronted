@@ -27,7 +27,7 @@ const DoctorHistory: React.FC = () => {
       if (!user?.id) return;
       try {
         setLoading(true);
-        const data = await makeApiRequest(`/symptoms/doctor/${user.id}/appointments/today`);
+const data = await makeApiRequest(`/appointments/doctor/${user.id}`);
         setAppointments(data || []);
       } catch (error) {
         console.error('Failed to load today\'s appointments:', error);

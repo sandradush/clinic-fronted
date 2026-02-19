@@ -126,7 +126,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (name: string, email: string, password: string, role: 'admin' | 'doctor'): Promise<boolean> => {
     try {
-      const res = await makeApiRequest('/auth/Re', {
+      const res = await makeApiRequest('/auth/Register', {
         method: 'POST',
         body: JSON.stringify({ name, email, password, role })
       });
