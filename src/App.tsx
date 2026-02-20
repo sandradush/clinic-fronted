@@ -17,8 +17,11 @@ import Consultation from './pages/Consultation';
 import Perception from './pages/prescription';
 import Doctors from './pages/Doctors';
 import Schedules from './pages/Schedules';
-import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
+import SettingPage from './pages/setting';
+import Roles from './pages/Roles';
+import ReceptionistDashboard from './pages/ReceptionistDashboard';
+import StaffManagement from './pages/StaffManagement';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfileSetup from './pages/ProfileSetup';
@@ -72,12 +75,16 @@ const ProtectedRoutes = () => {
         <Route path="/doctors" element={<Doctors />} />
         <Route path="/waiting-patients" element={<WaitingPatients />} />
         <Route path="/schedules" element={<Schedules />} />
-        <Route path="/notifications" element={<Notifications />} />
+        
         <Route path="/doctors/create" element={<CreateDoctorProfile />} />
         <Route path="/doctor/requests" element={<DoctorRequestsPage />} />
         <Route path="/doctor/appointment-requests" element={<DoctorAppointmentRequests />} />
         <Route path="/doctor/history" element={<DoctorHistory />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/staff-management" element={<StaffManagement />} />
+        <Route path="/roles" element={<Roles />} />
+        <Route path="/receptionist-dashboard" element={<ReceptionistDashboard />} />
+        <Route path="/setting" element={<SettingPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>

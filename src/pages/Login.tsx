@@ -11,7 +11,7 @@ const Login: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'doctor' as 'admin' | 'doctor'
+    role: 'doctor' as 'admin' | 'doctor' | 'receptionist'
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -65,7 +65,7 @@ const Login: React.FC = () => {
           } else if (result.redirectPath === '/profilesetup') {
             setSuccess('Login successful! Please complete your profile setup...');
           } else {
-            const roleLabel = result.role === 'admin' ? 'Admin Dashboard' : (result.role === 'doctor' ? 'Doctor Dashboard' : 'Dashboard');
+            const roleLabel = result.role === 'admin' ? 'Analytics Overview' : (result.role === 'doctor' ? 'Doctor Dashboard' : 'Dashboard');
             setSuccess(`Login successful! Redirecting to ${roleLabel}...`);
           }
           setTimeout(() => {
@@ -176,6 +176,7 @@ const Login: React.FC = () => {
                 >
                   <option value="doctor">Doctor</option>
                   <option value="admin">Admin</option>
+                  <option value="receptionist">Receptionist</option>
                 </select>
               </div>
             </>

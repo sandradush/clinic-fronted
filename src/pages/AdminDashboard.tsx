@@ -241,7 +241,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-6">Admin Dashboard</h1>
+      <h1 className="text-2xl font-semibold mb-6">Analytics Overview</h1>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
