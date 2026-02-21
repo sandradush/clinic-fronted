@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import Card from '../components/common/Card';
+import Button from '../components/common/Button';
+import { trackEvent } from '../services/analytics';
 
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,7 +14,7 @@ const Login: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'doctor' as 'admin' | 'doctor'
+    role: 'doctor' as 'admin' | 'doctor' | 'receptionist'
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -60,12 +63,13 @@ const Login: React.FC = () => {
       if (isLogin) {
         const result = await login(formData.email, formData.password);
         if (result.success) {
+          trackEvent('login_success', { role: result.role || 'unknown' });
           if (result.message) {
             setSuccess(result.message);
           } else if (result.redirectPath === '/profilesetup') {
             setSuccess('Login successful! Please complete your profile setup...');
           } else {
-            const roleLabel = result.role === 'admin' ? 'Admin Dashboard' : (result.role === 'doctor' ? 'Doctor Dashboard' : 'Dashboard');
+            const roleLabel = result.role === 'admin' ? 'Analytics Overview' : (result.role === 'doctor' ? 'Doctor Dashboard' : 'Dashboard');
             setSuccess(`Login successful! Redirecting to ${roleLabel}...`);
           }
           setTimeout(() => {
@@ -77,6 +81,7 @@ const Login: React.FC = () => {
       } else {
         const reg = await register(formData.name, formData.email, formData.password, formData.role);
         if (reg) {
+          trackEvent('signup_completed', { role: formData.role });
           setSuccess('Account created successfully! Please sign in.');
           setTimeout(() => {
             setIsLogin(true);
@@ -126,7 +131,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+      <Card className="w-full max-w-md p-8">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
           <p className="text-gray-600">{isLogin ? 'Sign in to manage your clinic' : 'Join us to streamline your clinic operations'}</p>
@@ -176,6 +181,7 @@ const Login: React.FC = () => {
                 >
                   <option value="doctor">Doctor</option>
                   <option value="admin">Admin</option>
+                  <option value="receptionist">Receptionist</option>
                 </select>
               </div>
             </>
@@ -257,9 +263,9 @@ const Login: React.FC = () => {
             </div>
           )}
 
-          <button 
+          <Button
             type="submit" 
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 px-4 rounded-md hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 font-medium" 
+            className="w-full"
             disabled={loading}
           >
             {loading ? (
@@ -270,7 +276,7 @@ const Login: React.FC = () => {
             ) : (
               isLogin ? 'Sign In' : 'Create Account'
             )}
-          </button>
+          </Button>
         </form>
 
         <div className="text-center mt-6">
@@ -285,7 +291,7 @@ const Login: React.FC = () => {
             </button>
           </p>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

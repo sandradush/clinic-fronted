@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 // Components
 import Sidebar from './Sidebar';
 import Header from './Header';
+import OnboardingModal from '../common/OnboardingModal';
 
 const MainLayout: React.FC = () => {
   const { t } = useTranslation();
@@ -13,6 +14,7 @@ const MainLayout: React.FC = () => {
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar Navigation */}
       <Sidebar />
+      <OnboardingModal />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col transition-all duration-300 overflow-hidden">
@@ -20,7 +22,7 @@ const MainLayout: React.FC = () => {
         <Header />
         
         {/* Page Content */}
-        <main className="flex-1 p-2 max-w-6xl mx-auto w-full mt-16 overflow-auto">
+        <main className="flex-1 p-3 md:p-4 max-w-6xl mx-auto w-full mt-16 overflow-auto">
           <Outlet />
         </main>
       </div>

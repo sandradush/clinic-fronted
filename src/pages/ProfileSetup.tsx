@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Upload } from 'lucide-react';
 import { makeApiRequest } from '../utils/api';
 import toast from 'react-hot-toast';
+import { trackEvent } from '../services/analytics';
 
 const ProfileSetup: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -54,8 +55,10 @@ const ProfileSetup: React.FC = () => {
       }
       
       toast.success('Profile submitted successfully!');
+      trackEvent('profile_setup_saved', { specialty: formData.specialty || 'unknown' });
       setSubmitted(true);
     } catch (error) {
+      trackEvent('profile_setup_failed');
       toast.error('Failed to setup profile');
     } finally {
       setLoading(false);

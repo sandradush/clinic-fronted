@@ -14,7 +14,7 @@ interface User {
 interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string; redirectPath?: string; role?: string }>;
-  register: (name: string, email: string, password: string, role: 'admin' | 'doctor') => Promise<boolean>;
+  register: (name: string, email: string, password: string, role: 'admin' | 'doctor' | 'receptionist') => Promise<boolean>;
   logout: () => void;
   user: User | null;
 }
@@ -124,7 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: 'admin' | 'doctor'): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string, role: 'admin' | 'doctor' | 'receptionist'): Promise<boolean> => {
     try {
       const res = await makeApiRequest('/auth/Register', {
         method: 'POST',

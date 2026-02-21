@@ -15,6 +15,8 @@ interface NewAppointmentForm {
 const Appointments: React.FC = () => {
   const { appointments = [], loading, refetch } = useAppointments();
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const appointmentsPerPage = 6;
   const [showNewAppointment, setShowNewAppointment] = useState(false);
   const [formData, setFormData] = useState<NewAppointmentForm>({
     patientId: '',
@@ -110,6 +112,19 @@ const Appointments: React.FC = () => {
     });
   }, [rows, searchTerm]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / appointmentsPerPage));
+  const paginatedAppointments = useMemo(() => {
+    const start = (page - 1) * appointmentsPerPage;
+    return filtered.slice(start, start + appointmentsPerPage);
+  }, [filtered, page]);
+
+  const startIndex = filtered.length === 0 ? 0 : (page - 1) * appointmentsPerPage + 1;
+  const endIndex = Math.min(page * appointmentsPerPage, filtered.length);
+
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-6">
@@ -118,7 +133,7 @@ const Appointments: React.FC = () => {
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowNewAppointment(true)}
-            className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded shadow-sm text-sm"
+            className="inline-flex items-center gap-2 px-3 py-2 bg-brand-700 text-white rounded shadow-sm text-sm hover:bg-brand-600"
           >
             <Plus size={16} /> New Appointment
           </button>
@@ -142,8 +157,8 @@ const Appointments: React.FC = () => {
 
           <div className="flex items-center gap-3 text-sm text-gray-600">
             <div className="hidden sm:flex items-center gap-2">
-              <div className="text-xs text-gray-500">Total</div>
-              <div className="font-semibold">{rows.length}</div>
+              <div className="text-xs text-gray-500">Showing</div>
+              <div className="font-semibold">{startIndex}-{endIndex} of {filtered.length}</div>
             </div>
             <div className="text-sm text-gray-500 flex items-center gap-1">{loading ? 'Loading...' : <><Clock size={14} /> Today</>}</div>
           </div>
@@ -162,7 +177,7 @@ const Appointments: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((a) => (
+              {paginatedAppointments.map((a) => (
                 <tr key={a.id} className="hover:bg-gray-50">
                   <td className="py-3 px-3 align-top w-28 text-sm text-gray-700">{a.time}</td>
                   <td className="py-3 px-3 align-top text-sm text-gray-700">{new Date(a.date).toLocaleDateString()}</td>
@@ -185,6 +200,27 @@ const Appointments: React.FC = () => {
 
           {filtered.length === 0 && (
             <div className="py-8 text-center text-gray-500">No appointments found for the selected filters.</div>
+          )}
+
+          {filtered.length > 0 && (
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                disabled={page === 1}
+                className="px-3 py-2 bg-brand-700 text-white rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-600"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={page === totalPages}
+                className="px-3 py-2 bg-brand-700 text-white rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-600"
+              >
+                Next
+              </button>
+            </div>
           )}
         </div>
       </div>

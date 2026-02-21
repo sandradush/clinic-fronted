@@ -17,8 +17,9 @@ import Consultation from './pages/Consultation';
 import Perception from './pages/prescription';
 import Doctors from './pages/Doctors';
 import Schedules from './pages/Schedules';
-import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
+import SettingPage from './pages/setting';
+import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfileSetup from './pages/ProfileSetup';
@@ -37,7 +38,7 @@ import i18n from './i18n/config';
 const Loading = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="text-center">
-      <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+      <div className="w-12 h-12 border-4 border-brand-100 border-t-brand-700 rounded-full animate-spin mx-auto mb-4"></div>
       <p className="text-gray-600">Loading...</p>
     </div>
   </div>
@@ -72,12 +73,14 @@ const ProtectedRoutes = () => {
         <Route path="/doctors" element={<Doctors />} />
         <Route path="/waiting-patients" element={<WaitingPatients />} />
         <Route path="/schedules" element={<Schedules />} />
-        <Route path="/notifications" element={<Notifications />} />
+        
         <Route path="/doctors/create" element={<CreateDoctorProfile />} />
         <Route path="/doctor/requests" element={<DoctorRequestsPage />} />
         <Route path="/doctor/appointment-requests" element={<DoctorAppointmentRequests />} />
         <Route path="/doctor/history" element={<DoctorHistory />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/receptionist-dashboard" element={<ReceptionistDashboard />} />
+        <Route path="/setting" element={<SettingPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>

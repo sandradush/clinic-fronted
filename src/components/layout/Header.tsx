@@ -30,7 +30,7 @@ const Header: React.FC = () => {
       title: 'New Doctor Request',
       message: `${req.name} applied for ${req.specialty}`,
       time: req.requestDate,
-      icon: <UserPlus size={18} className="text-blue-600" />,
+      icon: <UserPlus size={18} className="text-brand-700" />,
       action: () => navigate('/doctors/requests')
     })),
     ...offlineDoctors.map(doc => ({
@@ -63,7 +63,7 @@ const Header: React.FC = () => {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition-colors"
           >
-            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+            <div className="w-9 h-9 rounded-full bg-brand-700 flex items-center justify-center text-white font-semibold text-sm">
               {userInitials}
             </div>
             <div className="text-left">
