@@ -1,14 +1,11 @@
-// App.tsx - Simplified version
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'react-hot-toast';
 
-// Layout
 import MainLayout from './components/layout/MainLayout';
 import OfflineIndicator from './components/common/OfflineIndicator';
 
-// Pages
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Appointments from './pages/Appointments';
@@ -17,15 +14,8 @@ import Consultation from './pages/Consultation';
 import Perception from './pages/prescription';
 import Doctors from './pages/Doctors';
 import Schedules from './pages/Schedules';
-import Settings from './pages/Settings';
 import SettingPage from './pages/setting';
-<<<<<<< HEAD
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
-=======
-import Roles from './pages/Roles';
-import ReceptionistDashboard from './pages/ReceptionistDashboard';
-import StaffManagement from './pages/StaffManagement';
->>>>>>> bfdfd7ab5737074acaafdbe6deba76451d4cf2ca
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfileSetup from './pages/ProfileSetup';
@@ -35,12 +25,10 @@ import CreateDoctorProfile from './pages/CreateDoctorProfile';
 import WaitingPatients from './pages/WaitingPatients';
 import DoctorAppointmentRequests from './pages/DoctorAppointmentRequests';
 
-// Context & Config
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { OfflineProvider } from './contexts/OfflineContext';
 import i18n from './i18n/config';
 
-// Loading Component
 const Loading = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="text-center">
@@ -50,10 +38,9 @@ const Loading = () => (
   </div>
 );
 
-// Protected Routes Component
 const ProtectedRoutes = () => {
   const { isAuthenticated } = useAuth();
-  
+
   if (!isAuthenticated) {
     return (
       <Routes>
@@ -79,17 +66,11 @@ const ProtectedRoutes = () => {
         <Route path="/doctors" element={<Doctors />} />
         <Route path="/waiting-patients" element={<WaitingPatients />} />
         <Route path="/schedules" element={<Schedules />} />
-        
         <Route path="/doctors/create" element={<CreateDoctorProfile />} />
         <Route path="/doctor/requests" element={<DoctorRequestsPage />} />
         <Route path="/doctor/appointment-requests" element={<DoctorAppointmentRequests />} />
         <Route path="/doctor/history" element={<DoctorHistory />} />
-        <Route path="/settings" element={<Settings />} />
-<<<<<<< HEAD
-=======
-        <Route path="/staff-management" element={<StaffManagement />} />
-        <Route path="/roles" element={<Roles />} />
->>>>>>> bfdfd7ab5737074acaafdbe6deba76451d4cf2ca
+        <Route path="/settings" element={<SettingPage />} />
         <Route path="/receptionist-dashboard" element={<ReceptionistDashboard />} />
         <Route path="/setting" element={<SettingPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
@@ -98,9 +79,7 @@ const ProtectedRoutes = () => {
   );
 };
 
-// Main App Component
 const App: React.FC = () => {
-  // Initialize theme on app load
   React.useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
@@ -118,7 +97,7 @@ const App: React.FC = () => {
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
               <OfflineIndicator />
               <Toaster position="top-right" />
-              
+
               <Suspense fallback={<Loading />}>
                 <ProtectedRoutes />
               </Suspense>
