@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, User, FileText, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAppointments } from '../hooks/useApiData';
 import { useAuth } from '../contexts/AuthContext';
 import { makeApiRequest } from '../utils/api';
+import StatCard from '../components/common/StatCard';
 
 const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -37,42 +37,10 @@ const DoctorDashboard: React.FC = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center gap-3">
-            <Calendar className="text-blue-500" size={24} />
-            <div>
-              <h3 className="text-lg font-semibold">{todayAppointments.length}</h3>
-              <p className="text-gray-600">Today's Appointments</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center gap-3">
-            <Clock className="text-yellow-500" size={24} />
-            <div>
-              <h3 className="text-lg font-semibold">{statistics?.counts?.pending || 0}</h3>
-              <p className="text-gray-600">Pending</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="text-green-500" size={24} />
-            <div>
-              <h3 className="text-lg font-semibold">{statistics?.counts?.approved || 0}</h3>
-              <p className="text-gray-600">Approved</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center gap-3">
-            <FileText className="text-red-500" size={24} />
-            <div>
-              <h3 className="text-lg font-semibold">{statistics?.counts?.rejected || 0}</h3>
-              <p className="text-gray-600">Rejected</p>
-            </div>
-          </div>
-        </div>
+        <StatCard title="Today's Appointments" value={todayAppointments.length} icon={<Calendar size={22} />} color="blue" />
+        <StatCard title="Pending" value={statistics?.counts?.pending || 0} icon={<Clock size={22} />} color="yellow" />
+        <StatCard title="Approved" value={statistics?.counts?.approved || 0} icon={<CheckCircle size={22} />} color="green" />
+        <StatCard title="Rejected" value={statistics?.counts?.rejected || 0} icon={<FileText size={22} />} color="red" />
       </div>
 
       {/* Today's Schedule */}

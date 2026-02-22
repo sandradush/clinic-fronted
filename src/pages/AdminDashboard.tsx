@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Users, Calendar, UserCheck, Activity, Clock } from 'lucide-react';
 import AdminCharts from '../components/dashboard/AdminCharts';
+import StatCard from '../components/common/StatCard';
 
 interface DashboardStats {
   totalDoctors: number;
@@ -181,7 +182,7 @@ const AdminDashboard: React.FC = () => {
         // Transform and set appointments for charts
         const transformedAppointments = appointmentsData
           .map(transformAppointment)
-          .filter((apt): apt is Appointment => apt !== null);
+          .filter((apt: Appointment | null): apt is Appointment => apt !== null);
         
         setAppointments(transformedAppointments);
       } catch (error) {
@@ -205,7 +206,7 @@ const AdminDashboard: React.FC = () => {
         // Transform doctors for charts
         const transformedDoctors = doctorsData
           .map(transformDoctor)
-          .filter((doc): doc is Doctor => doc !== null);
+          .filter((doc: Doctor | null): doc is Doctor => doc !== null);
         
         setDoctors(transformedDoctors);
       } catch (error) {
@@ -227,10 +228,6 @@ const AdminDashboard: React.FC = () => {
     });
   }, []);
 
-  const handleWaitingPatientsClick = () => {
-    window.location.href = '/waiting-patients';
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -245,68 +242,11 @@ const AdminDashboard: React.FC = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Users className="text-blue-600" size={24} />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-800">{stats.totalDoctors}</h3>
-              <p className="text-sm text-gray-600">Total Doctors</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <Activity className="text-purple-600" size={24} />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-800">{stats.totalPatients}</h3>
-              <p className="text-sm text-gray-600">Total Patients</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-yellow-100 rounded-lg">
-              <Calendar className="text-yellow-600" size={24} />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-800">{stats.pendingAppointments}</h3>
-              <p className="text-sm text-gray-600">Pending Appointments</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <UserCheck className="text-green-600" size={24} />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-800">{stats.approvedAppointments}</h3>
-              <p className="text-sm text-gray-600">Approved Appointments</p>
-            </div>
-          </div>
-        </div>
-
-        <div 
-          className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer" 
-          onClick={handleWaitingPatientsClick}
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-orange-100 rounded-lg">
-              <Clock className="text-orange-600" size={24} />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-800">{waitingPatients.length}</h3>
-              <p className="text-sm text-gray-600">Waiting Patients</p>
-            </div>
-          </div>
-        </div>
+        <StatCard title="Total Doctors" value={stats.totalDoctors} icon={<Users size={22} />} color="blue" />
+        <StatCard title="Total Patients" value={stats.totalPatients} icon={<Activity size={22} />} color="purple" />
+        <StatCard title="Pending Appointments" value={stats.pendingAppointments} icon={<Calendar size={22} />} color="yellow" />
+        <StatCard title="Approved Appointments" value={stats.approvedAppointments} icon={<UserCheck size={22} />} color="green" />
+        <StatCard title="Waiting Patients" value={waitingPatients.length} icon={<Clock size={22} />} color="orange" />
       </div>
 
       {/* Charts Section */}
