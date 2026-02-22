@@ -13,6 +13,11 @@ const Sidebar: React.FC = () => {
     { path: '/appointments', icon: Calendar, label: 'Appointments' },
     { path: '/doctors', icon: UserCheck, label: 'Doctors' },
     { path: '/waiting-patients', icon: Clock, label: 'Waiting Patients' },
+<<<<<<< HEAD
+=======
+    { path: '/roles', icon: Users, label: 'Role & Permissions' },
+    { path: '/staff-management', icon: Users, label: 'Staff' },
+>>>>>>> bfdfd7ab5737074acaafdbe6deba76451d4cf2ca
       { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 
@@ -27,7 +32,15 @@ const Sidebar: React.FC = () => {
     { path: '/receptionist-dashboard', icon: Home, label: 'Reception Dashboard' },
     { path: '/schedules', icon: Calendar, label: 'Schedule' },
     { path: '/waiting-patients', icon: Clock, label: 'Waiting Patients' },
+<<<<<<< HEAD
   ];
+=======
+    { path: '/roles', icon: Users, label: 'Role & Permissions' },
+    { path: '/staff-management', icon: Users, label: 'Staff' },
+  ];
+
+  const menuItems = user?.role === 'doctor' ? doctorMenuItems : user?.role === 'receptionist' ? receptionistMenuItems : adminMenuItems;
+>>>>>>> bfdfd7ab5737074acaafdbe6deba76451d4cf2ca
 
   const menuItems = user?.role === 'doctor' ? doctorMenuItems : user?.role === 'receptionist' ? receptionistMenuItems : adminMenuItems;
   return (
@@ -56,8 +69,13 @@ const Sidebar: React.FC = () => {
               to={item.path}
               className={`flex items-center gap-3 px-6 py-3 text-gray-700 dark:text-gray-300 transition-all duration-200 border-l-3 border-transparent mx-1 ${
                 isActive
+<<<<<<< HEAD
                   ? 'bg-brand-100/40 dark:bg-brand-700/40 text-brand-700 dark:text-brand-100 border-l-brand-600 font-semibold'
                   : 'hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-brand-600 dark:hover:text-brand-100 hover:border-l-brand-500'
+=======
+                  ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-l-blue-600 font-semibold'
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-l-blue-300'
+>>>>>>> bfdfd7ab5737074acaafdbe6deba76451d4cf2ca
               }`}
             >
               <item.icon size={20} />

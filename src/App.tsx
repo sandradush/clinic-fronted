@@ -19,7 +19,13 @@ import Doctors from './pages/Doctors';
 import Schedules from './pages/Schedules';
 import Settings from './pages/Settings';
 import SettingPage from './pages/setting';
+<<<<<<< HEAD
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
+=======
+import Roles from './pages/Roles';
+import ReceptionistDashboard from './pages/ReceptionistDashboard';
+import StaffManagement from './pages/StaffManagement';
+>>>>>>> bfdfd7ab5737074acaafdbe6deba76451d4cf2ca
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfileSetup from './pages/ProfileSetup';
@@ -79,6 +85,11 @@ const ProtectedRoutes = () => {
         <Route path="/doctor/appointment-requests" element={<DoctorAppointmentRequests />} />
         <Route path="/doctor/history" element={<DoctorHistory />} />
         <Route path="/settings" element={<Settings />} />
+<<<<<<< HEAD
+=======
+        <Route path="/staff-management" element={<StaffManagement />} />
+        <Route path="/roles" element={<Roles />} />
+>>>>>>> bfdfd7ab5737074acaafdbe6deba76451d4cf2ca
         <Route path="/receptionist-dashboard" element={<ReceptionistDashboard />} />
         <Route path="/setting" element={<SettingPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
