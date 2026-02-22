@@ -84,14 +84,14 @@ const DoctorProfileSetup: React.FC = () => {
               placeholder="Phone Number *"
               value={formData.phone}
               onChange={handleInputChange}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
               required
             />
             <select 
               name="specialty"
               value={formData.specialty}
               onChange={handleInputChange}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
               required
             >
               <option value="">Select Specialty *</option>
@@ -109,7 +109,7 @@ const DoctorProfileSetup: React.FC = () => {
               value={formData.experience}
               onChange={handleInputChange}
               min="0"
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
               required
             />
             <input 
@@ -118,7 +118,7 @@ const DoctorProfileSetup: React.FC = () => {
               placeholder="Medical License Number *"
               value={formData.licenseNumber}
               onChange={handleInputChange}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
               required
             />
           </div>
@@ -129,7 +129,7 @@ const DoctorProfileSetup: React.FC = () => {
             value={formData.qualifications}
             onChange={handleInputChange}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
             required
           />
 
@@ -151,7 +151,7 @@ const DoctorProfileSetup: React.FC = () => {
                     onChange={handleFileUpload}
                     className="hidden"
                   />
-                  <span className="mt-2 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                  <span className="mt-2 inline-block px-4 py-2 bg-brand-700 text-white rounded hover:bg-brand-600">
                     Choose Files
                   </span>
                 </label>
@@ -184,7 +184,7 @@ const DoctorProfileSetup: React.FC = () => {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50 font-medium"
+            className="w-full bg-brand-700 text-white py-3 px-4 rounded-md hover:bg-brand-600 disabled:opacity-50 font-medium"
           >
             {loading ? 'Submitting...' : 'Submit for Approval'}
           </button>

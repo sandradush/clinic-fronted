@@ -9,7 +9,7 @@ interface StatCardProps {
 }
 
 const palette: Record<NonNullable<StatCardProps['color']>, { iconBg: string; iconText: string }> = {
-  blue: { iconBg: 'bg-blue-100', iconText: 'text-blue-700' },
+  blue: { iconBg: 'bg-brand-100', iconText: 'text-brand-700' },
   purple: { iconBg: 'bg-purple-100', iconText: 'text-purple-700' },
   yellow: { iconBg: 'bg-amber-100', iconText: 'text-amber-700' },
   green: { iconBg: 'bg-emerald-100', iconText: 'text-emerald-700' },

@@ -110,7 +110,7 @@ const RolesPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => { setShowAddForm(true); setNewName(''); setNewDescription(''); setErrors({}); }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-lg hover:bg-brand-600 transition-colors shadow-sm"
           >
             <Plus size={18} />
             Create New Role
@@ -176,7 +176,7 @@ const RolesPage: React.FC = () => {
                       if (Object.keys(newErrors).length) { setErrors(newErrors); return; }
                       await handleAdd();
                     }}
-                    className="px-4 py-2 bg-blue-700 text-white rounded text-sm"
+                    className="px-4 py-2 bg-brand-700 text-white rounded text-sm"
                   >
                     Save Role
                   </button>

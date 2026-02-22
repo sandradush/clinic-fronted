@@ -289,7 +289,7 @@ const Consultation: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-brand-100 border-t-brand-700 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -301,7 +301,7 @@ const Consultation: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-600 mb-2">Appointment not found</h2>
           <button
             onClick={() => navigate('/doctor-dashboard')}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-4 py-2 bg-brand-700 text-white rounded hover:bg-brand-600"
           >
             Back to Dashboard
           </button>
@@ -348,12 +348,12 @@ const Consultation: React.FC = () => {
             {/* Appointment Information Card */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <User className="text-blue-500" size={20} />
+                <User className="text-brand-700" size={20} />
                 Patient Information
               </h2>
               <div className="space-y-4">
-                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                <div className="flex items-center gap-3 p-4 bg-brand-50 rounded-lg">
+                  <div className="w-12 h-12 bg-brand-700 rounded-full flex items-center justify-center text-white font-semibold">
                     {appointment.patient_name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div>
@@ -368,7 +368,7 @@ const Consultation: React.FC = () => {
                     <span>{new Date(appointment.date).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <Clock className="text-blue-500" size={16} />
+                    <Clock className="text-brand-700" size={16} />
                     <span>{appointment.time}</span>
                   </div>
                 </div>
@@ -455,7 +455,7 @@ const Consultation: React.FC = () => {
               {/* Communication Tabs */}
               <div className="border-b border-gray-200 p-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <Stethoscope className="text-blue-500" size={20} />
+                  <Stethoscope className="text-brand-700" size={20} />
                   <h2 className="text-lg font-semibold text-gray-800">Consultation Interface</h2>
                 </div>
                 <div className="flex gap-2">
@@ -465,7 +465,7 @@ const Consultation: React.FC = () => {
                       onClick={() => setActiveTab(tab)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                         activeTab === tab
-                          ? 'bg-blue-100 text-blue-700'
+                          ? 'bg-brand-100 text-brand-700'
                           : 'text-gray-600 hover:bg-gray-100'
                       }`}
                     >
@@ -568,15 +568,15 @@ const Consultation: React.FC = () => {
                             <div key={msg.id} className={`flex flex-col ${msg.sender === 'You' ? 'items-end' : 'items-start'}`}>
                               <div className={`p-3 rounded-lg shadow-sm max-w-[80%] ${
                                 msg.sender === 'You' 
-                                  ? 'bg-blue-500 text-white' 
+                                  ? 'bg-brand-700 text-white' 
                                   : 'bg-white'
                               }`}>
                                 <div className="flex justify-between items-start mb-1 gap-3">
                                   <span className={`font-medium text-sm ${
-                                    msg.sender === 'You' ? 'text-blue-100' : 'text-gray-700'
+                                    msg.sender === 'You' ? 'text-brand-100' : 'text-gray-700'
                                   }`}>{msg.sender}</span>
                                   <span className={`text-xs ${
-                                    msg.sender === 'You' ? 'text-blue-100' : 'text-gray-500'
+                                    msg.sender === 'You' ? 'text-brand-100' : 'text-gray-500'
                                   }`}>{msg.time}</span>
                                 </div>
                                 <p className={msg.sender === 'You' ? 'text-white' : 'text-gray-800'}>{msg.message}</p>
@@ -592,14 +592,14 @@ const Consultation: React.FC = () => {
                         value={chatMessage}
                         onChange={(e) => setChatMessage(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-700 focus:border-transparent"
                         placeholder="Type your message..."
                         disabled={!isConnected}
                       />
                       <button
                         onClick={handleSendMessage}
                         disabled={!chatMessage.trim() || !isConnected}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="px-4 py-2 bg-brand-700 text-white rounded-lg hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         <Send size={16} />
                       </button>

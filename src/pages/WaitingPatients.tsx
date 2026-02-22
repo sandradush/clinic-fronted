@@ -74,7 +74,7 @@ const WaitingPatients: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-brand-100 border-t-brand-700 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -88,8 +88,8 @@ const WaitingPatients: React.FC = () => {
           {appointments.map((appointment) => (
             <div key={appointment.id} className="p-4 border rounded-lg hover:bg-gray-50">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                  <User size={24} className="text-blue-600" />
+                <div className="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center">
+                  <User size={24} className="text-brand-700" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-lg">{appointment.patient_name}</h3>
@@ -102,7 +102,7 @@ const WaitingPatients: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-2 text-sm font-medium">
-                    <Clock size={16} className="text-blue-500" />
+                    <Clock size={16} className="text-brand-700" />
                     {appointment.time}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
@@ -115,7 +115,7 @@ const WaitingPatients: React.FC = () => {
                     setSelectedAppointment(appointment.id);
                     setSelectedDoctor(appointment.doctor_id?.toString() || '');
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-brand-700 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2"
                 >
                   <UserPlus size={18} />
                   {appointment.doctor_id ? 'Reassign' : 'Assign'} Doctor
@@ -129,7 +129,7 @@ const WaitingPatients: React.FC = () => {
                     <select
                       value={selectedDoctor}
                       onChange={(e) => setSelectedDoctor(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-700"
                     >
                       <option value="">Choose a doctor...</option>
                       {doctors.map((doctor) => (

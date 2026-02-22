@@ -54,7 +54,7 @@ const StaffManagement: React.FC = () => {
             <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search staff by name or email" className="border rounded px-3 py-2 pr-10 w-72" />
             <Search size={16} className="absolute right-2 top-2 text-gray-400" />
           </div>
-          <button onClick={() => setShowAddForm(true)} className="px-3 py-2 bg-blue-600 text-white rounded inline-flex items-center gap-2"><Plus size={14} /> Add</button>
+          <button onClick={() => setShowAddForm(true)} className="px-3 py-2 bg-brand-700 text-white rounded inline-flex items-center gap-2"><Plus size={14} /> Add</button>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ const StaffManagement: React.FC = () => {
                 console.error('Failed to create staff', err);
                 toast.error('Failed to create staff');
               } finally { setCreating(false); }
-            }} className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50">{creating ? 'Creating...' : 'Create'}</button>
+            }} className="px-4 py-2 bg-brand-700 text-white rounded disabled:opacity-50">{creating ? 'Creating...' : 'Create'}</button>
 
             <button onClick={() => { setShowAddForm(false); setNewName(''); setNewEmail(''); setNewRole('Staff'); setNewSpecialist(''); }} className="px-4 py-2 bg-white border rounded">Cancel</button>
           </div>
@@ -115,7 +115,7 @@ const StaffManagement: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-end gap-2 mt-4">
-                  <button className="text-blue-600 hover:underline inline-flex items-center gap-2"><Edit size={14} /> Edit</button>
+                  <button className="text-brand-700 hover:underline inline-flex items-center gap-2"><Edit size={14} /> Edit</button>
                   <button onClick={() => handleDelete(s.id)} className="text-red-600 inline-flex items-center gap-2"><Trash2 size={14} /> Delete</button>
                 </div>
               </div>

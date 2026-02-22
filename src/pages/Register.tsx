@@ -67,7 +67,7 @@ const Register: React.FC = () => {
               placeholder="Full Name"
               value={formData.fullName}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
               required
             />
           </div>
@@ -79,7 +79,7 @@ const Register: React.FC = () => {
               placeholder="Email Address"
               value={formData.email}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
               required
             />
           </div>
@@ -91,7 +91,7 @@ const Register: React.FC = () => {
               placeholder="Password"
               value={formData.password}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
               required
             />
           </div>
@@ -103,7 +103,7 @@ const Register: React.FC = () => {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
               required
             />
           </div>
@@ -113,7 +113,7 @@ const Register: React.FC = () => {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50 font-medium"
+            className="w-full bg-brand-700 text-white py-3 px-4 rounded-md hover:bg-brand-600 disabled:opacity-50 font-medium"
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
@@ -124,7 +124,7 @@ const Register: React.FC = () => {
             Already have an account?{' '}
             <button 
               onClick={() => navigate('/login')}
-              className="text-blue-500 hover:text-blue-700 font-medium"
+              className="text-brand-700 hover:text-brand-600 font-medium"
             >
               Sign In
             </button>

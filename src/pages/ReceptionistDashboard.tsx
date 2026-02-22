@@ -112,7 +112,7 @@ const ReceptionistDashboard: React.FC = () => {
           </div>
 
           <div className="mt-6 flex gap-3">
-            <button onClick={saveGeneral} className="px-4 py-2 bg-blue-700 text-white rounded">Save</button>
+            <button onClick={saveGeneral} className="px-4 py-2 bg-brand-700 text-white rounded">Save</button>
           </div>
         </div>
 
@@ -133,7 +133,7 @@ const ReceptionistDashboard: React.FC = () => {
             ))}
 
             <div className="mt-4">
-              <button onClick={saveOperatingHours} className="px-4 py-2 bg-blue-700 text-white rounded">Save Operating Hours</button>
+              <button onClick={saveOperatingHours} className="px-4 py-2 bg-brand-700 text-white rounded">Save Operating Hours</button>
             </div>
           </div>
         </div>

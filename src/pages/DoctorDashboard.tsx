@@ -46,7 +46,7 @@ const DoctorDashboard: React.FC = () => {
       {/* Today's Schedule */}
       <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-100 p-6 mb-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-brand-700 to-brand-600 rounded-lg flex items-center justify-center">
             <Calendar size={20} className="text-white" />
           </div>
           <div>
@@ -57,16 +57,16 @@ const DoctorDashboard: React.FC = () => {
         
         <div className="space-y-4">
           {todayAppointments.map((appointment: { id: string | number; status: string; patient_name: React.ReactNode; time: React.ReactNode; date: string | number | Date; description: React.ReactNode; }, index: any) => (
-            <div key={String(appointment.id)} className="group relative bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-200">
+            <div key={String(appointment.id)} className="group relative bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-brand-100">
               {/* Time indicator line */}
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-blue-600 rounded-l-xl"></div>
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-500 to-brand-700 rounded-l-xl"></div>
               
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4 flex-1">
                   {/* Patient Avatar */}
                   <div className="relative">
-                    <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center shadow-sm">
-                      <User size={24} className="text-blue-600" />
+                    <div className="w-14 h-14 bg-gradient-to-br from-brand-100 to-brand-50 rounded-xl flex items-center justify-center shadow-sm">
+                      <User size={24} className="text-brand-700" />
                     </div>
                     {/* Status dot indicator */}
                     <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
@@ -91,7 +91,7 @@ const DoctorDashboard: React.FC = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Clock size={16} className="text-blue-500" />
+                        <Clock size={16} className="text-brand-700" />
                         <span className="font-medium">{appointment.time}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -102,7 +102,7 @@ const DoctorDashboard: React.FC = () => {
                     
                     {appointment.description && (
                       <div className="mb-3">
-                        <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 border-l-4 border-blue-200">
+                        <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 border-l-4 border-brand-100">
                           {appointment.description}
                         </p>
                       </div>
@@ -116,7 +116,7 @@ const DoctorDashboard: React.FC = () => {
                     onClick={() => handleStartConsultation(String(appointment.id))}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm ${
                       appointment.status === 'approved' 
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white focus:ring-blue-500' 
+                        ? 'bg-gradient-to-r from-brand-700 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white focus:ring-brand-700' 
                         : 'bg-gray-100 hover:bg-gray-200 text-gray-600 focus:ring-gray-500'
                     }`}
                     disabled={appointment.status !== 'approved'}

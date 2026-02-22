@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Mail, Lock, User, AlertCircle, CheckCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import { trackEvent } from '../services/analytics';
 
 const Login: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const [isLogin, setIsLogin] = useState(searchParams.get('mode') !== 'signup');
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [formData, setFormData] = useState({
     name: '',
@@ -22,6 +23,13 @@ const Login: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { login, register, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const isSignupMode = searchParams.get('mode') === 'signup';
+    setIsLogin(!isSignupMode);
+    setErrors({});
+    setSuccess('');
+  }, [searchParams]);
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -132,6 +140,16 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+          aria-label="Back to home"
+        >
+          <ArrowLeft size={16} />
+          Back
+        </button>
+
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
           <p className="text-gray-600">{isLogin ? 'Sign in to manage your clinic' : 'Join us to streamline your clinic operations'}</p>
@@ -156,7 +174,7 @@ const Login: React.FC = () => {
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                <div className={`relative flex items-center border rounded-md ${errors.name ? 'border-red-300' : 'border-gray-300'} focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500`}>
+                <div className={`relative flex items-center border rounded-md ${errors.name ? 'border-red-300' : 'border-gray-300'} focus-within:border-brand-700 focus-within:ring-1 focus-within:ring-brand-700`}>
                   <User size={18} className="ml-3 text-gray-400" />
                   <input
                     type="text"
@@ -177,7 +195,7 @@ const Login: React.FC = () => {
                   name="role"
                   value={formData.role}
                   onChange={handleChange as any}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
                 >
                   <option value="doctor">Doctor</option>
                   <option value="admin">Admin</option>
@@ -189,7 +207,7 @@ const Login: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-            <div className={`relative flex items-center border rounded-md ${errors.email ? 'border-red-300' : 'border-gray-300'} focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500`}>
+            <div className={`relative flex items-center border rounded-md ${errors.email ? 'border-red-300' : 'border-gray-300'} focus-within:border-brand-700 focus-within:ring-1 focus-within:ring-brand-700`}>
               <Mail size={18} className="ml-3 text-gray-400" />
               <input
                 type="email"
@@ -206,7 +224,7 @@ const Login: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-            <div className={`relative flex items-center border rounded-md ${errors.password ? 'border-red-300' : 'border-gray-300'} focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500`}>
+            <div className={`relative flex items-center border rounded-md ${errors.password ? 'border-red-300' : 'border-gray-300'} focus-within:border-brand-700 focus-within:ring-1 focus-within:ring-brand-700`}>
               <Lock size={18} className="ml-3 text-gray-400" />
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -237,7 +255,7 @@ const Login: React.FC = () => {
           {!isLogin && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label>
-              <div className={`relative flex items-center border rounded-md ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'} focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500`}>
+              <div className={`relative flex items-center border rounded-md ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'} focus-within:border-brand-700 focus-within:ring-1 focus-within:ring-brand-700`}>
                 <Lock size={18} className="ml-3 text-gray-400" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
@@ -285,7 +303,7 @@ const Login: React.FC = () => {
             <button
               type="button"
               onClick={toggleMode}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-brand-700 hover:text-brand-600 font-medium"
             >
               {isLogin ? 'Sign up' : 'Sign in'}
             </button>

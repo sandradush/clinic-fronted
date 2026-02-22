@@ -65,12 +65,12 @@ const data = await makeApiRequest(`/appointments/doctor/${user.id}`);
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                      <User size={24} className="text-blue-600" />
+                    <div className="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center">
+                      <User size={24} className="text-brand-700" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">{appointment.patient_name}</h3>
-                      <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 capitalize">
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-brand-100 text-brand-700 capitalize">
                         {appointment.status}
                       </span>
                     </div>

@@ -383,8 +383,8 @@ const Prescription: React.FC = () => {
                 <div className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
-                      <div className="w-14 h-14 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center">
-                        <User size={24} className="text-blue-600" />
+                      <div className="w-14 h-14 bg-gradient-to-br from-brand-50 to-brand-100 rounded-xl flex items-center justify-center">
+                        <User size={24} className="text-brand-700" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -422,7 +422,7 @@ const Prescription: React.FC = () => {
                     <button onClick={() => { setActiveAppointment(appt); setPerceptionForm({ title: '', note: '' }); setPerceptionModalOpen(true); }} className="px-3 py-2 bg-orange-500 text-white rounded-lg flex items-center gap-2 hover:bg-orange-600">
                       <Plus size={16} /> Add prescription
                     </button>
-                    <button onClick={() => openSymptoms(appt)} className="px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg flex items-center gap-2 hover:bg-blue-100">
+                    <button onClick={() => openSymptoms(appt)} className="px-3 py-2 bg-brand-50 text-brand-700 border border-brand-100 rounded-lg flex items-center gap-2 hover:bg-brand-100">
                       <Eye size={16} /> View Symptoms
                     </button>
                   </div>
@@ -562,7 +562,7 @@ const Prescription: React.FC = () => {
                 <button onClick={handlePrint} className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg flex items-center gap-2 hover:bg-gray-200">
                   <Printer size={16} /> Print
                 </button>
-                <button onClick={handleDownloadPDF} className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg flex items-center gap-2 hover:bg-blue-200">
+                <button onClick={handleDownloadPDF} className="px-3 py-2 bg-brand-100 text-brand-700 rounded-lg flex items-center gap-2 hover:bg-brand-50">
                   <Download size={16} /> Download
                 </button>
                 <button onClick={() => setSummaryModalOpen(false)} className="text-gray-500 hover:text-gray-700">
@@ -575,7 +575,7 @@ const Prescription: React.FC = () => {
               {summaryLoading ? (
                 <div className="flex items-center justify-center p-12">
                   <div className="text-center">
-                    <div className="w-8 h-8 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-2"></div>
+                    <div className="w-8 h-8 border-2 border-brand-100 border-t-brand-700 rounded-full animate-spin mx-auto mb-2"></div>
                     <p>Loading summary...</p>
                   </div>
                 </div>
@@ -592,8 +592,8 @@ const Prescription: React.FC = () => {
                   </div>
 
                   {/* Appointment Details */}
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold mb-3 text-blue-800">Appointment Information</h3>
+                  <div className="bg-brand-50 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold mb-3 text-brand-700">Appointment Information</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-gray-600">Patient</p>

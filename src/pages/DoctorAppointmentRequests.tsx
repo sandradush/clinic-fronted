@@ -74,7 +74,7 @@ const DoctorAppointmentRequests: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-brand-100 border-t-brand-700 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -97,8 +97,8 @@ const DoctorAppointmentRequests: React.FC = () => {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                      <User size={24} className="text-blue-600" />
+                    <div className="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center">
+                      <User size={24} className="text-brand-700" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold">{appointment.patient_name}</h3>
@@ -110,7 +110,7 @@ const DoctorAppointmentRequests: React.FC = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-3">
                     <div className="flex items-center gap-2 text-gray-600">
-                      <Clock size={16} className="text-blue-500" />
+                      <Clock size={16} className="text-brand-700" />
                       <span className="font-medium">{appointment.time}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
@@ -125,7 +125,7 @@ const DoctorAppointmentRequests: React.FC = () => {
                         <FileText size={16} className="text-gray-500 mt-0.5" />
                         <div>
                           <p className="text-gray-600 font-medium">Description:</p>
-                          <p className="text-gray-700 bg-gray-50 rounded-lg p-3 mt-1 border-l-4 border-blue-200">
+                          <p className="text-gray-700 bg-gray-50 rounded-lg p-3 mt-1 border-l-4 border-brand-100">
                             {appointment.description}
                           </p>
                         </div>

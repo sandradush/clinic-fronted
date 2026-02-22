@@ -146,7 +146,7 @@ const Appointments: React.FC = () => {
             <div className="relative flex items-center w-full max-w-md">
               <Search size={18} className="absolute left-3 text-gray-400" />
               <input
-                className="pl-10 pr-3 py-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="pl-10 pr-3 py-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-brand-100"
                 placeholder="Search patient, phone, type, or doctor"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -183,7 +183,7 @@ const Appointments: React.FC = () => {
                   <td className="py-3 px-3 align-top text-sm text-gray-700">{new Date(a.date).toLocaleDateString()}</td>
                   <td className="py-3 px-3 align-top">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><User size={16} /></div>
+                      <div className="w-9 h-9 rounded-full bg-brand-50 flex items-center justify-center text-brand-700"><User size={16} /></div>
                       <div>
                         <div className="font-medium text-sm">{a.patient_name}</div>
                         <div className="text-xs text-gray-500">&nbsp;</div>
@@ -247,7 +247,7 @@ const Appointments: React.FC = () => {
                   name="patientId"
                   value={formData.patientId}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
                   required
                 >
                   <option value="">Select patient</option>
@@ -264,7 +264,7 @@ const Appointments: React.FC = () => {
                   name="doctor"
                   value={formData.doctor}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
                   required
                 >
                   <option value="">Select doctor</option>
@@ -283,7 +283,7 @@ const Appointments: React.FC = () => {
                     name="date"
                     value={formData.date}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
                     required
                   />
                 </div>
@@ -294,7 +294,7 @@ const Appointments: React.FC = () => {
                     name="time"
                     value={formData.time}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
                     required
                   />
                 </div>
@@ -308,7 +308,7 @@ const Appointments: React.FC = () => {
                   value={formData.notes}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
                   placeholder="Appointment description or notes..."
                 />
               </div>
@@ -324,7 +324,7 @@ const Appointments: React.FC = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-brand-700 text-white rounded-md hover:bg-brand-600 disabled:opacity-50"
                 >
                   {submitting ? 'Creating...' : 'Create Appointment'}
                 </button>

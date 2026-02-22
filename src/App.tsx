@@ -16,6 +16,7 @@ import Doctors from './pages/Doctors';
 import Schedules from './pages/Schedules';
 import SettingPage from './pages/setting';
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfileSetup from './pages/ProfileSetup';
@@ -44,10 +45,11 @@ const ProtectedRoutes = () => {
   if (!isAuthenticated) {
     return (
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profilesetup" element={<ProfileSetup />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }

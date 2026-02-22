@@ -79,7 +79,7 @@ const ProfileSetup: React.FC = () => {
           <p className="text-sm text-gray-500">Status: <span className="font-semibold text-yellow-600">Pending</span></p>
           <button
             onClick={() => navigate('/login')}
-            className="mt-6 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="mt-6 px-6 py-2 bg-brand-700 text-white rounded hover:bg-brand-600"
           >
             Back to Login
           </button>
@@ -150,7 +150,7 @@ const ProfileSetup: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 text-white py-3 rounded hover:bg-blue-600 disabled:opacity-50"
+            className="w-full bg-brand-700 text-white py-3 rounded hover:bg-brand-600 disabled:opacity-50"
           >
             {loading ? 'Submitting...' : 'Complete Setup'}
           </button>

@@ -85,7 +85,7 @@ const CreateDoctorProfile: React.FC = () => {
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center mb-6">
-            <User className="h-6 w-6 text-blue-600 mr-2" />
+            <User className="h-6 w-6 text-brand-700 mr-2" />
             <h1 className="text-2xl font-bold text-gray-900">Create Doctor Profile</h1>
           </div>
 
@@ -103,7 +103,7 @@ const CreateDoctorProfile: React.FC = () => {
                   value={formData.doctor_id}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent"
                   placeholder="Enter user ID"
                 />
               </div>
@@ -120,7 +120,7 @@ const CreateDoctorProfile: React.FC = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent"
                   placeholder="+1234567890"
                 />
               </div>
@@ -136,7 +136,7 @@ const CreateDoctorProfile: React.FC = () => {
                   value={formData.speciality}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent"
                 >
                   <option value="">Select a speciality</option>
                   {specialities.map(speciality => (
@@ -158,7 +158,7 @@ const CreateDoctorProfile: React.FC = () => {
                   value={formData.status}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent"
                 >
                   {statusOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -181,7 +181,7 @@ const CreateDoctorProfile: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 bg-brand-700 text-white py-2 px-4 rounded-md hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-700 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Creating...' : 'Create Doctor Profile'}
               </button>
@@ -189,7 +189,7 @@ const CreateDoctorProfile: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/doctors')}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-700 focus:ring-offset-2 transition-colors"
               >
                 Cancel
               </button>
