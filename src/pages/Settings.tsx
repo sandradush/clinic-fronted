@@ -197,7 +197,6 @@ const Settings: React.FC = () => {
 
           <div className="mt-6">
             <button onClick={saveBilling} disabled={loading} className="px-4 py-2 bg-brand-700 text-white rounded disabled:opacity-50">
-              Save Billing
             </button>
           </div>
         </section>

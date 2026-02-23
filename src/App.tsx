@@ -9,7 +9,6 @@ import OfflineIndicator from './components/common/OfflineIndicator';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Appointments from './pages/Appointments';
-import NewAppointment from './pages/NewAppointment';
 import Consultation from './pages/Consultation';
 import Perception from './pages/prescription';
 import Doctors from './pages/Doctors';
@@ -62,7 +61,6 @@ const ProtectedRoutes = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/appointments" element={<Appointments />} />
-        <Route path="/appointments/new" element={<NewAppointment />} />
         <Route path="/consultation/:appointmentId" element={<Consultation />} />
         <Route path="/prescription" element={<Perception />} />
         <Route path="/doctors" element={<Doctors />} />
