@@ -24,6 +24,8 @@ const Prescription: React.FC = () => {
   const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<any[] | null>(null);
   const [symptomsModalOpen, setSymptomsModalOpen] = useState(false);
+  const [patientVitals, setPatientVitals] = useState<any | null>(null);
+  const [vitalsLoading, setVitalsLoading] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [prescriptionTitle, setPrescriptionTitle] = useState('');
   const [prescriptionNotes, setPrescriptionNotes] = useState('');
@@ -66,6 +68,8 @@ const Prescription: React.FC = () => {
     setActiveAppointment(appt);
     setSymptomsModalOpen(true);
     setSelectedSymptoms(null);
+    setPatientVitals(null);
+    setVitalsLoading(true);
     try {
       const resp = await makeApiRequest(`/symptoms/appointment/${appt.id}`);
       setSelectedSymptoms(resp || []);
@@ -73,6 +77,21 @@ const Prescription: React.FC = () => {
       console.error('Failed to fetch symptoms', err);
       toast.error('Failed to load symptoms');
       setSelectedSymptoms([]);
+    }
+    try {
+      if (appt.patient_id) {
+        const vr = await makeApiRequest(`/devices/patient/${appt.patient_id}/readings?limit=1`);
+        if (Array.isArray(vr) && vr.length > 0) setPatientVitals(vr[0]);
+        else setPatientVitals(null);
+      } else {
+        setPatientVitals(null);
+      }
+    } catch (err) {
+      console.error('Failed to fetch patient vitals', err);
+      // don't show a toast here to avoid spamming; vitals are optional
+      setPatientVitals(null);
+    } finally {
+      setVitalsLoading(false);
     }
   };
 
@@ -444,6 +463,33 @@ const Prescription: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Symptoms for Appointment #{activeAppointment?.id}</h3>
               <button onClick={() => setSymptomsModalOpen(false)} className="text-gray-500">Close</button>
+            </div>
+            <div className="mb-4">
+              <h4 className="text-sm font-medium">Latest Vitals</h4>
+              {vitalsLoading ? (
+                <div className="text-sm text-gray-600">Loading vitals...</div>
+              ) : patientVitals ? (
+                <div className="flex gap-3 mt-2">
+                  <div className="p-3 bg-gray-50 rounded">
+                    <div className="text-xs text-gray-500">Heart Rate</div>
+                    <div className="font-medium">{patientVitals.heart_rate_bpm} bpm</div>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded">
+                    <div className="text-xs text-gray-500">SpO₂</div>
+                    <div className="font-medium">{patientVitals.spo2}%</div>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded">
+                    <div className="text-xs text-gray-500">Temperature</div>
+                    <div className="font-medium">{patientVitals.temperature} °C</div>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded">
+                    <div className="text-xs text-gray-500">Recorded</div>
+                    <div className="text-xs text-gray-600">{new Date(patientVitals.created_at).toLocaleString()}</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 mt-2">No vitals available</div>
+              )}
             </div>
             {selectedSymptoms === null ? (
               <div>Loading...</div>
