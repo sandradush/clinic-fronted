@@ -5,7 +5,6 @@ import { Toaster } from 'react-hot-toast';
 
 import MainLayout from './components/layout/MainLayout';
 import OfflineIndicator from './components/common/OfflineIndicator';
-
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Appointments from './pages/Appointments';
@@ -14,7 +13,6 @@ import Perception from './pages/prescription';
 import Doctors from './pages/Doctors';
 import Schedules from './pages/Schedules';
 import SettingPage from './pages/setting';
-import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -71,7 +69,6 @@ const ProtectedRoutes = () => {
         <Route path="/doctor/appointment-requests" element={<DoctorAppointmentRequests />} />
         <Route path="/doctor/history" element={<DoctorHistory />} />
         <Route path="/settings" element={<SettingPage />} />
-        <Route path="/receptionist-dashboard" element={<ReceptionistDashboard />} />
         <Route path="/setting" element={<SettingPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
