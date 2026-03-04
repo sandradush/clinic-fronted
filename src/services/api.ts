@@ -260,6 +260,69 @@ class ApiService {
       },
     });
   }
+
+  // Payments
+  async getPayments() {
+    return this.request('/payments');
+  }
+
+  async approvePayment(paymentId: number) {
+    return this.request(`/payments/${paymentId}/approve`, {
+      method: 'PATCH',
+    });
+  }
+
+  async getPatientPayments(patientId: string) {
+    return this.request(`/patients/${patientId}/payments`);
+  }
+
+  // External payment event stream (e.g. local payment gateway)
+  async getPaymentEvents(params: { ref?: string; kind?: string; client?: string; status?: string } = {}) {
+    const base = 'http://localhost:3001';
+    const url = new URL('/api/payment/event', base);
+    Object.entries(params).forEach(([k, v]) => {
+      if (v) url.searchParams.append(k, String(v));
+    });
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Payment event error: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // Update external payment status by internal payment id
+  async updateExternalPaymentStatusById(paymentId: number | string, status: string, provider_ref?: string) {
+    const base = 'http://localhost:3001';
+    const url = `${base}/api/payment/${paymentId}/status`;
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+      },
+      body: JSON.stringify({ status, provider_ref }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update external payment status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // Try to find internal payment record by provider_ref
+  async getPaymentByProviderRef(providerRef: string) {
+    if (!providerRef) throw new Error('providerRef required');
+    return this.request(`/payments?provider_ref=${encodeURIComponent(providerRef)}`);
+  }
 }
 
 export const api = new ApiService();

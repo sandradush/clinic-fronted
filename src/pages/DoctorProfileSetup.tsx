@@ -38,13 +38,22 @@ const DoctorProfileSetup: React.FC = () => {
     }
   };
 
+  const removeFile = (index: number) => {
+    setDocuments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await makeApiRequest('/auth/doctors', {
         method: 'POST',
         body: JSON.stringify({
           name: user?.name || '',
           email: user?.email || '',
           phone: formData.phone,
           specialty: formData.specialty,
-          experience: parseInt(formData.experience),
+          experience: parseInt(formData.experience || '0'),
           qualifications: formData.qualifications,
           licenseNumber: formData.licenseNumber,
           documents: documents.map(file => file.name),
@@ -52,11 +61,11 @@ const DoctorProfileSetup: React.FC = () => {
           status: 'PENDING'
         })
       });
-      
+
       // Update user status in localStorage
       const updatedUser = { ...user, status: 'PENDING' };
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      
+
       toast.success('Profile submitted! Awaiting admin approval.');
       setTimeout(() => {
         toast.info('Please wait for admin verification before accessing the system.');
@@ -69,6 +78,7 @@ const DoctorProfileSetup: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">

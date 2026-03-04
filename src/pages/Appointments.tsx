@@ -130,14 +130,7 @@ const Appointments: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Appointments</h1>
 
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setShowNewAppointment(true)}
-            className="inline-flex items-center gap-2 px-3 py-2 bg-brand-700 text-white rounded shadow-sm text-sm hover:bg-brand-600"
-          >
-            <Plus size={16} /> New Appointment
-          </button>
-        </div>
+        
       </div>
 
       <div className="bg-white rounded-lg p-4 shadow-sm">
@@ -173,7 +166,7 @@ const Appointments: React.FC = () => {
                 <th className="py-3 px-3">Patient</th>
                 <th className="py-3 px-3">Doctor</th>
                 <th className="py-3 px-3">Description</th>
-                
+                <th className="py-3 px-3">Payment</th>
               </tr>
             </thead>
             <tbody>
@@ -192,6 +185,15 @@ const Appointments: React.FC = () => {
                   </td>
                   <td className="py-3 px-3 align-top text-sm text-gray-700">{a.doctor_name}</td>
                   <td className="py-3 px-3 align-top text-sm text-gray-700">{a.description}</td>
+                  <td className="py-3 px-3 align-top text-sm">
+                    {a.payment_status ? (
+                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${a.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {a.payment_status}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
+                  </td>
                   {/* actions column removed */}
                 </tr>
               ))}

@@ -13,6 +13,7 @@ const Sidebar: React.FC = () => {
     { path: '/appointments', icon: Calendar, label: 'Appointments' },
     { path: '/doctors', icon: UserCheck, label: 'Doctors' },
     { path: '/waiting-patients', icon: Clock, label: 'Waiting Patients' },
+    { path: '/payments', icon: ClipboardList, label: 'Payments' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 

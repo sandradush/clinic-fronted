@@ -24,7 +24,7 @@ const Settings: React.FC = () => {
 
   const [baseCurrency, setBaseCurrency] = useState('RWF (Rwandan Franc)');
   const [taxRate, setTaxRate] = useState<number>(18);
-  const [paymentGateway, setPaymentGateway] = useState<string>('stripe');
+  const [paymentGateway, setPaymentGateway] = useState<string>('paypack');
 
   const [operatingHours, setOperatingHours] = useState(defaultHours);
 
@@ -188,9 +188,8 @@ const Settings: React.FC = () => {
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-600 mb-1">Payment Gateway</label>
               <select value={paymentGateway} onChange={(e) => setPaymentGateway(e.target.value)} className="w-full border rounded px-3 py-2 bg-white">
-                <option value="stripe">Stripe</option>
-                <option value="paystack">Paystack</option>
-                <option value="flutterwave">Flutterwave</option>
+                <option value="paypack">paypack</option>
+      
               </select>
             </div>
           </div>

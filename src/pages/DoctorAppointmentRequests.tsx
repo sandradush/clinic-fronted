@@ -102,9 +102,19 @@ const DoctorAppointmentRequests: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold">{appointment.patient_name}</h3>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        {appointment.status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          {appointment.status}
+                        </span>
+                        {/** payment status if present */}
+                        {(
+                          (appointment as any).payment_status || null
+                        ) && (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${((appointment as any).payment_status) === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                            {(appointment as any).payment_status}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
