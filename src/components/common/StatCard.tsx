@@ -27,7 +27,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 'blue',
       </div>
 
       <div className="h-full flex flex-col items-start justify-center px-5">
-        <p className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-none">{value}</p>
+        <p className="text-3xl md:text-4xl font-normal text-gray-900 leading-none">{value}</p>
         <p className="text-sm font-medium text-gray-500 mt-2">{title}</p>
         {subtitle ? <p className="text-xs text-gray-400 mt-2">{subtitle}</p> : null}
       </div>
