@@ -156,14 +156,17 @@ class ApiService {
   }
 
   async approveAppointment(appointmentId: number) {
-    return this.request(`/appointments/${appointmentId}/approve`, {
+    // Backend expects a status update endpoint: PATCH /appointments/:id/status with { status }
+    return this.request(`/appointments/${appointmentId}/status`, {
       method: 'PATCH',
+      body: JSON.stringify({ status: 'approved' }),
     });
   }
 
   async rejectAppointment(appointmentId: number) {
-    return this.request(`/appointments/${appointmentId}/reject`, {
+    return this.request(`/appointments/${appointmentId}/status`, {
       method: 'PATCH',
+      body: JSON.stringify({ status: 'rejected' }),
     });
   }
 

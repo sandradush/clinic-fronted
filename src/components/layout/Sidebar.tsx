@@ -1,9 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Calendar, UserCheck, ClipboardList, History, Activity, Clock, Settings } from 'lucide-react';
+import { Home, Calendar, UserCheck, ClipboardList, History, Activity, Clock, Settings, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const location = useLocation();
   const { user } = useAuth();
   const [logoError, setLogoError] = React.useState(false);
@@ -33,9 +38,13 @@ const Sidebar: React.FC = () => {
   const menuItems = user?.role === 'doctor' ? doctorMenuItems : user?.role === 'receptionist' ? receptionistMenuItems : adminMenuItems;
 
   return (
-    <div className="w-64 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-20 flex flex-col sticky top-0 shadow-lg overflow-y-auto">
+    <>
+      {/* Mobile overlay/backdrop when sidebar is open */}
+      <div className={`fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden transition-opacity ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={onClose}></div>
+
+      <div className={`fixed inset-y-0 left-0 z-40 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:relative md:inset-auto md:left-auto md:transform-none w-64 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shadow-lg overflow-y-auto transition-transform` }>
       <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="mx-1 px-6 py-4 flex items-center gap-3">
+        <div className="mx-1 px-4 py-3 flex items-center gap-3">
           {!logoError && (
             <img
               src="/clinova-logo.jpg"
@@ -45,6 +54,14 @@ const Sidebar: React.FC = () => {
             />
           )}
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Clinova</h2>
+          {/* Close button visible only on mobile when sidebar is shown */}
+          <button
+            onClick={onClose}
+            className="ml-auto md:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Close sidebar"
+          >
+            <X size={18} />
+          </button>
         </div>
       </div>
 
@@ -69,6 +86,7 @@ const Sidebar: React.FC = () => {
         })}
       </nav>
     </div>
+    </>
   );
 };
 

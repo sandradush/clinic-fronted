@@ -336,6 +336,26 @@ const Consultation: React.FC = () => {
               }`}>
                 {appointment.status}
               </span>
+              <button
+                onClick={async () => {
+                  try {
+                    // mark appointment completed and set payment status to pending
+                    await makeApiRequest(`/appointments/${appointment.id}`, {
+                      method: 'PATCH',
+                      body: JSON.stringify({ status: 'completed', payment_status: 'pending' })
+                    });
+                    toast.success('Consultation completed. Please ask the patient to pay the consultation fee.');
+                    // update local state
+                    setAppointment({ ...appointment, status: 'completed', ...(appointment as any), payment_status: 'pending' } as any);
+                  } catch (err) {
+                    console.error('Failed to complete consultation', err);
+                    toast.error('Failed to complete consultation');
+                  }
+                }}
+                className="ml-3 px-3 py-1 rounded bg-brand-700 text-white text-sm hover:bg-brand-600"
+              >
+                Complete Consultation
+              </button>
             </div>
           </div>
         </div>

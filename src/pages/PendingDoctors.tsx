@@ -13,8 +13,7 @@ interface PendingDoctor {
   national_id: string;
   status: string;
   created_at: string;
-  payment_status?: string;
-  payment_amount?: number;
+  // payment fields removed from pending doctors UI; payments are handled via patient appointments
 }
 
 const PendingDoctors: React.FC = () => {
@@ -152,9 +151,7 @@ const PendingDoctors: React.FC = () => {
                 
                   <div className="flex flex-col items-end gap-2 ml-4">
                     <div className="text-sm">
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${doctor.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                        {doctor.payment_status ? doctor.payment_status : 'unpaid'}
-                      </span>
+                      {/* Payment info removed from pending doctor cards; payments are tracked on patient appointments */}
                     </div>
                     <div className="flex items-center gap-2">
                   <button
@@ -173,13 +170,7 @@ const PendingDoctors: React.FC = () => {
                     <CheckCircle size={16} />
                     Approve
                   </button>
-                  <button
-                    onClick={() => handleMarkPaid(doctor.doctor_id)}
-                    disabled={processing === doctor.doctor_id || doctor.payment_status === 'paid'}
-                    className="flex items-center gap-1 px-3 py-2 bg-brand-100 text-brand-700 rounded hover:bg-brand-200 disabled:opacity-50"
-                  >
-                    Mark Paid
-                  </button>
+                  {/* Mark Paid action removed — payment status is now shown on patient appointments in doctor dashboard */}
                   </div>
                 </div>
               </div>

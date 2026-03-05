@@ -13,7 +13,7 @@ import Consultation from './pages/Consultation';
 import Perception from './pages/prescription';
 import Doctors from './pages/Doctors';
 import Schedules from './pages/Schedules';
-import SettingPage from './pages/setting';
+import SettingPage from './pages/Settings';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -97,7 +97,7 @@ const App: React.FC = () => {
               <OfflineIndicator />
               <Toaster position="top-right" />
 
-              <Suspense fallback={<Loading />}>
+              <Suspense fallback={<Loading />}> 
                 <ProtectedRoutes />
               </Suspense>
             </div>

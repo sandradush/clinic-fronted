@@ -4,7 +4,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useDoctorRequests, useDoctors } from '../../hooks/useApiData';
 import { useNavigate } from 'react-router-dom';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
   const { doctorRequests = [] } = useDoctorRequests();
   const { doctors = [] } = useDoctors();
@@ -56,8 +60,16 @@ const Header: React.FC = () => {
   const unreadCount = notifications.length;
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-end px-8 shadow-sm z-40">
+    <header className="fixed top-0 left-0 right-0 md:left-64 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-end px-4 md:px-8 shadow-sm z-40">
       <div className="flex items-center gap-4">
+        {/* Mobile hamburger to toggle sidebar */}
+        <div className="md:hidden mr-auto">
+          <button onClick={onToggleSidebar} className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}

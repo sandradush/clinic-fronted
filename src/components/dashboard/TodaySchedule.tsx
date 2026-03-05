@@ -42,77 +42,78 @@ const TodaySchedule: React.FC = () => {
     },
   ];
 
-  const getStatusColor = (status: string) => {
+  const getStatusDotClass = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'success';
-      case 'waiting': return 'warning';
-      case 'pending': return 'info';
-      default: return 'gray';
+      case 'confirmed': return 'bg-emerald-500';
+      case 'waiting': return 'bg-amber-400';
+      case 'pending': return 'bg-sky-400';
+      default: return 'bg-gray-400';
+    }
+  };
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'confirmed': return 'bg-green-100 text-green-700';
+      case 'waiting': return 'bg-amber-100 text-amber-700';
+      case 'pending': return 'bg-sky-100 text-sky-700';
+      default: return 'bg-gray-100 text-gray-700';
     }
   };
 
   return (
-    <div className="schedule-timeline">
+    <div className="space-y-2">
       {todaysAppointments.map((appointment, index) => (
-        <div key={appointment.id} className="timeline-item">
-          <div className="timeline-marker">
-            <div className={`timeline-dot ${getStatusColor(appointment.status)}`}></div>
-            {index < todaysAppointments.length - 1 && <div className="timeline-line"></div>}
+        <div key={appointment.id} className="flex items-start gap-2">
+          <div className="flex flex-col items-center mt-1">
+            <div className={`w-2 h-2 rounded-full ${getStatusDotClass(appointment.status)}`}></div>
+            {index < todaysAppointments.length - 1 && <div className="w-px bg-gray-200 h-4 mt-1"></div>}
           </div>
-          
-          <div className="timeline-content">
-            <div className="appointment-card">
-              <div className="appointment-header">
-                <div className="appointment-time">
-                  <Clock size={16} />
-                  <span className="time">{appointment.time}</span>
-                  <span className="duration">({appointment.duration})</span>
+
+          <div className="flex-1">
+            <div className="ui-card p-2">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1 text-xs text-gray-600">
+                  <Clock size={12} />
+                  <span className="font-medium text-xs">{appointment.time}</span>
+                  <span className="text-[10px] text-gray-400">({appointment.duration})</span>
                 </div>
-                <span className={`status-badge ${appointment.status}`}>
-                  {appointment.status}
-                </span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full ${getStatusBadgeClass(appointment.status)}`}>{appointment.status}</span>
               </div>
-              
-              <div className="appointment-body">
-                <div className="patient-info">
-                  <div className="patient-avatar">
-                    <User size={18} />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                    <User size={12} />
                   </div>
-                  <div className="patient-details">
-                    <h4 className="patient-name">{appointment.patient}</h4>
-                    <p className="appointment-type">{appointment.type}</p>
+                  <div className="text-xs">
+                    <div className="font-medium text-xs truncate max-w-[180px]">{appointment.patient}</div>
+                    <div className="text-[10px] text-gray-500">{appointment.type}</div>
                   </div>
                 </div>
-                
-                <div className="appointment-meta">
-                  <div className="meta-item">
-                    <MapPin size={14} />
-                    <span>{appointment.room}</span>
-                  </div>
-                  <div className="meta-item">
-                    <Phone size={14} />
-                    <span>Call</span>
-                  </div>
+
+                <div className="flex flex-col items-end text-[10px] text-gray-500 gap-0.5">
+                  <div className="flex items-center gap-1"><MapPin size={10} /> <span>{appointment.room}</span></div>
+                  <div className="flex items-center gap-1"><Phone size={10} /> <span>Call</span></div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       ))}
-      
-      <div className="schedule-summary">
-        <div className="summary-stats">
-          <div className="stat">
-            <span className="stat-number">{todaysAppointments.length}</span>
-            <span className="stat-label">Total</span>
+
+      <div className="mt-1">
+        <div className="flex gap-3 text-xs text-gray-600">
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-medium">{todaysAppointments.length}</span>
+            <span className="text-[10px] text-gray-400">Total</span>
           </div>
-          <div className="stat">
-            <span className="stat-number">{todaysAppointments.filter(a => a.status === 'confirmed').length}</span>
-            <span className="stat-label">Confirmed</span>
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-medium">{todaysAppointments.filter(a => a.status === 'confirmed').length}</span>
+            <span className="text-[10px] text-gray-400">Confirmed</span>
           </div>
-          <div className="stat">
-            <span className="stat-number">{todaysAppointments.filter(a => a.status === 'waiting').length}</span>
-            <span className="stat-label">Waiting</span>
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-medium">{todaysAppointments.filter(a => a.status === 'waiting').length}</span>
+            <span className="text-[10px] text-gray-400">Waiting</span>
           </div>
         </div>
       </div>

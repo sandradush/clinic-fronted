@@ -15,7 +15,7 @@ const Login: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'doctor' as 'admin' | 'doctor' | 'receptionist'
+    role: 'doctor' as 'doctor'  
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -86,7 +86,7 @@ const Login: React.FC = () => {
         } else {
           setErrors({ general: result.message || 'Invalid email or password. Please try again.' });
         }
-      } else {
+        } else {
         const reg = await register(formData.name, formData.email, formData.password, formData.role);
         if (reg) {
           trackEvent('signup_completed', { role: formData.role });
@@ -198,8 +198,7 @@ const Login: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-700"
                 >
                   <option value="doctor">Doctor</option>
-                  <option value="admin">Admin</option>
-                  <option value="receptionist">Receptionist</option>
+                  
                 </select>
               </div>
             </>

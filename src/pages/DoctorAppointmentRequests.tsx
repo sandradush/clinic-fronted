@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, Clock, Calendar, User, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
+import { makeApiRequest } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 
 interface AppointmentRequest {
@@ -29,15 +30,25 @@ const DoctorAppointmentRequests: React.FC = () => {
 
   const fetchAssignedAppointments = async () => {
     if (!user?.id) return;
-    
+    setLoading(true);
+    const docId = user.id;
+    const endpoint = `/appointments/doctor/${docId}`;
+    console.debug('Fetching assigned appointments for doctor:', docId, 'endpoint:', endpoint);
     try {
-      const data = await api.getDoctorAssignedAppointments(user.id);
-      // Filter only pending appointments that need approval
-      const pendingAppointments = (data || []).filter((apt: AppointmentRequest) => apt.status === 'pending');
-      setAppointments(pendingAppointments);
-    } catch (error) {
-      toast.error('Failed to load appointment requests');
-      console.error('Error fetching appointments:', error);
+      // Use makeApiRequest first (consistent with other doctor pages)
+      const data = await makeApiRequest(endpoint);
+      setAppointments(data || []);
+    } catch (primaryError) {
+      console.error('Primary fetch (makeApiRequest) failed for', endpoint, primaryError);
+      // Try ApiService as a fallback
+      try {
+        const data = await api.getDoctorAssignedAppointments((docId as unknown) as number);
+        setAppointments(data || []);
+      } catch (fallbackError) {
+        console.error('Fallback api.getDoctorAssignedAppointments failed for', endpoint, fallbackError);
+        toast.error('Failed to load appointment requests');
+        setAppointments([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -149,22 +160,28 @@ const DoctorAppointmentRequests: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center gap-2 ml-4">
-                  <button
-                    onClick={() => handleReject(appointment.id)}
-                    disabled={processing === appointment.id}
-                    className="flex items-center gap-2 px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors"
-                  >
-                    <XCircle size={18} />
-                    Reject
-                  </button>
-                  <button
-                    onClick={() => handleApprove(appointment.id)}
-                    disabled={processing === appointment.id}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-                  >
-                    <CheckCircle size={18} />
-                    Approve
-                  </button>
+                  {appointment.status === 'pending' ? (
+                    <>
+                      <button
+                        onClick={() => handleReject(appointment.id)}
+                        disabled={processing === appointment.id}
+                        className="flex items-center gap-2 px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors"
+                      >
+                        <XCircle size={18} />
+                        Reject
+                      </button>
+                      <button
+                        onClick={() => handleApprove(appointment.id)}
+                        disabled={processing === appointment.id}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                      >
+                        <CheckCircle size={18} />
+                        Approve
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-500">No actions available</span>
+                  )}
                 </div>
               </div>
             </div>

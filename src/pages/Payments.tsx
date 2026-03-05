@@ -27,36 +27,39 @@ const Payments: React.FC = () => {
 
   const fetchPayments = async () => {
     try {
-      // Query the external payment event endpoint for pending CASHIN events
-      const resp = await api.getPaymentEvents({ status: 'pending', kind: 'CASHIN' });
-
-      // If endpoint returns `transactions` (event envelope), map to PaymentRecord
-      if (resp && resp.transactions) {
-        const mapped = resp.transactions.map((t: any) => {
-          const d = t.data || {};
-          // try to pick internal id if present in data
-          const internal = d.id || d.payment_id || d.internal_id || undefined;
-          return {
-            id: t.event_id || d.ref,
-            internal_id: internal,
-            provider_ref: d.ref || t.event_id,
-                raw: t,
-            appointment_id: d.appointment_id ?? undefined,
-            patient_name: d.client || d.user_ref || 'Unknown',
-            doctor_name: d.merchant || undefined,
-            amount: Number(d.amount || 0),
-            currency: d.currency || 'USD',
-            status: d.status || resp.status || 'pending',
-            created_at: d.created_at || t.created_at,
-          } as PaymentRecord;
+      // Prefer the backend payments endpoint which returns { count, payments: [...] }
+      let resp: any;
+      try {
+        resp = await api.getPayments();
+      } catch (e) {
+        // fallback to local payments endpoint if API base isn't configured for local testing
+        const fallback = await fetch('http://localhost:3001/api/payments?limit=100&offset=0', {
+          headers: { accept: 'application/json' },
         });
-
-        setPayments(mapped);
-      } else if (Array.isArray(resp)) {
-        setPayments(resp || []);
-      } else {
-        setPayments([]);
+        if (!fallback.ok) throw new Error('Failed to fetch payments');
+        resp = await fallback.json();
       }
+
+      // Handle response shapes: { payments: [...] } or direct array
+      const rawPayments: any[] = Array.isArray(resp) ? resp : resp?.payments ?? [];
+
+      const mapped = rawPayments.map((p: any) => {
+        return {
+          id: p.id ?? p.ref ?? Math.random().toString(36).slice(2),
+          internal_id: p.id,
+          provider_ref: p.provider_ref ?? p.ref,
+          raw: p,
+          appointment_id: p.appointment_id ?? undefined,
+          patient_name: (p.patient && (p.patient.name || p.patient.full_name)) || p.patient_id || p.number || 'Unknown',
+          doctor_name: p.doctor_name || undefined,
+          amount: Number(p.amount ?? 0),
+          currency: p.currency ?? 'USD',
+          status: p.status ?? 'pending',
+          created_at: p.created_at || p.createdAt || new Date().toISOString(),
+        } as PaymentRecord;
+      });
+
+      setPayments(mapped);
     } catch (err) {
       console.error('Failed to load payments', err);
       toast.error('Failed to load payments');

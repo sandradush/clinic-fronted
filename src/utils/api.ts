@@ -13,10 +13,26 @@ export const makeApiRequest = async (endpoint: string, options: RequestInit = {}
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error('Waiting for admin approval');
+    // Try to include response body in the thrown error for easier debugging
+    let bodyText: any = null;
+    try {
+      const ct = response.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        bodyText = await response.json();
+      } else {
+        bodyText = await response.text();
+      }
+    } catch (e) {
+      bodyText = '<unreadable response body>';
     }
-    throw new Error(`HTTP error! status: ${response.status}`);
+
+    if (response.status === 403) {
+      const msg = typeof bodyText === 'string' ? bodyText : JSON.stringify(bodyText);
+      throw new Error(`Waiting for admin approval: ${msg}`);
+    }
+
+    const bodyMsg = typeof bodyText === 'string' ? bodyText : JSON.stringify(bodyText);
+    throw new Error(`HTTP error! status: ${response.status} - ${bodyMsg}`);
   }
 
   return response.json();

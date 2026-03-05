@@ -81,12 +81,12 @@ const DoctorDashboard: React.FC = () => {
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-800 truncate">{appointment.patient_name}</h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium shadow-sm ${
-                        appointment.status === 'approved' ? 'bg-green-100 text-green-700 border border-green-200' :
-                        appointment.status === 'pending' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                        'bg-red-100 text-red-700 border border-red-200'
-                      }`}>
-                        {appointment.status || 'pending'}
-                      </span>
+                            appointment.status === 'approved' ? 'bg-green-100 text-green-700 border border-green-200' :
+                            appointment.status === 'pending' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                            'bg-red-100 text-red-700 border border-red-200'
+                          }`}>
+                            {appointment.status || 'pending'}
+                          </span>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
