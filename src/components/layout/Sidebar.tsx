@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
         <div className="mx-1 px-6 py-4 flex items-center gap-3">
           {!logoError && (
             <img
-              src="/clinova-logo.png"
+              src="/Clinova-logo.JPG"
               alt="Clinova icon"
               className="h-8 w-8 md:h-9 md:w-9 rounded-sm bg-white p-1"
               onError={() => setLogoError(true)}

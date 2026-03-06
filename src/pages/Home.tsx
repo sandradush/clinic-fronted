@@ -10,7 +10,7 @@ const Home: React.FC = () => {
         {/* MAIN CARD */}
         <div className="ui-card p-8 md:p-10">
           <div className="flex items-center gap-3 mb-5">
-            <img src="/clinova-logo.png" alt="Clinova" className="h-10 w-10 rounded" />
+            <img src="/Clinova-logo.JPG" alt="Clinova" className="h-10 w-10 rounded" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Clinova</h1>
             </div>
