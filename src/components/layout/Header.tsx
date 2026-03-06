@@ -60,8 +60,8 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const unreadCount = notifications.length;
 
   return (
-    <header className="fixed top-0 left-0 right-0 md:left-64 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-end px-4 md:px-8 shadow-sm z-40">
-      <div className="flex items-center gap-4">
+    <header className="fixed top-0 left-0 right-0 md:left-64 h-14 md:h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-end px-4 md:px-8 shadow-sm z-40">
+      <div className="flex items-center gap-4 w-full">
         {/* Mobile hamburger to toggle sidebar */}
         <div className="md:hidden mr-auto">
           <button onClick={onToggleSidebar} className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -70,15 +70,21 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             </svg>
           </button>
         </div>
-        <div className="relative">
+
+        {/* Center title for mobile */}
+        <div className="absolute left-0 right-0 flex items-center justify-center md:hidden pointer-events-none">
+          <div className="font-semibold text-lg text-gray-900 dark:text-white">Clinova</div>
+        </div>
+
+        <div className="relative ml-auto">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition-colors"
+            className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-2 py-1 md:px-3 md:py-2 transition-colors"
           >
-            <div className="w-9 h-9 rounded-full bg-brand-700 flex items-center justify-center text-white font-semibold text-sm">
+            <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-brand-700 flex items-center justify-center text-white font-semibold text-sm">
               {userInitials}
             </div>
-            <div className="text-left">
+            <div className="text-left hidden md:block">
               <div className="text-sm font-medium text-gray-900 dark:text-white">{user?.name || 'User'}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</div>
             </div>

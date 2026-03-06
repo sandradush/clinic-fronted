@@ -15,7 +15,17 @@
 
 	html {
 		/* Increase base font-size so rem-based sizing is larger across pages */
-		font-size: 125%; /* ~20px if browser default is 16px */
+		font-size: 100%; /* default for small screens */
+
+	/* Larger base font on medium+ screens for better desktop readability */
+	@media (min-width: 768px) {
+		font-size: 125%; /* ~20px on md+ */
+	}
+
+	/* Slightly smaller base on very small devices to avoid large UI elements */
+	@media (max-width: 375px) {
+		font-size: 90%;
+	}
 	}
 
 	.dark {
@@ -83,6 +93,15 @@
 
 	.ui-btn-primary:hover:not(:disabled) {
 		filter: brightness(0.98);
+	}
+
+	.ui-btn-primary-dark {
+		background: linear-gradient(135deg, #0f3b8c, #082967);
+		color: #fff;
+	}
+
+	.ui-btn-primary-dark:hover:not(:disabled) {
+		filter: brightness(0.95);
 	}
 
 	.ui-btn-secondary {

@@ -3,13 +3,13 @@
   "name": "Clinova ",
   "icons": [
     {
-      "src": "clinova-logo",
-      "type": "image/jpeg",
+      "src": "clinova-logo.png",
+      "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "clinova-logo",
-      "type": "image/jpeg",
+      "src": "clinova-logo.png",
+      "type": "image/png",
       "sizes": "512x512"
     }
   ],

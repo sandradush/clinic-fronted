@@ -11,9 +11,17 @@ interface User {
   doctorStatus?: string;
 }
 
+interface AuthResponse {
+  success: boolean;
+  message?: string;
+  redirectPath?: string;
+  role?: string;
+  downloadLink?: string;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; redirectPath?: string; role?: string }>;
+  login: (email: string, password: string) => Promise<AuthResponse>;
   register: (name: string, email: string, password: string, role: 'admin' | 'doctor' | 'receptionist') => Promise<boolean>;
   logout: () => void;
   user: User | null;
@@ -34,6 +42,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -41,15 +50,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const validateSession = async () => {
       const session = localStorage.getItem('session');
       const userData = localStorage.getItem('user');
+
       if (session && userData) {
         try {
-          // validate stored token by calling a protected endpoint
           await makeApiRequest('/profile');
           setIsAuthenticated(true);
           setUser(JSON.parse(userData));
-        } catch (err) {
-          // invalid/expired token - clear session
-          console.warn('Session validation failed, clearing local session', err);
+        } catch {
           localStorage.removeItem('session');
           localStorage.removeItem('user');
           setIsAuthenticated(false);
@@ -61,90 +68,98 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     validateSession();
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; message?: string; redirectPath?: string; role?: string }> => {
+  const login = async (email: string, password: string): Promise<AuthResponse> => {
+
     try {
+
       const data: any = await makeApiRequest('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
 
-      // Handle successful response with user data
       const userData = data?.user;
+
       if (userData) {
-        // Check if role is supported in web app
+
+        // BLOCK unsupported roles
         if (userData.role !== 'admin' && userData.role !== 'doctor') {
-          return { 
-            success: false, 
-            message: 'Please use our mobile application to access your account.',
-            role: userData.role 
+          return {
+            success: false,
+            message: "Please use our mobile application to access your account.",
+            role: userData.role,
+            downloadLink:
+              "https://expo.dev/accounts/sandradush1/projects/clinova/builds/8bdfa7f8-26cc-4d61-81c0-aba9fd425faa"
           };
         }
 
-        // Create a token if not provided (for compatibility)
         const token = data?.token || `session-${Date.now()}`;
-        
+
         localStorage.setItem('session', JSON.stringify({ token }));
         localStorage.setItem('user', JSON.stringify(userData));
+
         setIsAuthenticated(true);
         setUser(userData);
 
-        // Check if doctor profile doesn't exist - redirect to profile setup
-        if (userData.role === 'doctor' && userData.doctorStatus === 'not exist') {
-          return { success: true, redirectPath: '/profilesetup', role: userData.role };
-        }
+        const dashboardPath =
+          userData.role === 'admin' ? '/admin-dashboard' : '/dashboard';
 
-        // Check if doctor has pending status - show message and redirect to dashboard
-        if (userData.role === 'doctor' && userData.doctorStatus === 'pending') {
-          return { 
-            success: true, 
-            redirectPath: '/dashboard',
-            message: 'Your profile is pending admin approval. You will have limited access until approved.',
-            role: userData.role 
-          };
-        }
-
-        // Check if doctor is approved
-        if (userData.role === 'doctor' && userData.status !== 'APPROVED' && userData.doctorStatus !== 'pending') {
-          return { 
-            success: false, 
-            message: 'Your account is not approved. Please contact admin.',
-            role: userData.role 
-          };
-        }
-
-        const dashboardPath = userData.role === 'admin' ? '/admin-dashboard' : '/dashboard';
-        return { success: true, redirectPath: dashboardPath, role: userData.role };
+        return {
+          success: true,
+          redirectPath: dashboardPath,
+          role: userData.role
+        };
       }
 
-      const serverMessage = data?.message || 'Invalid server response';
-      return { success: false, message: String(serverMessage) };
+      return {
+        success: false,
+        message: 'Invalid server response'
+      };
+
     } catch (err: any) {
-      console.error('Auth signin error', err);
-      return { success: false, message: err?.message || 'Network error. Please check your connection or CORS settings.' };
+
+      return {
+        success: false,
+        message: err?.message || 'Network error'
+      };
+
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: 'admin' | 'doctor' | 'receptionist'): Promise<boolean> => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    role: 'admin' | 'doctor' | 'receptionist'
+  ): Promise<boolean> => {
+
     try {
+
       const res = await makeApiRequest('/auth/Register', {
         method: 'POST',
         body: JSON.stringify({ name, email, password, role })
       });
+
       return Boolean(res);
-    } catch (err) {
-      console.error('Register error', err);
+
+    } catch {
+
       return false;
+
     }
   };
 
   const logout = () => {
+
     localStorage.clear();
     setIsAuthenticated(false);
     setUser(null);
+
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, register, logout, user }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, login, register, logout, user }}
+    >
       {children}
     </AuthContext.Provider>
   );
