@@ -44,16 +44,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
 
       <div className={`fixed inset-y-0 left-0 z-40 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:relative md:inset-auto md:left-auto md:transform-none w-64 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shadow-lg overflow-y-auto transition-transform` }>
       <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="mx-1 px-6 py-4 flex items-center gap-3">
+        <div className="h-14 md:h-16 px-6 flex items-center gap-3">
           {!logoError && (
             <img
-              src="/Clinova-logo.JPG"
-              alt="Clinova icon"
+              src="/smart-health-consultation-logo.JPG"
+              alt="Smart Health Consultation icon"
               className="h-8 w-8 md:h-9 md:w-9 rounded-sm bg-white p-1"
               onError={() => setLogoError(true)}
             />
           )}
-          <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Clinova</h2>
+          <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Smart Health Consultation</h2>
         </div>
       </div>
 

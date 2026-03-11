@@ -10,9 +10,9 @@ const Home: React.FC = () => {
         {/* MAIN CARD */}
         <div className="ui-card p-8 md:p-10">
           <div className="flex items-center gap-3 mb-5">
-            <img src="/Clinova-logo.JPG" alt="Clinova" className="h-10 w-10 rounded" />
+            <img src="/smart-health-consultation-logo.JPG" alt="Smart Health Consultation" className="h-10 w-10 rounded" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Clinova</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Smart Health Consultation</h1>
             </div>
           </div>
 
@@ -91,12 +91,12 @@ const Home: React.FC = () => {
             </h3>
 
             <p className="text-gray-600 text-sm mb-6">
-              Patients can book appointments, chat with doctors, and receive prescriptions directly through the Clinova mobile app.
+              Patients can book appointments, chat with doctors, and receive prescriptions directly through the Smart Health Consultation mobile app.
             </p>
           </div>
 
           <a
-            href="https://expo.dev/accounts/sandradush1/projects/clinova/builds/8bdfa7f8-26cc-4d61-81c0-aba9fd425faa"
+            href="https://expo.dev/accounts/sandradush1/projects/smart-health-consultation/builds/8bdfa7f8-26cc-4d61-81c0-aba9fd425faa"
             target="_blank"
             rel="noopener noreferrer"
             className="ui-btn ui-btn-primary-dark text-center"

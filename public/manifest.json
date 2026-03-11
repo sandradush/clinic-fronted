@@ -1,14 +1,14 @@
 {
-  "short_name": "Clinova",
-  "name": "Clinova ",
+  "short_name": "Smart Health Consultation",
+  "name": "Smart Health Consultation",
   "icons": [
     {
-      "src": "Clinova-logo.JPG",
+      "src": "smart-health-consultation-logo.JPG",
       "type": "image/jpeg",
       "sizes": "192x192"
     },
     {
-      "src": "Clinova-logo.JPG",
+      "src": "smart-health-consultation-logo.JPG",
       "type": "image/jpeg",
       "sizes": "512x512"
     }

@@ -18,7 +18,7 @@ const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [loading, setLoading] = useState(false);
 
-  const [clinicName, setClinicName] = useState('King Faisal Hospital - Clinova Branch');
+  const [clinicName, setClinicName] = useState('King Faisal Hospital - Smart Health Consultation Branch');
   const [primaryAddress, setPrimaryAddress] = useState('KG 544 St, Kigali, Rwanda');
   const [defaultLanguage, setDefaultLanguage] = useState('English');
 
@@ -146,7 +146,7 @@ const Settings: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                setClinicName('King Faisal Hospital - Clinova Branch');
+                setClinicName('King Faisal Hospital - Smart Health Consultation Branch');
                 setPrimaryAddress('KG 544 St, Kigali, Rwanda');
                 setDefaultLanguage('English');
               }}

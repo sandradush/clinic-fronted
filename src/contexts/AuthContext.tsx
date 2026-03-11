@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             message: "Please use our mobile application to access your account.",
             role: userData.role,
             downloadLink:
-              "https://expo.dev/accounts/sandradush1/projects/clinova/builds/8bdfa7f8-26cc-4d61-81c0-aba9fd425faa"
+              "https://expo.dev/accounts/sandradush1/projects/smart-health-consultation/builds/8bdfa7f8-26cc-4d61-81c0-aba9fd425faa"
           };
         }
 

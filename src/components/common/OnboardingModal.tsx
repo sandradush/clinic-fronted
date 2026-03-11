@@ -50,12 +50,12 @@ const OnboardingModal: React.FC = () => {
       <Card className="w-full max-w-xl p-6 md:p-8">
         <div className="flex items-center gap-2 text-brand-600 mb-3">
           <Sparkles size={20} />
-          <span className="font-semibold">Welcome to Clinova</span>
+          <span className="font-semibold">Welcome to Smart Health Consultation</span>
         </div>
 
         <h2 className="text-2xl font-bold mb-2">Start faster with guided setup</h2>
         <p className="text-slate-600 dark:text-slate-300 mb-5">
-          Clinova helps you organize people, appointments, and approvals from one workspace. Complete your top task in 1 click.
+          Smart Health Consultation helps you organize people, appointments, and approvals from one workspace. Complete your top task in 1 click.
         </p>
 
         <div className="grid sm:grid-cols-2 gap-3 mb-6">
