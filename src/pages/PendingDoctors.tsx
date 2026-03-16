@@ -18,7 +18,7 @@ interface PendingDoctor {
 
 const PendingDoctors: React.FC = () => {
   const [doctors, setDoctors] = useState<PendingDoctor[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState<number | null>(null);
 
   useEffect(() => {
@@ -99,11 +99,7 @@ const PendingDoctors: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="w-8 h-8 border-4 border-brand-100 border-t-brand-700 rounded-full animate-spin"></div>
-      </div>
-    );
+    return null; // Simplified loading
   }
 
   return (

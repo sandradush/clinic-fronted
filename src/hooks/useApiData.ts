@@ -11,11 +11,6 @@ interface Patient {
 }
 
 interface Doctor {
-  location: any;
-  nextAvailable: string;
-  totalAppointments: number;
-  rating: string;
-  todayAppointments: number;
   id: string;
   name: string;
   specialty: string;
@@ -24,7 +19,6 @@ interface Doctor {
   experience: number;
   availability: 'available' | 'busy' | 'offline';
   status?: string;
-  password?: string;
 }
 
 interface Appointment {
@@ -64,7 +58,7 @@ interface DoctorRequest {
 
 export const usePatients = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchPatients = async () => {
@@ -89,7 +83,7 @@ export const usePatients = () => {
 
 export const useDoctors = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchDoctors = async () => {
@@ -114,7 +108,7 @@ export const useDoctors = () => {
 
 export const useAppointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchAppointments = async () => {
@@ -139,7 +133,7 @@ export const useAppointments = () => {
 
 export const usePrescriptions = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchPrescriptions = async () => {
@@ -164,7 +158,7 @@ export const usePrescriptions = () => {
 
 export const useDoctorRequests = (doctorId?: string) => {
   const [doctorRequests, setDoctorRequests] = useState<DoctorRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchDoctorRequests = async () => {

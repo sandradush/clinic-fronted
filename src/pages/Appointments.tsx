@@ -126,102 +126,139 @@ const Appointments: React.FC = () => {
   const endIndex = Math.min(page * appointmentsPerPage, filtered.length);
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Appointments</h1>
-
-        
+    <div className="p-2 sm:p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-0">Appointments</h1>
       </div>
 
-      <div className="bg-white rounded-lg p-4 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="relative flex items-center w-full max-w-md">
-              <Search size={18} className="absolute left-3 text-gray-400" />
-              <input
-                className="pl-10 pr-3 py-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-brand-100"
-                placeholder="Search patient, phone, type, or doctor"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+      <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+        <div className="flex flex-col gap-3 sm:gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+              <div className="relative flex items-center w-full sm:max-w-md">
+                <Search size={18} className="absolute left-3 text-gray-400" />
+                <input
+                  className="pl-10 pr-3 py-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-brand-100 text-sm"
+                  placeholder="Search patient, phone, type, or doctor"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
-            {/* status filter removed — statuses are optional */}
-          </div>
-
-          <div className="flex items-center gap-3 text-sm text-gray-600">
-            <div className="hidden sm:flex items-center gap-2">
-              <div className="text-xs text-gray-500">Showing</div>
-              <div className="font-semibold">{startIndex}-{endIndex} of {filtered.length}</div>
+            <div className="flex items-center justify-between sm:justify-end gap-3 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className="text-xs text-gray-500">Showing</div>
+                <div className="font-semibold">{startIndex}-{endIndex} of {filtered.length}</div>
+              </div>
+              <div className="text-sm text-gray-500 flex items-center gap-1">
+                {loading ? 'Loading...' : <><Clock size={14} /> Today</>}
+              </div>
             </div>
-            <div className="text-sm text-gray-500 flex items-center gap-1">{loading ? 'Loading...' : <><Clock size={14} /> Today</>}</div>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full table-auto border-collapse">
-            <thead>
-              <tr className="text-left text-xs text-gray-500 border-b">
-                <th className="py-3 px-3">Time</th>
-                <th className="py-3 px-3">Date</th>
-                <th className="py-3 px-3">Patient</th>
-                <th className="py-3 px-3">Doctor</th>
-                <th className="py-3 px-3">Description</th>
-                <th className="py-3 px-3">Payment</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div className="min-w-full">
+            {/* Mobile Card View */}
+            <div className="block sm:hidden space-y-3">
               {paginatedAppointments.map((a) => (
-                <tr key={a.id} className="hover:bg-gray-50">
-                  <td className="py-3 px-3 align-top w-28 text-sm text-gray-700">{a.time}</td>
-                  <td className="py-3 px-3 align-top text-sm text-gray-700">{new Date(a.date).toLocaleDateString()}</td>
-                  <td className="py-3 px-3 align-top">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-brand-50 flex items-center justify-center text-brand-700"><User size={16} /></div>
-                      <div>
-                        <div className="font-medium text-sm">{a.patient_name}</div>
-                        <div className="text-xs text-gray-500">&nbsp;</div>
-                      </div>
+                <div key={a.id} className="bg-gray-50 rounded-lg p-3 border">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-700">
+                      <User size={14} />
                     </div>
-                  </td>
-                  <td className="py-3 px-3 align-top text-sm text-gray-700">{a.doctor_name}</td>
-                  <td className="py-3 px-3 align-top text-sm text-gray-700">{a.description}</td>
-                  <td className="py-3 px-3 align-top text-sm">
-                    {a.payment_status ? (
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${a.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                        {a.payment_status}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">—</span>
-                    )}
-                  </td>
-                  {/* actions column removed */}
-                </tr>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{a.patient_name}</div>
+                      <div className="text-xs text-gray-500">Dr. {a.doctor_name}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium">{a.time}</div>
+                      <div className="text-xs text-gray-500">{new Date(a.date).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-700 mb-2">{a.description}</div>
+                  {a.payment_status && (
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${a.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {a.payment_status}
+                    </span>
+                  )}
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Desktop Table View */}
+            <table className="hidden sm:table w-full table-auto border-collapse">
+              <thead>
+                <tr className="text-left text-xs text-gray-500 border-b">
+                  <th className="py-3 px-3">Time</th>
+                  <th className="py-3 px-3">Date</th>
+                  <th className="py-3 px-3">Patient</th>
+                  <th className="py-3 px-3">Doctor</th>
+                  <th className="py-3 px-3">Description</th>
+                  <th className="py-3 px-3">Payment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedAppointments.map((a) => (
+                  <tr key={a.id} className="hover:bg-gray-50">
+                    <td className="py-3 px-3 align-top w-28 text-sm text-gray-700">{a.time}</td>
+                    <td className="py-3 px-3 align-top text-sm text-gray-700">{new Date(a.date).toLocaleDateString()}</td>
+                    <td className="py-3 px-3 align-top">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-brand-50 flex items-center justify-center text-brand-700"><User size={16} /></div>
+                        <div>
+                          <div className="font-medium text-sm">{a.patient_name}</div>
+                          <div className="text-xs text-gray-500">&nbsp;</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 align-top text-sm text-gray-700">{a.doctor_name}</td>
+                    <td className="py-3 px-3 align-top text-sm text-gray-700">{a.description}</td>
+                    <td className="py-3 px-3 align-top text-sm">
+                      {a.payment_status ? (
+                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${a.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                          {a.payment_status}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {filtered.length === 0 && (
             <div className="py-8 text-center text-gray-500">No appointments found for the selected filters.</div>
           )}
 
           {filtered.length > 0 && (
-            <div className="mt-4 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                disabled={page === 1}
-                className="px-3 py-2 bg-brand-700 text-white rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-600"
-              >
-                Previous
-              </button>
-              <button
-                type="button"
-                onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-2 bg-brand-700 text-white rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-600"
-              >
-                Next
-              </button>
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-sm text-gray-600 order-2 sm:order-1">
+                Showing {startIndex}-{endIndex} of {filtered.length} appointments
+              </div>
+              <div className="flex items-center gap-2 order-1 sm:order-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                  disabled={page === 1}
+                  className="px-3 py-2 bg-brand-700 text-white rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-600"
+                >
+                  Previous
+                </button>
+                <span className="px-3 py-2 text-sm text-gray-600">
+                  {page} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={page === totalPages}
+                  className="px-3 py-2 bg-brand-700 text-white rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-600"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </div>

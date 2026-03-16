@@ -119,33 +119,28 @@ const Login: React.FC = () => {
         );
 
         if (reg) {
-
           trackEvent('signup_completed', { role: formData.role });
-
-          setSuccess('Account created successfully! Please sign in.');
-
-          setTimeout(() => {
-
-            setIsLogin(true);
-
-            setFormData({
-              name: '',
-              email: formData.email,
-              password: '',
-              confirmPassword: '',
-              role: 'doctor'
-            });
-
-            setSuccess('');
-
-          }, 2000);
-
+          // Redirect doctor to profile setup after registration
+          if (formData.role === 'doctor') {
+            navigate('/profile-setup', { replace: true });
+          } else {
+            setSuccess('Account created successfully! Please sign in.');
+            setTimeout(() => {
+              setIsLogin(true);
+              setFormData({
+                name: '',
+                email: formData.email,
+                password: '',
+                confirmPassword: '',
+                role: 'doctor'
+              });
+              setSuccess('');
+            }, 2000);
+          }
         } else {
-
           setErrors({
             general: 'Registration failed. Please try again.'
           });
-
         }
       }
 
@@ -241,37 +236,40 @@ const Login: React.FC = () => {
 
         {errors.general && (
           <div className="p-3 mb-4 text-red-800 bg-red-50 border border-red-200 rounded-md">
-
             <div className="flex items-center gap-2 mb-2">
               <AlertCircle size={16} />
-              {errors.general}
+              <div dangerouslySetInnerHTML={{ __html: errors.general }} />
             </div>
-
-            {downloadLink && (
-              <a
-                href={downloadLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline font-medium"
-              >
-                Download the mobile app here
-              </a>
-            )}
-
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Name *
+              </label>
+              <div className="relative flex items-center border border-gray-300 rounded-md">
+                <Mail size={18} className="ml-3 text-gray-400" />
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="flex-1 px-3 py-2 border-0 rounded-md focus:outline-none"
+                  placeholder="Enter your name"
+                />
+              </div>
+              {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+            </div>
+          )}
 
           <div>
-
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email Address *
             </label>
-
             <div className="relative flex items-center border border-gray-300 rounded-md">
               <Mail size={18} className="ml-3 text-gray-400" />
-
               <input
                 type="email"
                 name="email"
@@ -281,19 +279,15 @@ const Login: React.FC = () => {
                 placeholder="Enter your email"
               />
             </div>
-
+            {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
           </div>
 
           <div>
-
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Password *
             </label>
-
             <div className="relative flex items-center border border-gray-300 rounded-md">
-
               <Lock size={18} className="ml-3 text-gray-400" />
-
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
@@ -302,7 +296,6 @@ const Login: React.FC = () => {
                 className="flex-1 px-3 py-2 border-0 rounded-md focus:outline-none"
                 placeholder="Enter your password"
               />
-
               <button
                 type="button"
                 className="p-2 text-gray-400"
@@ -310,19 +303,38 @@ const Login: React.FC = () => {
               >
                 {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
               </button>
-
             </div>
-
+            {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
           </div>
 
+          {!isLogin && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password *
+              </label>
+              <div className="relative flex items-center border border-gray-300 rounded-md">
+                <Lock size={18} className="ml-3 text-gray-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="flex-1 px-3 py-2 border-0 rounded-md focus:outline-none"
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  className="p-2 text-gray-400"
+                  onClick={() => setShowPassword(prev => !prev)}
+                >
+                  {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
+                </button>
+              </div>
+              {errors.confirmPassword && <p className="text-red-600 text-sm mt-1">{errors.confirmPassword}</p>}
+            </div>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
-
-            {loading
-              ? 'Signing in...'
-              : isLogin
-              ? 'Sign In'
-              : 'Create Account'}
-
+            {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
           </Button>
 
         </form>

@@ -81,7 +81,7 @@ const AdminDashboard: React.FC = () => {
   const [waitingPatients, setWaitingPatients] = useState<WaitingPatient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // Transform API appointment data to match Appointment interface
   const transformAppointment = (apiAppointment: ApiAppointment): Appointment | null => {
@@ -213,7 +213,7 @@ const AdminDashboard: React.FC = () => {
         console.error('Failed to fetch doctors:', error);
         setDoctors([]);
       } finally {
-        setLoading(false);
+        // Remove loading state to make dashboard load faster
       }
     };
 
@@ -224,33 +224,28 @@ const AdminDashboard: React.FC = () => {
       fetchDoctors()
     ]).catch(error => {
       console.error('Error fetching dashboard data:', error);
-      setLoading(false);
     });
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-12 h-12 border-4 border-brand-100 border-t-brand-700 rounded-full animate-spin"></div>
-      </div>
-    );
+    return null; // Remove loading spinner for faster experience
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-6">Analytics Overview</h1>
+    <div className="p-2 sm:p-4 md:p-6">
+      <h1 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">Analytics Overview</h1>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <StatCard title="Total Doctors" value={stats.totalDoctors} icon={<Users size={22} />} color="blue" />
-        <StatCard title="Total Patients" value={stats.totalPatients} icon={<Activity size={22} />} color="purple" />
-        <StatCard title="Pending Appointments" value={stats.pendingAppointments} icon={<Calendar size={22} />} color="yellow" />
-        <StatCard title="Approved Appointments" value={stats.approvedAppointments} icon={<UserCheck size={22} />} color="green" />
-        <StatCard title="Waiting Patients" value={waitingPatients.length} icon={<Clock size={22} />} color="orange" />
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <StatCard title="Total Doctors" value={stats.totalDoctors} icon={<Users size={18} />} color="blue" />
+        <StatCard title="Total Patients" value={stats.totalPatients} icon={<Activity size={18} />} color="purple" />
+        <StatCard title="Pending Appointments" value={stats.pendingAppointments} icon={<Calendar size={18} />} color="yellow" />
+        <StatCard title="Approved Appointments" value={stats.approvedAppointments} icon={<UserCheck size={18} />} color="green" />
+        <StatCard title="Waiting Patients" value={waitingPatients.length} icon={<Clock size={18} />} color="orange" />
       </div>
 
       {/* Charts Section */}
-      <div className="mt-8">
+      <div className="mt-4 sm:mt-8">
         <AdminCharts 
           appointments={appointments} 
           doctors={doctors} 

@@ -72,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </div>
 
         {/* Center title for mobile */}
-          <div className="absolute left-0 right-0 flex items-center justify-center md:hidden pointer-events-none">
+        <div className="absolute left-0 right-0 flex items-center justify-center md:hidden pointer-events-none">
           <div className="font-semibold text-lg text-gray-900 dark:text-white">Smart Health Consultation</div>
         </div>
 
@@ -88,19 +88,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               <div className="text-sm font-medium text-gray-900 dark:text-white">{user?.name || 'User'}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</div>
             </div>
-            <ChevronDown size={16} className="text-gray-400 dark:text-gray-500" />
           </button>
 
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-              {/* Settings removed from header menu */}
-              <button
-                onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left text-red-600 dark:text-red-400"
-              >
-                <LogOut size={18} />
-                <span className="text-sm">Sign Out</span>
-              </button>
+              {/* Profile menu without sign out */}
             </div>
           )}
         </div>

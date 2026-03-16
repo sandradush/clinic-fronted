@@ -27,8 +27,8 @@ const ProfileSetup: React.FC = () => {
     setLoading(true);
 
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const userId = user.id;
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      const userId = userData.id;
 
       if (!userId) {
         toast.error('User not found. Please login again.');
@@ -51,12 +51,28 @@ const ProfileSetup: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit profile');
+        if (response.status === 403) {
+          toast.error('Waiting for admin approval');
+        } else {
+          throw new Error('Failed to submit profile');
+        }
+        return;
       }
+      
+      // Update user's doctorStatus to pending
+      const updatedUserData = JSON.parse(localStorage.getItem('user') || '{}');
+      updatedUserData.doctorStatus = 'pending';
+      localStorage.setItem('user', JSON.stringify(updatedUserData));
       
       toast.success('Profile submitted successfully!');
       trackEvent('profile_setup_saved', { specialty: formData.specialty || 'unknown' });
       setSubmitted(true);
+      
+      // Clear authentication to force re-login after approval
+      setTimeout(() => {
+        localStorage.removeItem('session');
+        localStorage.removeItem('user');
+      }, 3000);
     } catch (error) {
       trackEvent('profile_setup_failed');
       toast.error('Failed to setup profile');

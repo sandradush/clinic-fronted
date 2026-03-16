@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Calendar, UserCheck, ClipboardList, History, Activity, Clock, Settings } from 'lucide-react';
+import { Home, Calendar, UserCheck, ClipboardList, History, Activity, Clock, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
@@ -10,7 +10,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [logoError, setLogoError] = React.useState(false);
 
   const adminMenuItems = [
@@ -19,7 +19,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     { path: '/doctors', icon: UserCheck, label: 'Doctors' },
     { path: '/waiting-patients', icon: Clock, label: 'Waiting Patients' },
     { path: '/payments', icon: ClipboardList, label: 'Payments' },
-    { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 
   const doctorMenuItems = [
@@ -34,6 +33,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     { path: '/schedules', icon: Calendar, label: 'Schedule' },
     { path: '/waiting-patients', icon: Clock, label: 'Waiting Patients' },
   ];
+
+  const handleSignOut = () => {
+    logout();
+  };
 
   const menuItems = user?.role === 'doctor' ? doctorMenuItems : user?.role === 'receptionist' ? receptionistMenuItems : adminMenuItems;
 
@@ -80,6 +83,37 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
           );
         })}
       </nav>
+      
+      {/* Settings Button - Show for admin only */}
+      {user?.role === 'admin' && (
+        <div className="px-0 py-2">
+          <Link
+            to="/settings"
+            className={`flex items-center gap-3 px-4 md:px-6 py-2 md:py-3 text-gray-700 dark:text-gray-300 transition-all duration-200 border-l-3 border-transparent mx-1 ${
+              location.pathname === '/settings'
+                ? 'bg-brand-100/40 dark:bg-brand-700/40 text-brand-700 dark:text-brand-100 border-l-brand-600 font-semibold'
+                : 'hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-brand-600 dark:hover:text-brand-100 hover:border-l-brand-500'
+            }`}
+            onClick={() => {
+              if (onClose && isOpen) onClose();
+            }}
+          >
+            <Settings className="w-5 h-5 md:w-6 md:h-6" />
+            <span className="text-sm md:text-base">Settings</span>
+          </Link>
+        </div>
+      )}
+      
+      {/* Sign Out Button */}
+      <div className="px-0 py-4 border-t border-gray-200 dark:border-gray-700">
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-3 px-4 md:px-6 py-2 md:py-3 text-gray-700 dark:text-gray-300 transition-all duration-200 border-l-3 border-transparent mx-1 w-full text-left hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-red-600 dark:hover:text-red-400 hover:border-l-red-300"
+        >
+          <LogOut className="w-5 h-5 md:w-6 md:h-6" />
+          <span className="text-sm md:text-base">Sign Out</span>
+        </button>
+      </div>
     </div>
     </>
   );

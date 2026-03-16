@@ -85,11 +85,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (userData.role !== 'admin' && userData.role !== 'doctor') {
           return {
             success: false,
-            message: "Please use our mobile application to access your account.",
-            role: userData.role,
-            downloadLink:
-              "https://expo.dev/accounts/sandradush1/projects/smart-health-consultation/builds/8bdfa7f8-26cc-4d61-81c0-aba9fd425faa"
+            message: `Please use our mobile application to access your account. <a href="https://play.google.com/store/apps/details?id=com.clinic.app" target="_blank" class="text-blue-600 underline">Download here</a>`,
+            role: userData.role
           };
+        }
+
+        // Handle doctor registration flow
+        if (userData.role === 'doctor') {
+          // If doctor hasn't completed profile setup
+          if (userData.doctorStatus === 'not exist') {
+            const token = data?.token || `session-${Date.now()}`;
+            localStorage.setItem('session', JSON.stringify({ token }));
+            localStorage.setItem('user', JSON.stringify(userData));
+            setIsAuthenticated(true);
+            setUser(userData);
+            
+            return {
+              success: true,
+              redirectPath: '/profilesetup',
+              message: 'Please complete your profile setup',
+              role: userData.role
+            };
+          }
+          
+          // If doctor profile is pending approval - block access completely
+          if (userData.doctorStatus === 'pending') {
+            return {
+              success: false,
+              message: 'Your profile is pending admin approval. Please wait for verification before accessing the system.',
+              role: userData.role
+            };
+          }
+          
+          // If doctor is not approved - block access
+          if (userData.status !== 'APPROVED' && userData.status !== 'approved') {
+            return {
+              success: false,
+              message: 'Your account is not approved yet. Please contact admin or wait for approval.',
+              role: userData.role
+            };
+          }
         }
 
         const token = data?.token || `session-${Date.now()}`;

@@ -130,36 +130,17 @@ const DoctorDashboard: React.FC = () => {
           ))}
           
           {todayAppointments.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Calendar size={32} className="text-gray-400" />
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Calendar size={24} className="text-gray-400" />
               </div>
+              <p className="text-gray-500">No appointments today</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Consultation Area */}
-      {selectedAppointment && (
-        <div className="bg-white rounded-lg shadow-sm p-4">
-          <h2 className="text-lg font-semibold mb-4">Consultation in Progress</h2>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <FileText size={48} className="mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-600 mb-4">Consultation interface would be implemented here</p>
-            <div className="flex justify-center gap-2">
-              <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-                Complete Consultation
-              </button>
-              <button 
-                onClick={() => setSelectedAppointment(null)}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Consultation interface removed - no dummy implementation */}
     </div>
   );
 };
