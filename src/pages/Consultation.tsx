@@ -134,116 +134,142 @@ const Consultation: React.FC = () => {
     fetchAppointment();
   }, [appointmentId, navigate]);
 
-  // WebSocket connection
+  // WebSocket connection with retry logic
   useEffect(() => {
     if (!appointment || !user) return;
 
-    const websocket = new WebSocket(`wss://chat.mababa.app/ws/${user?.id}`);
-    
-    websocket.onopen = () => {
-      console.log('WebSocket connected');
-      setIsConnected(true);
-      toast.success('Chat connected');
-    };
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
+    let reconnectTimeout: NodeJS.Timeout;
 
-    websocket.onmessage = (event) => {
+    const connectWebSocket = () => {
       try {
-        // First, try to parse as JSON
-        const data = JSON.parse(event.data);
+        const websocket = new WebSocket(`wss://chat.mababa.app/ws/${user?.id}`);
         
-        // Add received message to chat history
-        const newMessage = {
-          id: Date.now(),
-          message: data.content || data.message || event.data,
-          sender: data.sender === user.id?.toString() ? 'You' : appointment.patient_name,
-          time: new Date().toLocaleTimeString()
+        websocket.onopen = () => {
+          console.log('WebSocket connected');
+          setIsConnected(true);
+          reconnectAttempts = 0;
+          toast.success('Chat connected');
         };
-        
-        setChatHistory(prev => [...prev, newMessage]);
-      } catch (error) {
-        // If JSON parsing fails, try to parse the "patient_id: message" format
-        const messageText = event.data;
-        const colonIndex = messageText.indexOf(':');
-        
-        if (colonIndex !== -1) {
-          // Extract patient_id and message from format "patient_id: message"
-          const patientIdStr = messageText.substring(0, colonIndex).trim();
-          const messageContent = messageText.substring(colonIndex + 1).trim();
+
+        websocket.onmessage = (event) => {
+          console.log('Received message:', event.data);
           
-          // Check if it's a valid number (patient_id)
-          const patientId = parseInt(patientIdStr, 10);
-          
-          if (!isNaN(patientId) && messageContent) {
-            // Check if the patient_id matches the current appointment's patient
-            if (patientId === appointment.patient_id) {
+          try {
+            // Try to parse as JSON first
+            const data = JSON.parse(event.data);
+            
+            const newMessage = {
+              id: Date.now(),
+              message: data.content || data.message || data.text || event.data,
+              sender: data.sender_id === user.id || data.sender === user.id?.toString() ? 'You' : appointment.patient_name,
+              time: new Date().toLocaleTimeString()
+            };
+            
+            setChatHistory(prev => [...prev, newMessage]);
+          } catch (error) {
+            // Handle plain text messages
+            const messageText = event.data.toString();
+            
+            if (messageText.trim()) {
               const newMessage = {
                 id: Date.now(),
-                message: messageContent,
+                message: messageText,
                 sender: appointment.patient_name,
                 time: new Date().toLocaleTimeString()
               };
               setChatHistory(prev => [...prev, newMessage]);
             }
           }
-        } else {
-          // If no colon, treat as regular message from patient
-          const newMessage = {
-            id: Date.now(),
-            message: messageText,
-            sender: appointment.patient_name,
-            time: new Date().toLocaleTimeString()
-          };
-          setChatHistory(prev => [...prev, newMessage]);
-        }
+        };
+
+        websocket.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setIsConnected(false);
+          if (reconnectAttempts === 0) {
+            toast.error('Chat connection failed');
+          }
+        };
+
+        websocket.onclose = (event) => {
+          console.log('WebSocket disconnected:', event.code, event.reason);
+          setIsConnected(false);
+          
+          // Attempt to reconnect if not manually closed
+          if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            console.log(`Attempting to reconnect... (${reconnectAttempts}/${maxReconnectAttempts})`);
+            reconnectTimeout = setTimeout(connectWebSocket, 3000 * reconnectAttempts);
+          } else if (reconnectAttempts >= maxReconnectAttempts) {
+            toast.error('Chat connection lost. Please refresh the page.');
+          }
+        };
+
+        setWs(websocket);
+        
+        return websocket;
+      } catch (error) {
+        console.error('Failed to create WebSocket:', error);
+        toast.error('Failed to initialize chat');
+        return null;
       }
     };
 
-    websocket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      toast.error('Chat connection error');
-      setIsConnected(false);
-    };
-
-    websocket.onclose = () => {
-      console.log('WebSocket disconnected');
-      setIsConnected(false);
-      toast.error('Chat disconnected');
-    };
-
-    setWs(websocket);
+    const websocket = connectWebSocket();
 
     return () => {
-      websocket.close();
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+      if (websocket) {
+        websocket.close(1000, 'Component unmounting');
+      }
     };
   }, [appointment, user]);
 
   const handleSendMessage = () => {
-    if (chatMessage.trim() && ws && isConnected && appointment) {
-      // Send message via WebSocket
+    if (!chatMessage.trim()) {
+      return;
+    }
+    
+    if (!ws || !isConnected) {
+      toast.error('Chat not connected. Please wait...');
+      return;
+    }
+    
+    if (!appointment) {
+      toast.error('Appointment data not available');
+      return;
+    }
+
+    try {
+      // Try multiple message formats for compatibility
       const messageData = {
-        sender: user?.id?.toString() || 'doctor',
-        receiver: appointment.patient_id.toString(),
-        content: chatMessage.trim()
+        type: 'message',
+        sender_id: user?.id,
+        receiver_id: appointment.patient_id,
+        content: chatMessage.trim(),
+        timestamp: new Date().toISOString()
       };
       
-      try {
-        ws.send(JSON.stringify(messageData));
-        
-        // Add to local chat history
-        const newMessage = {
-          id: Date.now(),
-          message: chatMessage,
-          sender: 'You',
-          time: new Date().toLocaleTimeString()
-        };
-        setChatHistory([...chatHistory, newMessage]);
-        setChatMessage('');
-      } catch (error) {
-        console.error('Failed to send message:', error);
-        toast.error('Failed to send message');
-      }
-    } else if (!isConnected) {
-      toast.error('Chat not connected. Please wait...');
+      console.log('Sending message:', messageData);
+      ws.send(JSON.stringify(messageData));
+      
+      // Add to local chat history immediately
+      const newMessage = {
+        id: Date.now(),
+        message: chatMessage.trim(),
+        sender: 'You',
+        time: new Date().toLocaleTimeString()
+      };
+      
+      setChatHistory(prev => [...prev, newMessage]);
+      setChatMessage('');
+      
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      toast.error('Failed to send message. Please try again.');
     }
   };
 

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, XCircle, Clock, Calendar, User, FileText } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Calendar, User, FileText, Video } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { api } from '../services/api';
 import { makeApiRequest } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface AppointmentRequest {
   id: number;
@@ -18,6 +18,7 @@ interface AppointmentRequest {
 
 const DoctorAppointmentRequests: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<AppointmentRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<number | null>(null);
@@ -31,24 +32,21 @@ const DoctorAppointmentRequests: React.FC = () => {
   const fetchAssignedAppointments = async () => {
     if (!user?.id) return;
     setLoading(true);
-    const docId = user.id;
-    const endpoint = `/appointments/doctor/${docId}`;
-    console.debug('Fetching assigned appointments for doctor:', docId, 'endpoint:', endpoint);
     try {
-      // Use makeApiRequest first (consistent with other doctor pages)
-      const data = await makeApiRequest(endpoint);
-      setAppointments(data || []);
-    } catch (primaryError) {
-      console.error('Primary fetch (makeApiRequest) failed for', endpoint, primaryError);
-      // Try ApiService as a fallback
-      try {
-        const data = await api.getDoctorAssignedAppointments((docId as unknown) as number);
-        setAppointments(data || []);
-      } catch (fallbackError) {
-        console.error('Fallback api.getDoctorAssignedAppointments failed for', endpoint, fallbackError);
-        toast.error('Failed to load appointment requests');
-        setAppointments([]);
-      }
+      // Fetch all appointments and filter by doctor
+      const allAppointments = await makeApiRequest('/appointments');
+      
+      // Filter appointments assigned to this doctor
+      const doctorAppointments = allAppointments.filter((apt: any) => 
+        apt.doctor_id === user.id || apt.doctor_name_id === user.id
+      );
+      
+      console.log('Doctor appointments:', doctorAppointments);
+      setAppointments(doctorAppointments || []);
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error);
+      toast.error('Failed to load appointment requests');
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
@@ -57,8 +55,11 @@ const DoctorAppointmentRequests: React.FC = () => {
   const handleApprove = async (appointmentId: number) => {
     setProcessing(appointmentId);
     try {
-      await api.approveAppointment(appointmentId);
-      toast.success('Appointment approved successfully!');
+      await makeApiRequest(`/appointments/${appointmentId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'approved' })
+      });
+      toast.success('Appointment approved! You can now start consultation.');
       fetchAssignedAppointments();
     } catch (error) {
       toast.error('Failed to approve appointment');
@@ -71,7 +72,10 @@ const DoctorAppointmentRequests: React.FC = () => {
   const handleReject = async (appointmentId: number) => {
     setProcessing(appointmentId);
     try {
-      await api.rejectAppointment(appointmentId);
+      await makeApiRequest(`/appointments/${appointmentId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'rejected' })
+      });
       toast.success('Appointment rejected');
       fetchAssignedAppointments();
     } catch (error) {
@@ -92,7 +96,18 @@ const DoctorAppointmentRequests: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-6">Appointment Requests</h2>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-semibold">My Appointment Requests</h2>
+          <p className="text-gray-600 text-sm mt-1">Review and approve appointments assigned to you</p>
+        </div>
+        <button
+          onClick={fetchAssignedAppointments}
+          className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+        >
+          🔄 Refresh
+        </button>
+      </div>
       
       {appointments.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm p-8 text-center">
@@ -104,9 +119,9 @@ const DoctorAppointmentRequests: React.FC = () => {
       ) : (
         <div className="space-y-4">
           {appointments.map((appointment) => (
-            <div key={appointment.id} className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
+            <div key={appointment.id} className="bg-white border rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center">
                       <User size={24} className="text-brand-700" />
@@ -114,8 +129,18 @@ const DoctorAppointmentRequests: React.FC = () => {
                     <div>
                       <h3 className="text-lg font-semibold">{appointment.patient_name}</h3>
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          {appointment.status}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          appointment.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          appointment.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                          appointment.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {appointment.status === 'approved' ? '✅ Approved' :
+                           appointment.status === 'pending' ? '⏳ Pending' :
+                           appointment.status === 'rejected' ? '❌ Rejected' :
+                           appointment.status === 'completed' ? '✓ Completed' :
+                           appointment.status}
                         </span>
                         {/** payment status if present */}
                         {(
@@ -159,28 +184,44 @@ const DoctorAppointmentRequests: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2 ml-4">
+                <div className="flex items-center gap-2 flex-wrap sm:ml-4 shrink-0">
                   {appointment.status === 'pending' ? (
                     <>
                       <button
                         onClick={() => handleReject(appointment.id)}
                         disabled={processing === appointment.id}
-                        className="flex items-center gap-2 px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors"
+                        className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors text-sm"
                       >
-                        <XCircle size={18} />
+                        <XCircle size={16} />
                         Reject
                       </button>
                       <button
                         onClick={() => handleApprove(appointment.id)}
                         disabled={processing === appointment.id}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors text-sm"
                       >
-                        <CheckCircle size={18} />
+                        <CheckCircle size={16} />
                         Approve
                       </button>
                     </>
+                  ) : appointment.status === 'approved' ? (
+                    <button
+                      onClick={() => navigate(`/consultation/${appointment.id}`)}
+                      className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-md text-sm"
+                    >
+                      <Video size={18} />
+                      🩺 Start Consultation
+                    </button>
                   ) : (
-                    <span className="text-sm text-gray-500">No actions available</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      appointment.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                      appointment.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {appointment.status === 'rejected' ? '❌ Rejected' :
+                       appointment.status === 'completed' ? '✅ Completed' :
+                       appointment.status}
+                    </span>
                   )}
                 </div>
               </div>

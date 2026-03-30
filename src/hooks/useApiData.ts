@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { makeApiRequest } from '../utils/api';
+
+// Simple in-memory cache so navigating away and back shows data instantly
+const cache: Record<string, any[]> = {};
 
 interface Patient {
   id: string;
@@ -107,14 +110,17 @@ export const useDoctors = () => {
 };
 
 export const useAppointments = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(false);
+  const CACHE_KEY = '/appointments';
+  const [appointments, setAppointments] = useState<Appointment[]>(cache[CACHE_KEY] ?? []);
+  // Only show loading spinner on the very first fetch (no cached data yet)
+  const [loading, setLoading] = useState(!cache[CACHE_KEY]);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = async (showSpinner = false) => {
     try {
-      setLoading(true);
-      const data = await makeApiRequest('/appointments');
+      if (showSpinner) setLoading(true);
+      const data = await makeApiRequest(CACHE_KEY);
+      cache[CACHE_KEY] = data;
       setAppointments(data);
       setError(null);
     } catch (err) {
@@ -125,10 +131,11 @@ export const useAppointments = () => {
   };
 
   useEffect(() => {
-    fetchAppointments();
+    // If we already have cached data, refresh silently in the background
+    fetchAppointments(!cache[CACHE_KEY]);
   }, []);
 
-  return { appointments, loading, error, refetch: fetchAppointments };
+  return { appointments, loading, error, refetch: () => fetchAppointments(false) };
 };
 
 export const usePrescriptions = () => {

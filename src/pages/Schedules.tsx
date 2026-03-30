@@ -139,13 +139,13 @@ const Schedules: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Doctor Schedules & Holidays</h1>
+    <div className="p-4 sm:p-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-semibold">Doctor Schedules & Holidays</h1>
         <p className="text-sm text-gray-600">Manage working hours and holidays for doctors</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
         <select
           value={selectedDoctor}
@@ -163,7 +163,7 @@ const Schedules: React.FC = () => {
 
       {selectedDoctor && workingHours && (
         <>
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Clock size={20} />
@@ -172,17 +172,17 @@ const Schedules: React.FC = () => {
               <button
                 onClick={saveWorkingHours}
                 disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-brand-700 text-white rounded hover:bg-brand-600 disabled:opacity-50"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-brand-700 text-white rounded hover:bg-brand-600 disabled:opacity-50 text-sm"
               >
                 <Save size={16} />
                 Save Changes
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               {days.map((day) => (
-                <div key={day} className="flex items-center gap-4 p-3 border rounded">
-                  <div className="w-32">
+                <div key={day} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 border rounded">
+                  <div className="w-full sm:w-32 shrink-0">
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -194,55 +194,55 @@ const Schedules: React.FC = () => {
                     </label>
                   </div>
                   {workingHours[day as keyof WorkingHours].isWorking && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                       <input
                         type="time"
                         value={workingHours[day as keyof WorkingHours].start}
                         onChange={(e) => handleWorkingHoursChange(day, 'start', e.target.value)}
-                        className="px-3 py-2 border rounded"
+                        className="px-2 sm:px-3 py-1.5 sm:py-2 border rounded text-sm"
                       />
-                      <span>to</span>
+                      <span className="text-gray-500">to</span>
                       <input
                         type="time"
                         value={workingHours[day as keyof WorkingHours].end}
                         onChange={(e) => handleWorkingHoursChange(day, 'end', e.target.value)}
-                        className="px-3 py-2 border rounded"
+                        className="px-2 sm:px-3 py-1.5 sm:py-2 border rounded text-sm"
                       />
                     </div>
                   )}
                   {!workingHours[day as keyof WorkingHours].isWorking && (
-                    <span className="text-gray-500">Off Day</span>
+                    <span className="text-gray-500 text-sm">Off Day</span>
                   )}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
             <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
               <Calendar size={20} />
               Holidays & Off Days
             </h2>
 
-            <div className="mb-6 p-4 bg-gray-50 rounded">
+            <div className="mb-6 p-3 sm:p-4 bg-gray-50 rounded">
               <h3 className="font-medium mb-3">Add New Holiday</h3>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <input
                   type="date"
                   value={newHoliday.date}
                   onChange={(e) => setNewHoliday({ ...newHoliday, date: e.target.value })}
-                  className="px-3 py-2 border rounded"
+                  className="px-3 py-2 border rounded text-sm"
                 />
                 <input
                   type="text"
                   placeholder="Reason (e.g., Annual Leave)"
                   value={newHoliday.reason}
                   onChange={(e) => setNewHoliday({ ...newHoliday, reason: e.target.value })}
-                  className="flex-1 px-3 py-2 border rounded"
+                  className="flex-1 px-3 py-2 border rounded text-sm"
                 />
                 <button
                   onClick={addHoliday}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                 >
                   <Plus size={16} />
                   Add

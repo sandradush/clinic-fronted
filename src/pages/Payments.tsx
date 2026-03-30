@@ -135,35 +135,35 @@ const Payments: React.FC = () => {
 
   return (
     <>
-      <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-6 flex items-center gap-3">
+      <div className="p-3 sm:p-6">
+      <h1 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 flex items-center gap-3">
         <ClipboardList />
         Payments
       </h1>
 
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="space-y-4">
+      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+        <div className="space-y-3 sm:space-y-4">
           {payments.length === 0 && (
             <div className="text-center text-gray-500 py-8">No payments found</div>
           )}
 
           {payments.map((p) => (
-            <div key={p.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-              <div>
-                <div className="font-medium">{p.patient_name} {p.doctor_name ? `→ Dr. ${p.doctor_name}` : ''}</div>
+            <div key={p.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border rounded-lg hover:bg-gray-50 gap-3">
+              <div className="min-w-0">
+                <div className="font-medium truncate">{p.patient_name} {p.doctor_name ? `→ Dr. ${p.doctor_name}` : ''}</div>
                 <div className="text-sm text-gray-500 mt-1">Appointment: {p.appointment_id ?? '—'}</div>
-                <div className="text-sm text-gray-600 mt-2">{new Date(p.created_at).toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mt-1">{new Date(p.created_at).toLocaleString()}</div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="text-right">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap shrink-0">
+                <div>
                   <div className="font-semibold">{p.currency ?? 'USD'} {p.amount.toFixed(2)}</div>
                   <div className={`text-xs inline-block mt-1 px-2 py-1 rounded-full ${p.status === 'approved' || p.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{p.status}</div>
                 </div>
 
                 <button
                   onClick={() => openModal(p)}
-                  className="px-3 py-1 bg-gray-100 text-gray-800 rounded hover:bg-gray-200"
+                  className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-sm"
                 >
                   View
                 </button>
@@ -172,9 +172,9 @@ const Payments: React.FC = () => {
                   <button
                     onClick={() => openModal(p)}
                     disabled={confirmProcessing}
-                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 text-sm"
                   >
-                    <CheckCircle size={16} className="inline mr-2" /> Approve
+                    <CheckCircle size={15} /> Approve
                   </button>
                 )}
               </div>

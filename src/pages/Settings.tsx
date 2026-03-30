@@ -77,33 +77,33 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-2">Settings</h1>
-      <p className="text-sm text-gray-500 mb-6">Update clinic details, billing, and operating hours.</p>
+    <div className="p-4 sm:p-6">
+      <h1 className="text-xl sm:text-2xl font-semibold mb-2">Settings</h1>
+      <p className="text-sm text-gray-500 mb-4 sm:mb-6">Update clinic details, billing, and operating hours.</p>
 
-      <div className="bg-white rounded-lg border shadow-sm p-2 inline-flex gap-2 mb-6">
+      <div className="bg-white rounded-lg border shadow-sm p-2 flex flex-wrap gap-2 mb-4 sm:mb-6 w-full sm:w-auto sm:inline-flex">
         <button
           onClick={() => setActiveTab('general')}
-          className={`px-4 py-2 rounded-md text-sm ${activeTab === 'general' ? 'bg-brand-700 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+          className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm ${activeTab === 'general' ? 'bg-brand-700 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
         >
           General
         </button>
         <button
           onClick={() => setActiveTab('billing')}
-          className={`px-4 py-2 rounded-md text-sm ${activeTab === 'billing' ? 'bg-brand-700 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+          className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm ${activeTab === 'billing' ? 'bg-brand-700 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
         >
           Billing
         </button>
         <button
           onClick={() => setActiveTab('hours')}
-          className={`px-4 py-2 rounded-md text-sm ${activeTab === 'hours' ? 'bg-brand-700 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+          className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm ${activeTab === 'hours' ? 'bg-brand-700 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
         >
           Operating Hours
         </button>
       </div>
 
       {activeTab === 'general' && (
-        <section className="bg-white rounded-lg border shadow-sm p-6 max-w-4xl">
+        <section className="bg-white rounded-lg border shadow-sm p-4 sm:p-6 max-w-4xl">
           <h2 className="text-lg font-semibold mb-1">General</h2>
           <p className="text-sm text-gray-500 mb-5">Basic clinic identity and language preferences.</p>
 
@@ -159,7 +159,7 @@ const Settings: React.FC = () => {
       )}
 
       {activeTab === 'billing' && (
-        <section className="bg-white rounded-lg border shadow-sm p-6 max-w-4xl">
+        <section className="bg-white rounded-lg border shadow-sm p-4 sm:p-6 max-w-4xl">
           <h2 className="text-lg font-semibold mb-1">Billing</h2>
           <p className="text-sm text-gray-500 mb-5">Set currency, tax, and payment provider.</p>
 
@@ -202,14 +202,14 @@ const Settings: React.FC = () => {
       )}
 
       {activeTab === 'hours' && (
-        <section className="bg-white rounded-lg border shadow-sm p-6 max-w-4xl">
+        <section className="bg-white rounded-lg border shadow-sm p-4 sm:p-6 max-w-4xl">
           <h2 className="text-lg font-semibold mb-1">Operating Hours</h2>
           <p className="text-sm text-gray-500 mb-5">Set open days and time ranges.</p>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {operatingHours.map((item, index) => (
-              <div key={item.day} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-center border rounded p-3">
-                <div className="font-medium text-sm md:col-span-2">{item.day}</div>
+              <div key={item.day} className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-3 sm:items-center border rounded p-3">
+                <div className="font-medium text-sm sm:col-span-2">{item.day}</div>
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"

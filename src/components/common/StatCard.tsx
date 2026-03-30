@@ -21,15 +21,15 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 'blue',
   const tone = palette[color];
 
   return (
-    <div className="ui-card relative bg-white rounded-xl shadow-card overflow-hidden hover:shadow-md transition-all duration-200" style={{ height: '8rem' }}>
+    <div className="ui-card relative bg-white rounded-xl shadow-card hover:shadow-md transition-all duration-200 min-h-[7rem]">
       <div className="absolute top-3 right-3 w-10 h-10 rounded-md flex items-center justify-center text-base shadow-sm" style={{ background: 'rgba(0,0,0,0.04)' }}>
         <div className={`${tone.iconBg} ${tone.iconText} w-8 h-8 rounded-md flex items-center justify-center`}>{icon}</div>
       </div>
 
-      <div className="h-full flex flex-col items-start justify-center px-4">
-        <p className="text-2xl md:text-3xl font-normal text-gray-900 leading-none">{value}</p>
-        <p className="text-sm font-medium text-gray-500 mt-2">{title}</p>
-        {subtitle ? <p className="text-xs text-gray-400 mt-2">{subtitle}</p> : null}
+      <div className="flex flex-col items-start justify-center px-4 py-4 pr-14">
+        <p className="text-xl sm:text-2xl md:text-3xl font-normal text-gray-900 leading-none">{value}</p>
+        <p className="text-xs sm:text-sm font-medium text-gray-500 mt-2 leading-tight">{title}</p>
+        {subtitle ? <p className="text-xs text-gray-400 mt-1">{subtitle}</p> : null}
       </div>
     </div>
   );
