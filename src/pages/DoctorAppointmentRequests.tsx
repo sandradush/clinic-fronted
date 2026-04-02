@@ -55,9 +55,9 @@ const DoctorAppointmentRequests: React.FC = () => {
   const handleApprove = async (appointmentId: number) => {
     setProcessing(appointmentId);
     try {
-      await makeApiRequest(`/appointments/${appointmentId}`, {
+      await makeApiRequest(`/appointments/${appointmentId}/approve`, {
         method: 'PATCH',
-        body: JSON.stringify({ status: 'approved' })
+        headers: { 'accept': 'application/json' },
       });
       toast.success('Appointment approved! You can now start consultation.');
       fetchAssignedAppointments();

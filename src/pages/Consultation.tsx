@@ -144,7 +144,7 @@ const Consultation: React.FC = () => {
 
     const connectWebSocket = () => {
       try {
-        const websocket = new WebSocket(`wss://chat.mababa.app/ws/${user?.id}`);
+        const websocket = new WebSocket(`wss://mababa-api.onrender.com/ws/${user?.id}`);
         
         websocket.onopen = () => {
           console.log('WebSocket connected');
