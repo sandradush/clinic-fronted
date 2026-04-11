@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 
 import MainLayout from './components/layout/MainLayout';
 import OfflineIndicator from './components/common/OfflineIndicator';
+import AuthDebug from './components/debug/AuthDebug';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Appointments from './pages/Appointments';
@@ -95,6 +96,7 @@ const App: React.FC = () => {
           <Router>
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
               <OfflineIndicator />
+              <AuthDebug />
               <Toaster position="top-right" />
 
               <Suspense fallback={<Loading />}> 

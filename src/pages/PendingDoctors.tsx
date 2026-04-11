@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, Mail, Phone, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { makeApiRequest } from '../utils/api';
 
 interface PendingDoctor {
   doctor_id: number;
@@ -27,11 +28,16 @@ const PendingDoctors: React.FC = () => {
 
   const fetchPendingDoctors = async () => {
     try {
-      const response = await fetch('https://clinic-backend-s2lx.onrender.com/api/auth/doctors/pending');
-      const data = await response.json();
+      setLoading(true);
+      const data = await makeApiRequest('/auth/doctors/pending');
       setDoctors(data);
-    } catch (error) {
-      toast.error('Failed to load pending doctors');
+    } catch (error: any) {
+      console.error('Failed to fetch pending doctors:', error);
+      if (error.message && error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
+        toast.error('Connection issue detected. Please refresh the page.');
+      } else {
+        toast.error('Failed to load pending doctors');
+      }
     } finally {
       setLoading(false);
     }
@@ -40,17 +46,19 @@ const PendingDoctors: React.FC = () => {
   const handleApprove = async (doctorId: number) => {
     setProcessing(doctorId);
     try {
-      const response = await fetch(`https://clinic-backend-s2lx.onrender.com/api/auth/doctors/${doctorId}/status`, {
+      await makeApiRequest(`/auth/doctors/${doctorId}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'approved' })
       });
-      if (response.ok) {
-        toast.success('Doctor approved successfully!');
-        fetchPendingDoctors();
+      toast.success('Doctor approved successfully!');
+      fetchPendingDoctors();
+    } catch (error: any) {
+      console.error('Failed to approve doctor:', error);
+      if (error.message && error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
+        toast.error('Connection issue. Please try again.');
+      } else {
+        toast.error('Failed to approve doctor');
       }
-    } catch (error) {
-      toast.error('Failed to approve doctor');
     } finally {
       setProcessing(null);
     }
@@ -59,17 +67,19 @@ const PendingDoctors: React.FC = () => {
   const handleReject = async (doctorId: number) => {
     setProcessing(doctorId);
     try {
-      const response = await fetch(`https://clinic-backend-s2lx.onrender.com/api/auth/doctors/${doctorId}/status`, {
+      await makeApiRequest(`/auth/doctors/${doctorId}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'rejected' })
       });
-      if (response.ok) {
-        toast.success('Doctor rejected');
-        fetchPendingDoctors();
+      toast.success('Doctor rejected');
+      fetchPendingDoctors();
+    } catch (error: any) {
+      console.error('Failed to reject doctor:', error);
+      if (error.message && error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
+        toast.error('Connection issue. Please try again.');
+      } else {
+        toast.error('Failed to reject doctor');
       }
-    } catch (error) {
-      toast.error('Failed to reject doctor');
     } finally {
       setProcessing(null);
     }
@@ -78,21 +88,19 @@ const PendingDoctors: React.FC = () => {
   const handleMarkPaid = async (doctorId: number) => {
     setProcessing(doctorId);
     try {
-      const response = await fetch(`https://clinic-backend-s2lx.onrender.com/api/auth/doctors/${doctorId}/payment`, {
+      await makeApiRequest(`/auth/doctors/${doctorId}/payment`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payment_status: 'paid' })
       });
-
-      if (response.ok) {
-        toast.success('Payment status updated to paid');
-        fetchPendingDoctors();
+      toast.success('Payment status updated to paid');
+      fetchPendingDoctors();
+    } catch (error: any) {
+      console.error('mark paid error', error);
+      if (error.message && error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
+        toast.error('Connection issue. Please try again.');
       } else {
         toast.error('Failed to update payment status');
       }
-    } catch (error) {
-      console.error('mark paid error', error);
-      toast.error('Failed to update payment status');
     } finally {
       setProcessing(null);
     }

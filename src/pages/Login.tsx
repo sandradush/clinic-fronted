@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, CheckCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
+import ServerStatus from '../components/common/ServerStatus';
 import { trackEvent } from '../services/analytics';
 
 const Login: React.FC = () => {
@@ -144,12 +145,26 @@ const Login: React.FC = () => {
         }
       }
 
-    } catch {
+    } catch (error: any) {
+
+      console.error('Login/Register error:', error);
+      
+      let errorMessage = isLogin
+        ? 'Invalid email or password. Please try again.'
+        : 'Registration failed. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('Invalid credentials') || error.message.includes('401')) {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        } else if (error.message.includes('Backend server unavailable')) {
+          errorMessage = 'Server is currently unavailable. Please try again in a few minutes.';
+        } else if (error.message.includes('timeout')) {
+          errorMessage = 'Request timed out. Please check your connection and try again.';
+        }
+      }
 
       setErrors({
-        general: isLogin
-          ? 'Invalid email or password. Please try again.'
-          : 'Registration failed. Please try again.'
+        general: errorMessage
       });
 
     } finally {
@@ -226,6 +241,8 @@ const Login: React.FC = () => {
           </p>
 
         </div>
+
+        <ServerStatus className="mb-4" />
 
         {success && (
           <div className="flex items-center gap-2 p-3 mb-4 text-green-800 bg-green-50 border border-green-200 rounded-md">

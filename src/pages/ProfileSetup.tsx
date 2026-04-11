@@ -47,6 +47,10 @@ const ProfileSetup: React.FC = () => {
 
       const response = await fetch('https://clinic-backend-s2lx.onrender.com/api/auth/doctors', {
         method: 'POST',
+        headers: {
+          'Connection': 'keep-alive',
+          'Cache-Control': 'no-cache',
+        },
         body: formDataToSend
       });
 
@@ -68,14 +72,17 @@ const ProfileSetup: React.FC = () => {
       trackEvent('profile_setup_saved', { specialty: formData.specialty || 'unknown' });
       setSubmitted(true);
       
-      // Clear authentication to force re-login after approval
-      setTimeout(() => {
-        localStorage.removeItem('session');
-        localStorage.removeItem('user');
-      }, 3000);
-    } catch (error) {
+      // Don't clear authentication - keep user logged in but show pending status
+      // The AuthContext will handle blocking access until approval
+    } catch (error: any) {
+      console.error('Profile setup error:', error);
       trackEvent('profile_setup_failed');
-      toast.error('Failed to setup profile');
+      
+      if (error.message && error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
+        toast.error('Connection issue detected. Please try again.');
+      } else {
+        toast.error('Failed to setup profile');
+      }
     } finally {
       setLoading(false);
     }
@@ -94,7 +101,12 @@ const ProfileSetup: React.FC = () => {
           <p className="text-gray-600 mb-4">Your profile has been submitted successfully. Please wait for admin verification.</p>
           <p className="text-sm text-gray-500">Status: <span className="font-semibold text-yellow-600">Pending</span></p>
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => {
+              // Clear session and redirect to login
+              localStorage.removeItem('session');
+              localStorage.removeItem('user');
+              navigate('/login');
+            }}
             className="mt-6 px-6 py-2 bg-brand-700 text-white rounded hover:bg-brand-600"
           >
             Back to Login

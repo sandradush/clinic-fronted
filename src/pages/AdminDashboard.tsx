@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Users, Calendar, UserCheck, Activity, Clock } from 'lucide-react';
 import AdminCharts from '../components/dashboard/AdminCharts';
 import StatCard from '../components/common/StatCard';
+import { makeApiRequest } from '../utils/api';
 
 interface DashboardStats {
   totalDoctors: number;
@@ -141,11 +142,7 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const response = await fetch('https://clinic-backend-s2lx.onrender.com/api/auth/dashboard');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        const data = await makeApiRequest('/auth/dashboard');
         
         // Handle different possible response structures
         setStats({
@@ -154,8 +151,11 @@ const AdminDashboard: React.FC = () => {
           pendingAppointments: data.pendingAppointments || data.pending_count || 0,
           approvedAppointments: data.approvedAppointments || data.approved_count || 0
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch dashboard stats:', error);
+        if (error.message && error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
+          console.log('HTTP/2 protocol error in dashboard stats');
+        }
         // Set default values on error
         setStats({
           totalDoctors: 0,
@@ -168,11 +168,7 @@ const AdminDashboard: React.FC = () => {
 
     const fetchWaitingPatients = async () => {
       try {
-        const response = await fetch('https://clinic-backend-s2lx.onrender.com/api/appointments');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        const data = await makeApiRequest('/appointments');
         
         // Handle both array and object responses
         const appointmentsData = Array.isArray(data) ? data : data.appointments || [];
@@ -185,8 +181,11 @@ const AdminDashboard: React.FC = () => {
           .filter((apt: Appointment | null): apt is Appointment => apt !== null);
         
         setAppointments(transformedAppointments);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch waiting patients:', error);
+        if (error.message && error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
+          console.log('HTTP/2 protocol error in appointments');
+        }
         setWaitingPatients([]);
         setAppointments([]);
       }
@@ -194,11 +193,7 @@ const AdminDashboard: React.FC = () => {
 
     const fetchDoctors = async () => {
       try {
-        const response = await fetch('https://clinic-backend-s2lx.onrender.com/api/auth/doctors');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        const data = await makeApiRequest('/auth/doctors');
         
         // Handle both array and object responses
         const doctorsData = Array.isArray(data) ? data : data.doctors || [];
@@ -209,8 +204,11 @@ const AdminDashboard: React.FC = () => {
           .filter((doc: Doctor | null): doc is Doctor => doc !== null);
         
         setDoctors(transformedDoctors);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch doctors:', error);
+        if (error.message && error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
+          console.log('HTTP/2 protocol error in doctors');
+        }
         setDoctors([]);
       } finally {
         // Remove loading state to make dashboard load faster

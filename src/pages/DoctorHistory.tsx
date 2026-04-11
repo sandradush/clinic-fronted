@@ -27,15 +27,21 @@ const DoctorHistory: React.FC = () => {
   const [selected, setSelected] = useState<Appointment | null>(null);
   const navigate = useNavigate();
 
+
   useEffect(() => {
-    const fetchTodayAppointments = async () => {
+    const fetchEndedAppointments = async () => {
       if (!user?.id) return;
       try {
         setLoading(true);
-const data = await makeApiRequest(`/appointments/doctor/${user.id}`);
-        setAppointments(data || []);
+        const data = await makeApiRequest(`/appointments/doctor/${user.id}`);
+        // Only keep appointments that are ended (not ongoing)
+        // Assuming status 'ended', 'completed', or similar means ended
+        // and 'ongoing', 'active', 'pending' means not ended
+        const endedStatuses = ['ended', 'completed', 'done', 'finished'];
+        const endedAppointments = (data || []).filter((appt: Appointment) => endedStatuses.includes(appt.status?.toLowerCase()));
+        setAppointments(endedAppointments);
       } catch (error) {
-        console.error('Failed to load today\'s appointments:', error);
+        console.error('Failed to load ended appointments:', error);
         toast.error('Failed to load appointments');
         setAppointments([]);
       } finally {
@@ -43,13 +49,14 @@ const data = await makeApiRequest(`/appointments/doctor/${user.id}`);
       }
     };
 
-    fetchTodayAppointments();
+    fetchEndedAppointments();
   }, [user]);
 
   return (
     <div className="p-6">
+
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Today's Appointments</h1>
+        <h1 className="text-2xl font-semibold">Consultation History</h1>
       </div>
 
       {loading ? (

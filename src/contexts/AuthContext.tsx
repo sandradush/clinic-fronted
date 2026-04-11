@@ -92,8 +92,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         // Handle doctor registration flow
         if (userData.role === 'doctor') {
+          console.log('Doctor login attempt:', {
+            doctorStatus: userData.doctorStatus,
+            status: userData.status,
+            email: userData.email
+          });
+          
           // If doctor hasn't completed profile setup
           if (userData.doctorStatus === 'not exist') {
+            console.log('Doctor needs to complete profile setup');
             const token = data?.token || `session-${Date.now()}`;
             localStorage.setItem('session', JSON.stringify({ token }));
             localStorage.setItem('user', JSON.stringify(userData));
@@ -110,6 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           
           // If doctor profile is pending approval - block access completely
           if (userData.doctorStatus === 'pending') {
+            console.log('Doctor profile is pending approval');
             return {
               success: false,
               message: 'Your profile is pending admin approval. Please wait for verification before accessing the system.',
@@ -117,14 +125,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             };
           }
           
-          // If doctor is not approved - block access
-          if (userData.status !== 'APPROVED' && userData.status !== 'approved') {
+          // Check if doctor is approved - allow access if approved
+          // Handle multiple possible field names and values from backend
+          const isApproved = 
+            userData.status === 'APPROVED' || 
+            userData.status === 'approved' || 
+            userData.doctorStatus === 'approved' ||
+            userData.doctor_status === 'approved' ||
+            userData.approval_status === 'approved';
+            
+          if (isApproved) {
+            console.log('Doctor is approved, allowing access');
+            // Doctor is approved, allow login
+            const token = data?.token || `session-${Date.now()}`;
+            localStorage.setItem('session', JSON.stringify({ token }));
+            localStorage.setItem('user', JSON.stringify(userData));
+            setIsAuthenticated(true);
+            setUser(userData);
+            
             return {
-              success: false,
-              message: 'Your account is not approved yet. Please contact admin or wait for approval.',
+              success: true,
+              redirectPath: '/dashboard',
+              message: 'Welcome back, Doctor!',
               role: userData.role
             };
           }
+          
+          // If doctor is not approved - block access
+          console.log('Doctor is not approved, blocking access');
+          return {
+            success: false,
+            message: 'Your account is not approved yet. Please contact admin or wait for approval.',
+            role: userData.role
+          };
         }
 
         const token = data?.token || `session-${Date.now()}`;
