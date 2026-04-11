@@ -15,7 +15,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const { user, logout } = useAuth();
   const isDoctor = user?.role === 'doctor';
   const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [logoError, setLogoError] = React.useState(false);
   // const [showChat, setShowChat] = React.useState(false);
 
   useEffect(() => {
@@ -66,15 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
             <Menu size={20} />
           </button>
           <div className={`flex items-center gap-3 overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'} transition-all duration-300`}>
-            {!logoError && (
-              <img
-                src="/smart-health-consultation-logo.JPG"
-                alt="Smart Health Consultation icon"
-                className="h-8 w-8 md:h-9 md:w-9 rounded-sm bg-white p-1 shrink-0"
-                onError={() => setLogoError(true)}
-              />
-            )}
-            <h2 className={`text-lg md:text-xl font-bold whitespace-nowrap ${isDoctor ? 'text-white' : 'text-gray-900 dark:text-white'}`}>SHC</h2>
+            <h2 className={`text-lg md:text-xl font-bold whitespace-nowrap ${isDoctor ? 'text-white' : 'text-gray-900 dark:text-white'}`}>Smarthealth</h2>
           </div>
         </div>
       </div>

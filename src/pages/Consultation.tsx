@@ -53,56 +53,68 @@ const Consultation: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [videoWs, setVideoWs] = useState<WebSocket | null>(null);
   const [isVideoConnected, setIsVideoConnected] = useState(false);
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [initiatingCall, setInitiatingCall] = useState(false);
 
-  // Video WebSocket connection handler
-  const handleVideoCallToggle = () => {
-    if (!isCallActive) {
-      // Starting a call - establish WebSocket connection
-      if (user?.id) {
-        const videoWebsocket = new WebSocket(`wss://call-app-backend-g992.onrender.com/ws/${user.id}`);
-        
-        videoWebsocket.onopen = () => {
-          console.log('Video WebSocket connected');
-          setIsVideoConnected(true);
-          toast.success('Video call connected');
-        };
-
-        videoWebsocket.onmessage = (event) => {
-          console.log('Video WebSocket message:', event.data);
-          try {
-            const data = JSON.parse(event.data);
-            // Handle incoming offer/answer messages
-            if (data.type === 'offer' || data.type === 'answer') {
-              console.log('Received signaling message:', data.type);
-            }
-          } catch (error) {
-            console.log('Received non-JSON message:', event.data);
-          }
-        };
-
-        videoWebsocket.onerror = (error) => {
-          console.error('Video WebSocket error:', error);
-          toast.error('Video connection error');
-        };
-
-        videoWebsocket.onclose = () => {
-          console.log('Video WebSocket disconnected');
-          setIsVideoConnected(false);
-          setIsCallActive(false);
-          toast.error('Video call disconnected');
-        };
-
-        setVideoWs(videoWebsocket);
-      }
-    } else {
-      // Ending the call - close WebSocket connection
-      if (videoWs) {
-        videoWs.close();
-        setVideoWs(null);
-      }
-      setIsVideoConnected(false);
+  // Video call initiation using the new endpoint
+  const initiateVideoCall = async () => {
+    if (!appointment || !user) {
+      toast.error('Missing appointment or user data');
+      return;
     }
-    setIsCallActive(!isCallActive);
+
+    setInitiatingCall(true);
+    try {
+      const response = await fetch('http://localhost:3001/api/calls/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          caller_id: user.id, // Doctor is the caller
+          receiver_id: appointment.patient_id, // Patient is the receiver
+          appointment_id: appointment.id
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Video call initiated:', data);
+      
+      if (data.room_id) {
+        setRoomId(data.room_id);
+        setIsCallActive(true);
+        toast.success(`Video call initiated! Room ID: ${data.room_id}`);
+        
+        // Here you would typically integrate with your video calling library
+        // For example, if using WebRTC or a service like Agora, Twilio, etc.
+        console.log('Room ID for video call:', data.room_id);
+      } else {
+        throw new Error('No room_id received from server');
+      }
+    } catch (error) {
+      console.error('Failed to initiate video call:', error);
+      toast.error('Failed to start video call. Please try again.');
+    } finally {
+      setInitiatingCall(false);
+    }
+  };
+
+  // End video call
+  const endVideoCall = () => {
+    setIsCallActive(false);
+    setRoomId(null);
+    if (videoWs) {
+      videoWs.close();
+      setVideoWs(null);
+    }
+    setIsVideoConnected(false);
+    toast.success('Video call ended');
   };
 
   // Symptoms form state
@@ -228,13 +240,8 @@ const Consultation: React.FC = () => {
     };
   }, [appointment, user]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!chatMessage.trim()) {
-      return;
-    }
-    
-    if (!ws || !isConnected) {
-      toast.error('Chat not connected. Please wait...');
       return;
     }
     
@@ -243,33 +250,81 @@ const Consultation: React.FC = () => {
       return;
     }
 
+    if (!user?.id) {
+      toast.error('User not authenticated');
+      return;
+    }
+
     try {
-      // Try multiple message formats for compatibility
-      const messageData = {
-        type: 'message',
-        sender_id: user?.id,
-        receiver_id: appointment.patient_id,
-        content: chatMessage.trim(),
-        timestamp: new Date().toISOString()
-      };
-      
-      console.log('Sending message:', messageData);
-      ws.send(JSON.stringify(messageData));
+      // Send message using the new chat endpoint
+      const response = await fetch('http://localhost:3001/api/chat/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          sender_id: user.id, // Doctor is the sender
+          receiver_id: appointment.patient_id, // Patient is the receiver
+          content: chatMessage.trim()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Message sent successfully:', data);
       
       // Add to local chat history immediately
       const newMessage = {
-        id: Date.now(),
+        id: data.id || Date.now(),
         message: chatMessage.trim(),
         sender: 'You',
-        time: new Date().toLocaleTimeString()
+        time: new Date(data.timestamp || new Date()).toLocaleTimeString()
       };
       
       setChatHistory(prev => [...prev, newMessage]);
       setChatMessage('');
+      toast.success('Message sent successfully');
       
     } catch (error) {
       console.error('Failed to send message:', error);
       toast.error('Failed to send message. Please try again.');
+      
+      // Fallback to WebSocket if available
+      if (ws && isConnected) {
+        try {
+          const messageData = {
+            type: 'message',
+            sender_id: user.id,
+            receiver_id: appointment.patient_id,
+            content: chatMessage.trim(),
+            timestamp: new Date().toISOString()
+          };
+          
+          console.log('Falling back to WebSocket:', messageData);
+          ws.send(JSON.stringify(messageData));
+          
+          // Add to local chat history
+          const newMessage = {
+            id: Date.now(),
+            message: chatMessage.trim(),
+            sender: 'You',
+            time: new Date().toLocaleTimeString()
+          };
+          
+          setChatHistory(prev => [...prev, newMessage]);
+          setChatMessage('');
+          toast.success('Message sent via WebSocket');
+          
+        } catch (wsError) {
+          console.error('WebSocket fallback also failed:', wsError);
+          toast.error('Failed to send message via both methods');
+        }
+      }
     }
   };
 
@@ -531,38 +586,100 @@ const Consultation: React.FC = () => {
                     <div className="flex-1 bg-gray-900 rounded-lg relative mb-4 min-h-[400px]">
                       <div className="absolute inset-0 flex items-center justify-center text-white">
                         <div className="text-center">
-                          <Video size={48} className="mx-auto mb-4 opacity-50" />
-                          <p className="text-lg">Video call interface</p>
-                          <p className="text-sm opacity-75">Camera feed would appear here</p>
+                          {isCallActive && roomId ? (
+                            <>
+                              <Video size={48} className="mx-auto mb-4 text-green-400" />
+                              <p className="text-lg text-green-400">Video call active</p>
+                              <p className="text-sm opacity-75">Room ID: {roomId}</p>
+                              <p className="text-xs opacity-50 mt-2">Video interface would be integrated here</p>
+                            </>
+                          ) : (
+                            <>
+                              <Video size={48} className="mx-auto mb-4 opacity-50" />
+                              <p className="text-lg">Video call interface</p>
+                              <p className="text-sm opacity-75">Click "Start Call" to begin video consultation</p>
+                            </>
+                          )}
                         </div>
                       </div>
-                      {/* Small self-view */}
-                      <div className="absolute top-4 right-4 w-32 h-24 bg-gray-800 rounded-lg border-2 border-white">
-                        <div className="w-full h-full flex items-center justify-center text-white text-xs">
-                          Self View
+                      {/* Small self-view - only show when call is active */}
+                      {isCallActive && (
+                        <div className="absolute top-4 right-4 w-32 h-24 bg-gray-800 rounded-lg border-2 border-green-400">
+                          <div className="w-full h-full flex items-center justify-center text-white text-xs">
+                            Self View
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                     <div className="flex justify-center gap-4">
                       <button
                         onClick={() => setIsMicOn(!isMicOn)}
-                        className={`p-3 rounded-full ${isMicOn ? 'bg-gray-200' : 'bg-red-500 text-white'}`}
+                        disabled={!isCallActive}
+                        className={`p-3 rounded-full transition-colors ${
+                          !isCallActive ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                          isMicOn ? 'bg-gray-200 hover:bg-gray-300' : 'bg-red-500 text-white hover:bg-red-600'
+                        }`}
                       >
                         {isMicOn ? <Mic size={20} /> : <MicOff size={20} />}
                       </button>
                       <button
                         onClick={() => setIsVideoOn(!isVideoOn)}
-                        className={`p-3 rounded-full ${isVideoOn ? 'bg-gray-200' : 'bg-red-500 text-white'}`}
+                        disabled={!isCallActive}
+                        className={`p-3 rounded-full transition-colors ${
+                          !isCallActive ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                          isVideoOn ? 'bg-gray-200 hover:bg-gray-300' : 'bg-red-500 text-white hover:bg-red-600'
+                        }`}
                       >
                         {isVideoOn ? <Video size={20} /> : <VideoOff size={20} />}
                       </button>
                       <button
-                        onClick={() => setIsCallActive(!isCallActive)}
-                        className={`p-3 rounded-full ${isCallActive ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}
+                        onClick={isCallActive ? endVideoCall : initiateVideoCall}
+                        disabled={initiatingCall}
+                        className={`p-3 rounded-full transition-colors flex items-center gap-2 px-6 ${
+                          isCallActive 
+                            ? 'bg-red-500 text-white hover:bg-red-600' 
+                            : 'bg-green-500 text-white hover:bg-green-600'
+                        } ${initiatingCall ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
-                        <PhoneCall size={20} />
+                        {initiatingCall ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-sm">Starting...</span>
+                          </>
+                        ) : isCallActive ? (
+                          <>
+                            <PhoneCall size={20} />
+                            <span className="text-sm">End Call</span>
+                          </>
+                        ) : (
+                          <>
+                            <Video size={20} />
+                            <span className="text-sm">Start Call</span>
+                          </>
+                        )}
                       </button>
                     </div>
+                    
+                    {/* Room ID Display */}
+                    {roomId && (
+                      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-green-800">Video Call Room</p>
+                            <p className="text-xs text-green-600">Room ID: {roomId}</p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(roomId);
+                              toast.success('Room ID copied to clipboard');
+                            }}
+                            className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 transition-colors"
+                          >
+                            Copy ID
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -595,11 +712,9 @@ const Consultation: React.FC = () => {
                 {activeTab === 'chat' && (
                   <div className="h-full flex flex-col">
                     {/* Connection Status */}
-                    <div className={`mb-2 px-3 py-1 rounded-lg text-xs flex items-center gap-2 ${
-                      isConnected ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                    }`}>
-                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                      {isConnected ? 'Connected' : 'Disconnected'}
+                    <div className="mb-2 px-3 py-1 rounded-lg text-xs flex items-center gap-2 bg-blue-50 text-blue-700">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      Chat Ready {isConnected && '(WebSocket backup active)'}
                     </div>
                     
                     <div className="flex-1 border border-gray-200 rounded-lg p-4 mb-4 overflow-y-auto min-h-[400px] bg-gray-50">
@@ -640,11 +755,10 @@ const Consultation: React.FC = () => {
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-700 focus:border-transparent"
                         placeholder="Type your message..."
-                        disabled={!isConnected}
                       />
                       <button
                         onClick={handleSendMessage}
-                        disabled={!chatMessage.trim() || !isConnected}
+                        disabled={!chatMessage.trim()}
                         className="px-4 py-2 bg-brand-700 text-white rounded-lg hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         <Send size={16} />

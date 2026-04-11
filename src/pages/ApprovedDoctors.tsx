@@ -91,10 +91,6 @@ const ApprovedDoctors: React.FC = () => {
   const specialties = Array.from(new Set(doctors.map(doctor => doctor.speciality)));
 
   const handleEdit = async (doctor: ApprovedDoctor) => {
-    // TODO: Implement when backend endpoint is ready
-    toast.error('Edit functionality coming soon!');
-    return;
-    
     setEditingDoctor({ ...doctor });
   };
 
@@ -103,17 +99,25 @@ const ApprovedDoctors: React.FC = () => {
     
     setProcessing(editingDoctor.doctor_id);
     try {
-      // TODO: Update when backend provides edit endpoint
-      await makeApiRequest(`/auth/doctors/${editingDoctor.doctor_id}`, {
+      const response = await fetch(`http://localhost:3001/api/auth/doctors/${editingDoctor.doctor_id}`, {
         method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({
           name: editingDoctor.name,
           email: editingDoctor.email,
           phone: editingDoctor.phone,
           speciality: editingDoctor.speciality,
-          national_id: editingDoctor.national_id
+          national_id: editingDoctor.national_id,
+          status: editingDoctor.status
         })
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update doctor');
+      }
       
       toast.success('Doctor updated successfully!');
       setEditingDoctor(null);
@@ -133,13 +137,18 @@ const ApprovedDoctors: React.FC = () => {
   const handleDelete = async (doctorId: number) => {
     setProcessing(doctorId);
     try {
-      // Use status update endpoint for soft delete
-      await makeApiRequest(`/auth/doctors/${doctorId}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'deleted' })
+      const response = await fetch(`http://localhost:3001/api/auth/doctors/${doctorId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       
-      toast.success('Doctor removed successfully!');
+      if (!response.ok) {
+        throw new Error('Failed to delete doctor');
+      }
+      
+      toast.success('Doctor deleted successfully!');
       setShowDeleteConfirm(null);
       fetchApprovedDoctors();
     } catch (error: any) {
@@ -147,7 +156,7 @@ const ApprovedDoctors: React.FC = () => {
       if (error.message && error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
         toast.error('Connection issue. Please try again.');
       } else {
-        toast.error('Failed to remove doctor');
+        toast.error('Failed to delete doctor');
       }
     } finally {
       setProcessing(null);
@@ -669,6 +678,19 @@ const ApprovedDoctors: React.FC = () => {
                   onChange={(e) => setEditingDoctor({ ...editingDoctor, national_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  value={editingDoctor.status}
+                  onChange={(e) => setEditingDoctor({ ...editingDoctor, status: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="suspended">Suspended</option>
+                </select>
               </div>
             </div>
             

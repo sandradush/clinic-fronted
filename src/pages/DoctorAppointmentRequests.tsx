@@ -96,17 +96,9 @@ const DoctorAppointmentRequests: React.FC = () => {
 
   return (
     <div className="p-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-semibold">My Appointment Requests</h2>
-          <p className="text-gray-600 text-sm mt-1">Review and approve appointments assigned to you</p>
-        </div>
-        <button
-          onClick={fetchAssignedAppointments}
-          className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-        >
-          🔄 Refresh
-        </button>
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold">My Appointment Requests</h2>
+        <p className="text-gray-600 text-sm mt-1">Review and approve appointments assigned to you</p>
       </div>
       
       {appointments.length === 0 ? (
@@ -117,110 +109,80 @@ const DoctorAppointmentRequests: React.FC = () => {
           <p className="text-gray-500">No pending appointment requests</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {appointments.map((appointment) => (
-            <div key={appointment.id} className="bg-white border rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center">
-                      <User size={24} className="text-brand-700" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">{appointment.patient_name}</h3>
-                      <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          appointment.status === 'approved' ? 'bg-green-100 text-green-800' :
-                          appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          appointment.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                          appointment.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
+            <div key={appointment.id} className="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className={`w-3 h-3 rounded-full shrink-0 ${
+                    appointment.status === 'approved' ? 'bg-green-500' :
+                    appointment.status === 'pending' ? 'bg-yellow-500' :
+                    appointment.status === 'rejected' ? 'bg-red-500' :
+                    appointment.status === 'completed' ? 'bg-blue-500' :
+                    'bg-gray-500'
+                  }`}></div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-medium text-gray-800 truncate">{appointment.patient_name}</h3>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        appointment.status === 'approved' ? 'bg-green-100 text-green-700' :
+                        appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                        appointment.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                        appointment.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {appointment.status}
+                      </span>
+                      {(appointment as any).payment_status && (
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          (appointment as any).payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                         }`}>
-                          {appointment.status === 'approved' ? '✅ Approved' :
-                           appointment.status === 'pending' ? '⏳ Pending' :
-                           appointment.status === 'rejected' ? '❌ Rejected' :
-                           appointment.status === 'completed' ? '✓ Completed' :
-                           appointment.status}
+                          {(appointment as any).payment_status}
                         </span>
-                        {/** payment status if present */}
-                        {(
-                          (appointment as any).payment_status || null
-                        ) && (
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${((appointment as any).payment_status) === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                            {(appointment as any).payment_status}
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-3">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Clock size={16} className="text-brand-700" />
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="font-medium">{appointment.time}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar size={16} className="text-green-500" />
                       <span>{new Date(appointment.date).toLocaleDateString()}</span>
+                      {appointment.description && (
+                        <span className="truncate">{appointment.description}</span>
+                      )}
                     </div>
-                  </div>
-
-                  {appointment.description && (
-                    <div className="mb-3">
-                      <div className="flex items-start gap-2 text-sm">
-                        <FileText size={16} className="text-gray-500 mt-0.5" />
-                        <div>
-                          <p className="text-gray-600 font-medium">Description:</p>
-                          <p className="text-gray-700 bg-gray-50 rounded-lg p-3 mt-1 border-l-4 border-brand-100">
-                            {appointment.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="text-xs text-gray-500">
-                    Requested: {new Date(appointment.created_at).toLocaleString()}
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2 flex-wrap sm:ml-4 shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   {appointment.status === 'pending' ? (
                     <>
                       <button
                         onClick={() => handleReject(appointment.id)}
                         disabled={processing === appointment.id}
-                        className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors text-sm"
+                        className="px-3 py-1.5 text-red-600 border border-red-200 rounded hover:bg-red-50 disabled:opacity-50 transition-colors text-sm"
                       >
-                        <XCircle size={16} />
                         Reject
                       </button>
                       <button
                         onClick={() => handleApprove(appointment.id)}
                         disabled={processing === appointment.id}
-                        className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors text-sm"
+                        className="px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 transition-colors text-sm"
                       >
-                        <CheckCircle size={16} />
                         Approve
                       </button>
                     </>
                   ) : appointment.status === 'approved' ? (
                     <button
                       onClick={() => navigate(`/consultation/${appointment.id}`)}
-                      className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-md text-sm"
+                      className="px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-all text-sm"
                     >
-                      <Video size={18} />
-                      🩺 Start Consultation
+                      Start
                     </button>
                   ) : (
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
                       appointment.status === 'rejected' ? 'bg-red-100 text-red-700' :
                       appointment.status === 'completed' ? 'bg-blue-100 text-blue-700' :
                       'bg-gray-100 text-gray-700'
                     }`}>
-                      {appointment.status === 'rejected' ? '❌ Rejected' :
-                       appointment.status === 'completed' ? '✅ Completed' :
-                       appointment.status}
+                      {appointment.status}
                     </span>
                   )}
                 </div>

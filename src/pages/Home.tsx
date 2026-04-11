@@ -10,9 +10,9 @@ const Home: React.FC = () => {
         {/* MAIN CARD */}
         <div className="ui-card p-8 md:p-10">
           <div className="flex items-center gap-3 mb-5">
-            <img src="/smart-health-consultation-logo.JPG" alt="Smart Health Consultation" className="h-10 w-10 rounded" />
+            <img src="/smart-health-consultation-logo.JPG" alt="Smarthealth" className="h-10 w-10 rounded" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Smart Health Consultation</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Smarthealth</h1>
             </div>
           </div>
 
@@ -91,7 +91,7 @@ const Home: React.FC = () => {
             </h3>
 
             <p className="text-gray-600 text-sm mb-6">
-              Patients can book appointments, chat with doctors, and receive prescriptions directly through the Smart Health Consultation mobile app.
+              Patients can book appointments, chat with doctors, and receive prescriptions directly through the Smarthealth mobile app.
             </p>
           </div>
 

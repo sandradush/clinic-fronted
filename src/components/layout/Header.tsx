@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
         {/* Center title for mobile */}
         <div className="absolute left-0 right-0 flex items-center justify-center md:hidden pointer-events-none">
-          <div className="font-semibold text-lg text-gray-900 dark:text-white">SHC</div>
+          <div className="font-semibold text-lg text-gray-900 dark:text-white">Smarthealth</div>
         </div>
 
         <div className="flex items-center gap-2 ml-auto">

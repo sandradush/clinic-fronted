@@ -229,8 +229,15 @@ const Login: React.FC = () => {
         </button>
 
         <div className="text-center mb-6">
-
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <div className="flex items-center justify-center mb-4">
+            <img 
+              src="/smart-health-consultation-logo.JPG" 
+              alt="Smarthealth Logo" 
+              className="w-16 h-16 rounded-full object-cover shadow-lg"
+            />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Smarthealth</h1>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
 

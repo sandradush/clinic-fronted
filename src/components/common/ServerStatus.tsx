@@ -6,7 +6,7 @@ interface ServerStatusProps {
 }
 
 const ServerStatus: React.FC<ServerStatusProps> = ({ className = '' }) => {
-  const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+  const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('online');
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
 
   const checkServerStatus = async () => {
@@ -36,10 +36,38 @@ const ServerStatus: React.FC<ServerStatusProps> = ({ className = '' }) => {
   };
 
   useEffect(() => {
-    checkServerStatus();
+    // Only check server status if there's an actual connection issue
+    // Don't show checking state on initial load
+    const checkOnlyIfNeeded = async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+        const response = await fetch('https://clinic-backend-s2lx.onrender.com/api/health', {
+          method: 'GET',
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          setStatus('online');
+        } else {
+          setStatus('offline');
+        }
+      } catch (error) {
+        // Only show offline status if there's a real connection error
+        setStatus('offline');
+      } finally {
+        setLastCheck(new Date());
+      }
+    };
+
+    // Check once on mount, but don't show checking state
+    checkOnlyIfNeeded();
     
-    // Check every 30 seconds
-    const interval = setInterval(checkServerStatus, 30000);
+    // Check every 60 seconds (less frequent)
+    const interval = setInterval(checkOnlyIfNeeded, 60000);
     
     return () => clearInterval(interval);
   }, []);
@@ -79,8 +107,9 @@ const ServerStatus: React.FC<ServerStatusProps> = ({ className = '' }) => {
   const config = getStatusConfig();
   const Icon = config.icon;
 
-  if (status === 'online') {
-    return null; // Don't show anything when server is online
+  // Only show component when there's actually an offline status
+  if (status === 'online' || status === 'checking') {
+    return null;
   }
 
   return (
