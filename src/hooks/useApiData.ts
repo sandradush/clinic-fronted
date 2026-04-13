@@ -20,7 +20,7 @@ interface Doctor {
   email: string;
   phone: string;
   experience: number;
-  availability: 'available' | 'busy' | 'offline';
+  availability: 'online' | 'offline' | 'busy';
   status?: string;
 }
 

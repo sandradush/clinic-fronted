@@ -4,6 +4,7 @@ import { useAppointments } from '../hooks/useApiData';
 import toast from 'react-hot-toast';
 import { makeApiRequest } from '../utils/api';
 
+
 interface NewAppointmentForm {
   patientId: string;
   date: string;
@@ -225,6 +226,7 @@ const Appointments: React.FC = () => {
                         <td className="py-3 px-3"><div className="h-3 bg-gray-200 rounded w-32" /></td>
                         <td className="py-3 px-3"><div className="h-5 bg-gray-200 rounded-full w-12" /></td>
                         <td className="py-3 px-3"><div className="h-5 bg-gray-200 rounded-full w-16" /></td>
+                        <td className="py-3 px-3"><div className="h-6 bg-gray-200 rounded w-20" /></td>
                       </tr>
                     ))}
                   </tbody>

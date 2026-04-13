@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, CheckCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
-import ServerStatus from '../components/common/ServerStatus';
 import { trackEvent } from '../services/analytics';
 
 const Login: React.FC = () => {
@@ -248,8 +247,6 @@ const Login: React.FC = () => {
           </p>
 
         </div>
-
-        <ServerStatus className="mb-4" />
 
         {success && (
           <div className="flex items-center gap-2 p-3 mb-4 text-green-800 bg-green-50 border border-green-200 rounded-md">

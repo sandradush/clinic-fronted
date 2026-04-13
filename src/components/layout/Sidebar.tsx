@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 // import DoctorSidebarChat from '../common/DoctorSidebarChat';
 // import SidebarChatButton from '../common/SidebarChatButton';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Calendar, UserCheck, ClipboardList, History, Activity, Clock, Settings, LogOut, Menu } from 'lucide-react';
+import { Home, Calendar, UserCheck, ClipboardList, History, Activity, Clock, FileText, LogOut, Menu, Bell, BarChart3, Send } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
@@ -27,6 +27,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     { path: '/appointments', icon: Calendar, label: 'Appointments' },
     { path: '/doctors', icon: UserCheck, label: 'Doctors' },
     { path: '/waiting-patients', icon: Clock, label: 'Waiting Patients' },
+    { path: '/medical-records', icon: FileText, label: 'Medical Records' },
+    { path: '/notifications', icon: Bell, label: 'Notifications' },
+    { path: '/admin-reports', icon: BarChart3, label: 'Reports' },
     { path: '/payments', icon: ClipboardList, label: 'Payments' },
   ];
 
@@ -35,6 +38,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     { path: '/doctor/appointment-requests', icon: ClipboardList, label: 'Requests' },
     { path: '/prescription', icon: Activity, label: 'Prescription' },
     { path: '/doctor/history', icon: History, label: 'History' },
+    { path: '/doctor/medical-records', icon: FileText, label: 'Medical Records' },
+   // { path: '/doctor/notifications', icon: Bell, label: 'Notifications' },
+    { path: '/doctor/sent-notifications', icon: Send, label: 'Sent Notifications' },
   ];
 
   const receptionistMenuItems = [
@@ -93,23 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
         {/* Chat button removed */}
       </nav>
       
-      {/* Settings Button - Show for admin only */}
-      {user?.role === 'admin' && (
-        <div className="px-0 py-2">
-          <Link
-            to="/settings"
-            className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-4 md:px-6'} py-2 md:py-3 transition-all duration-200 border-l-3 border-transparent mx-1
-              ${location.pathname === '/settings' ? 'bg-white/10 text-white border-l-white font-semibold' : 'text-blue-100 hover:bg-white/5 hover:text-white hover:border-l-blue-400'}`}
-            onClick={() => {
-              if (onClose && isOpen) onClose();
-            }}
-            title={isCollapsed ? "Settings" : ""}
-          >
-            <Settings className="w-5 h-5 md:w-6 md:h-6 shrink-0" />
-            {!isCollapsed && <span className="text-sm md:text-base truncate transition-opacity duration-300">Settings</span>}
-          </Link>
-        </div>
-      )}
+
       
       {/* Sign Out Button */}
       <div className="px-0 py-4 border-t border-blue-900/50">

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { makeApiRequest } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import VideoCallButton from '../components/VideoCallButton';
 
 interface AppointmentRequest {
   id: number;
@@ -170,12 +171,19 @@ const DoctorAppointmentRequests: React.FC = () => {
                       </button>
                     </>
                   ) : appointment.status === 'approved' ? (
-                    <button
-                      onClick={() => navigate(`/consultation/${appointment.id}`)}
-                      className="px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-all text-sm"
-                    >
-                      Start
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <VideoCallButton 
+                        appointmentId={appointment.id}
+                        status={appointment.status}
+                        size="sm"
+                      />
+                      <button
+                        onClick={() => navigate(`/consultation/${appointment.id}`)}
+                        className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-all text-sm"
+                      >
+                        Consult
+                      </button>
+                    </div>
                   ) : (
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
                       appointment.status === 'rejected' ? 'bg-red-100 text-red-700' :

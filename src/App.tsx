@@ -5,16 +5,23 @@ import { Toaster } from 'react-hot-toast';
 
 import MainLayout from './components/layout/MainLayout';
 import OfflineIndicator from './components/common/OfflineIndicator';
-import AuthDebug from './components/debug/AuthDebug';
+
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Appointments from './pages/Appointments';
 import Payments from './pages/Payments';
 import Consultation from './pages/Consultation';
-import Perception from './pages/prescription';
+import Prescription from './pages/prescription';
 import Doctors from './pages/Doctors';
 import Schedules from './pages/Schedules';
-import SettingPage from './pages/Settings';
+import AdminNotifications from './pages/AdminNotifications';
+import AdminReports from './pages/AdminReports';
+import DoctorMedicalRecords from './pages/DoctorMedicalRecords';
+import DoctorNotifications from './pages/DoctorNotifications';
+import DoctorSentNotifications from './pages/DoctorSentNotifications';
+import VideoConsultation from './pages/VideoConsultation';
+import MobileVideoConsultation from './pages/MobileVideoConsultation';
+import MedicalRecords from './pages/MedicalRecords';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -63,7 +70,7 @@ const ProtectedRoutes = () => {
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/consultation/:appointmentId" element={<Consultation />} />
-        <Route path="/prescription" element={<Perception />} />
+        <Route path="/prescription" element={<Prescription />} />
         <Route path="/doctors" element={<Doctors />} />
         <Route path="/waiting-patients" element={<WaitingPatients />} />
         <Route path="/schedules" element={<Schedules />} />
@@ -71,8 +78,14 @@ const ProtectedRoutes = () => {
         <Route path="/doctor/requests" element={<DoctorRequestsPage />} />
         <Route path="/doctor/appointment-requests" element={<DoctorAppointmentRequests />} />
         <Route path="/doctor/history" element={<DoctorHistory />} />
-        <Route path="/settings" element={<SettingPage />} />
-        <Route path="/setting" element={<SettingPage />} />
+        <Route path="/doctor/medical-records" element={<DoctorMedicalRecords />} />
+        <Route path="/doctor/notifications" element={<DoctorNotifications />} />
+        <Route path="/doctor/sent-notifications" element={<DoctorSentNotifications />} />
+        <Route path="/video-consultation/:appointmentId" element={<VideoConsultation />} />
+        <Route path="/mobile-video/:appointmentId" element={<MobileVideoConsultation />} />
+        <Route path="/medical-records" element={<MedicalRecords />} />
+        <Route path="/notifications" element={<AdminNotifications />} />
+        <Route path="/admin-reports" element={<AdminReports />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>
@@ -96,7 +109,7 @@ const App: React.FC = () => {
           <Router>
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
               <OfflineIndicator />
-              <AuthDebug />
+
               <Toaster position="top-right" />
 
               <Suspense fallback={<Loading />}> 

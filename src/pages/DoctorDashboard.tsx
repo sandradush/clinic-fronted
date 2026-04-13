@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, FileText, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, User, FileText, CheckCircle, TrendingUp, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { makeApiRequest } from '../utils/api';
@@ -10,6 +10,8 @@ const DoctorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [statistics, setStatistics] = useState<any>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<string | null>(null);
+  const [weeklyData, setWeeklyData] = useState<any[]>([]);
+  const [monthlyData, setMonthlyData] = useState<any[]>([]);
 
   // Fetch appointment statistics for current doctor from backend
   useEffect(() => {
@@ -45,6 +47,9 @@ const DoctorDashboard: React.FC = () => {
             counts, 
             allAppointments: doctorAppointments 
           });
+          
+          // Generate weekly and monthly data for charts
+          generateChartData(doctorAppointments);
         } catch (fallbackErr) {
           console.error('Fallback fetch also failed:', fallbackErr);
           setStatistics({ todayAppointments: [], counts: { pending: 0, approved: 0, rejected: 0 } });
@@ -54,6 +59,178 @@ const DoctorDashboard: React.FC = () => {
 
     fetchDoctorStatistics();
   }, [user]);
+
+  const generateChartData = (appointments: any[]) => {
+    // Generate last 7 days data
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const dayAppointments = appointments.filter(apt => 
+        apt.date === dateStr || new Date(apt.date).toDateString() === date.toDateString()
+      );
+      
+      last7Days.push({
+        day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        date: dateStr,
+        total: dayAppointments.length,
+        approved: dayAppointments.filter(apt => apt.status === 'approved').length,
+        pending: dayAppointments.filter(apt => apt.status === 'pending').length,
+        rejected: dayAppointments.filter(apt => apt.status === 'rejected').length
+      });
+    }
+    setWeeklyData(last7Days);
+
+    // Generate last 6 months data
+    const last6Months = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      
+      const monthAppointments = appointments.filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate >= monthStart && aptDate <= monthEnd;
+      });
+      
+      last6Months.push({
+        month: date.toLocaleDateString('en-US', { month: 'short' }),
+        total: monthAppointments.length,
+        approved: monthAppointments.filter(apt => apt.status === 'approved').length,
+        pending: monthAppointments.filter(apt => apt.status === 'pending').length,
+        rejected: monthAppointments.filter(apt => apt.status === 'rejected').length
+      });
+    }
+    setMonthlyData(last6Months);
+  };
+
+  const SimpleLineChart = ({ data, title, color = "blue" }: { data: any[], title: string, color?: string }) => {
+    const maxValue = Math.max(...data.map(item => item.total), 1);
+    const points = data.map((item, index) => {
+      const x = (index / (data.length - 1)) * 100;
+      const y = 100 - ((item.total / maxValue) * 80);
+      return `${x},${y}`;
+    }).join(' ');
+
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-3">
+        <h4 className="text-sm font-medium text-gray-700 mb-2">{title}</h4>
+        <div className="h-16 relative">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <polyline
+              fill="none"
+              stroke={color === "blue" ? "#3b82f6" : color === "green" ? "#10b981" : "#f59e0b"}
+              strokeWidth="2"
+              points={points}
+            />
+            {data.map((item, index) => {
+              const x = (index / (data.length - 1)) * 100;
+              const y = 100 - ((item.total / maxValue) * 80);
+              return (
+                <circle
+                  key={index}
+                  cx={x}
+                  cy={y}
+                  r="2"
+                  fill={color === "blue" ? "#3b82f6" : color === "green" ? "#10b981" : "#f59e0b"}
+                />
+              );
+            })}
+          </svg>
+        </div>
+        <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <span>{data[0]?.day || data[0]?.month}</span>
+          <span>{data[data.length - 1]?.day || data[data.length - 1]?.month}</span>
+        </div>
+      </div>
+    );
+  };
+
+  const MiniBarChart = ({ data, title }: { data: any[], title: string }) => {
+    const maxValue = Math.max(...data.map(item => item.total), 1);
+    
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-3">
+        <h4 className="text-sm font-medium text-gray-700 mb-2">{title}</h4>
+        <div className="flex items-end justify-between gap-1 h-12">
+          {data.slice(-7).map((item, index) => (
+            <div key={index} className="flex flex-col items-center flex-1">
+              <div className="w-full flex flex-col">
+                <div 
+                  className="w-full bg-blue-500 rounded-t"
+                  style={{ height: `${(item.total / maxValue) * 40}px`, minHeight: item.total > 0 ? '2px' : '0px' }}
+                ></div>
+              </div>
+              <span className="text-xs text-gray-500 mt-1">{item.day?.slice(0, 1) || item.month?.slice(0, 1)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const StatusPieChart = () => {
+    const total = (statistics?.counts?.pending || 0) + (statistics?.counts?.approved || 0) + (statistics?.counts?.rejected || 0);
+    if (total === 0) return null;
+    
+    const approved = statistics?.counts?.approved || 0;
+    const pending = statistics?.counts?.pending || 0;
+    const rejected = statistics?.counts?.rejected || 0;
+    
+    const approvedAngle = (approved / total) * 360;
+    const pendingAngle = (pending / total) * 360;
+    const rejectedAngle = (rejected / total) * 360;
+    
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-3">
+        <h4 className="text-sm font-medium text-gray-700 mb-2">Status Overview</h4>
+        <div className="flex items-center gap-3">
+          <div className="relative w-12 h-12">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 42 42">
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e5e7eb" strokeWidth="3"/>
+              <circle 
+                cx="21" cy="21" r="15.915" fill="transparent" 
+                stroke="#10b981" strokeWidth="3"
+                strokeDasharray={`${(approved/total) * 100} ${100 - (approved/total) * 100}`}
+                strokeDashoffset="0"
+              />
+              <circle 
+                cx="21" cy="21" r="15.915" fill="transparent" 
+                stroke="#f59e0b" strokeWidth="3"
+                strokeDasharray={`${(pending/total) * 100} ${100 - (pending/total) * 100}`}
+                strokeDashoffset={`-${(approved/total) * 100}`}
+              />
+              <circle 
+                cx="21" cy="21" r="15.915" fill="transparent" 
+                stroke="#ef4444" strokeWidth="3"
+                strokeDasharray={`${(rejected/total) * 100} ${100 - (rejected/total) * 100}`}
+                strokeDashoffset={`-${((approved + pending)/total) * 100}`}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xs font-medium">{total}</span>
+            </div>
+          </div>
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>{approved}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+              <span>{pending}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span>{rejected}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const todayAppointments = statistics?.todayAppointments || [];
 
@@ -70,6 +247,13 @@ const DoctorDashboard: React.FC = () => {
         <StatCard title="Pending" value={statistics?.counts?.pending || 0} icon={<Clock size={22} />} color="yellow" />
         <StatCard title="Approved" value={statistics?.counts?.approved || 0} icon={<CheckCircle size={22} />} color="green" />
         <StatCard title="Rejected" value={statistics?.counts?.rejected || 0} icon={<FileText size={22} />} color="red" />
+      </div>
+
+      {/* Mini Charts */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+        <SimpleLineChart data={weeklyData} title="Weekly Trend" color="blue" />
+        <MiniBarChart data={weeklyData} title="Last 7 Days" />
+        <StatusPieChart />
       </div>
 
       {/* Today's Schedule - Compact */}

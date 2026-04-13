@@ -1,0 +1,5 @@
+# Install Agora SDK packages
+npm install agora-rtc-sdk-ng agora-rtc-react
+
+# If you get peer dependency warnings, you can install with --legacy-peer-deps
+npm install agora-rtc-sdk-ng agora-rtc-react --legacy-peer-deps

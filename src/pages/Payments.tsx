@@ -1,25 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { ClipboardList, CheckCircle } from 'lucide-react';
+import { CreditCard, CheckCircle, XCircle, Eye, RefreshCw, Search, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { api } from '../services/api';
+import BackendTest from '../components/BackendTest';
 
-interface PaymentRecord {
-  id: number | string;
-  appointment_id?: number;
-  patient_name: string;
-  doctor_name?: string;
+interface Payment {
+  id: string;
   amount: number;
-  currency?: string;
-  status: string; // pending | paid | approved
+  currency: string;
+  status: string;
+  patient_id: string;
+  appointment_id: string;
   created_at: string;
-  provider_ref?: string;
-  internal_id?: number | string;
-  raw?: any;
+  patient_name?: string;
+  appointment_details?: any;
 }
 
 const Payments: React.FC = () => {
-  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchPayments();
@@ -27,215 +29,422 @@ const Payments: React.FC = () => {
 
   const fetchPayments = async () => {
     try {
-      // Prefer the backend payments endpoint which returns { count, payments: [...] }
-      let resp: any;
-      try {
-        resp = await api.getPayments();
-      } catch (e) {
-        // fallback to local payments endpoint if API base isn't configured for local testing
-        const fallback = await fetch('http://localhost:3001/api/payments?limit=100&offset=0', {
-          headers: { accept: 'application/json' },
-        });
-        if (!fallback.ok) throw new Error('Failed to fetch payments');
-        resp = await fallback.json();
-      }
-
-      // Handle response shapes: { payments: [...] } or direct array
-      const rawPayments: any[] = Array.isArray(resp) ? resp : resp?.payments ?? [];
-
-      const mapped = rawPayments.map((p: any) => {
-        return {
-          id: p.id ?? p.ref ?? Math.random().toString(36).slice(2),
-          internal_id: p.id,
-          provider_ref: p.provider_ref ?? p.ref,
-          raw: p,
-          appointment_id: p.appointment_id ?? undefined,
-          patient_name: (p.patient && (p.patient.name || p.patient.full_name)) || p.patient_id || p.number || 'Unknown',
-          doctor_name: p.doctor_name || undefined,
-          amount: Number(p.amount ?? 0),
-          currency: p.currency ?? 'USD',
-          status: p.status ?? 'pending',
-          created_at: p.created_at || p.createdAt || new Date().toISOString(),
-        } as PaymentRecord;
+      setLoading(true);
+      console.log('🔄 Fetching payments from:', 'http://localhost:3001/api/payments');
+      
+      const response = await fetch('http://localhost:3001/api/payments', {
+        headers: {
+          'accept': 'application/json'
+        }
       });
-
-      setPayments(mapped);
-    } catch (err) {
-      console.error('Failed to load payments', err);
-      toast.error('Failed to load payments');
+      
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Raw payment data:', data);
+        console.log('📊 Number of payments:', data.length);
+        
+        // Check if data is an array
+        if (!Array.isArray(data)) {
+          console.error('❌ Expected array but got:', typeof data, data);
+          toast.error('Invalid data format received from server');
+          return;
+        }
+        
+        // Fetch additional details for each payment
+        const paymentsWithDetails = await Promise.all(
+          data.map(async (payment, index) => {
+            try {
+              // Try to get patient name
+              const patientResponse = await fetch(`http://localhost:3001/api/users/${payment.patient_id}`);
+              let patient_name = `Patient ${payment.patient_id}`;
+              
+              if (patientResponse.ok) {
+                const patientData = await patientResponse.json();
+                patient_name = patientData.name || 
+                             (patientData.first_name && patientData.last_name ? 
+                              `${patientData.first_name} ${patientData.last_name}` : 
+                              patient_name);
+              }
+              
+              return {
+                ...payment,
+                patient_name
+              };
+            } catch (error) {
+              console.error(`❌ Error processing payment ${index + 1}:`, error);
+              return {
+                ...payment,
+                patient_name: `Patient ${payment.patient_id}`
+              };
+            }
+          })
+        );
+        
+        console.log('✅ Final processed payments:', paymentsWithDetails);
+        setPayments(paymentsWithDetails);
+        toast.success(`Loaded ${paymentsWithDetails.length} payments`);
+        
+      } else {
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        
+        toast.error(`Failed to fetch payments: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('❌ Network/Fetch Error:', error);
+      
+      // Check if it's a network error
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        toast.error('Cannot connect to server. Is your backend running on http://localhost:3001?');
+      } else {
+        toast.error(`Network error: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Modal / confirm flow
-  const [selected, setSelected] = useState<PaymentRecord | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalInternalId, setModalInternalId] = useState<string>('');
-  const [confirmProcessing, setConfirmProcessing] = useState(false);
-
-  const openModal = (rec: PaymentRecord) => {
-    setSelected(rec);
-    setModalInternalId(rec.internal_id ? String(rec.internal_id) : '');
-    setModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelected(null);
-    setModalInternalId('');
-    setModalOpen(false);
-  };
-
-  const confirmApprove = async () => {
-    if (!selected) return;
-    setConfirmProcessing(true);
-    try {
-      const providedId = modalInternalId || selected.internal_id || selected.id;
-      if (!providedId || !String(providedId).match(/^\d+$/)) {
-        toast.error('Please provide a numeric internal payment id to approve.');
-        setConfirmProcessing(false);
-        return;
-      }
-
-      // 1) Update external provider state to completed
-      const extResp = await api.updateExternalPaymentStatusById(Number(providedId), 'completed', selected.provider_ref);
-
-      // 2) If external service returns an internal payment id, try to mark it approved in our system
-      try {
-        if (extResp && extResp.id && String(extResp.id).match(/^\d+$/)) {
-          await api.approvePayment(Number(extResp.id));
-        }
-
-        // 3) If external response includes appointment linkage, try to approve appointment as well
-        if (extResp && extResp.appointment_id && String(extResp.appointment_id).match(/^\d+$/)) {
-          await api.approveAppointment(Number(extResp.appointment_id));
-        }
-      } catch (e) {
-        console.warn('internal approve/appointment update failed', e);
-      }
-
-      toast.success('Payment completed and recorded');
-      fetchPayments();
-      closeModal();
-    } catch (err) {
-      console.error('approve error', err);
-      toast.error('Failed to approve payment');
-    } finally {
-      setConfirmProcessing(false);
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'succeeded':
+      case 'paid':
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'requires_payment_method':
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'failed':
+      case 'canceled':
+        return 'bg-red-100 text-red-800';
+      case 'processing':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'succeeded':
+      case 'paid':
+      case 'completed':
+        return <CheckCircle size={16} className="text-green-600" />;
+      case 'failed':
+      case 'canceled':
+        return <XCircle size={16} className="text-red-600" />;
+      default:
+        return <CreditCard size={16} className="text-gray-600" />;
+    }
+  };
+
+  const formatAmount = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
+  };
+
+  const filteredPayments = payments.filter(payment => {
+    const matchesSearch = 
+      payment.patient_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      payment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      payment.appointment_id.includes(searchTerm);
+    
+    const matchesStatus = statusFilter === 'all' || payment.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const getStatusCounts = () => {
+    const total = payments.length;
+    const succeeded = payments.filter(p => ['succeeded', 'paid', 'completed'].includes(p.status.toLowerCase())).length;
+    const pending = payments.filter(p => ['requires_payment_method', 'pending'].includes(p.status.toLowerCase())).length;
+    const failed = payments.filter(p => ['failed', 'canceled'].includes(p.status.toLowerCase())).length;
+    return { total, succeeded, pending, failed };
+  };
+
+  const counts = getStatusCounts();
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="w-8 h-8 border-4 border-brand-100 border-t-brand-700 rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="p-3 sm:p-6">
-      <h1 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 flex items-center gap-3">
-        <ClipboardList />
-        Payments
-      </h1>
-
-      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
-        <div className="space-y-3 sm:space-y-4">
-          {payments.length === 0 && (
-            <div className="text-center text-gray-500 py-8">No payments found</div>
-          )}
-
-          {payments.map((p) => (
-            <div key={p.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border rounded-lg hover:bg-gray-50 gap-3">
-              <div className="min-w-0">
-                <div className="font-medium truncate">{p.patient_name} {p.doctor_name ? `→ Dr. ${p.doctor_name}` : ''}</div>
-                <div className="text-sm text-gray-500 mt-1">Appointment: {p.appointment_id ?? '—'}</div>
-                <div className="text-sm text-gray-600 mt-1">{new Date(p.created_at).toLocaleString()}</div>
-              </div>
-
-              <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap shrink-0">
-                <div>
-                  <div className="font-semibold">{p.currency ?? 'USD'} {p.amount.toFixed(2)}</div>
-                  <div className={`text-xs inline-block mt-1 px-2 py-1 rounded-full ${p.status === 'approved' || p.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{p.status}</div>
-                </div>
-
-                <button
-                  onClick={() => openModal(p)}
-                  className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-sm"
-                >
-                  View
-                </button>
-
-                {p.status !== 'approved' && (
-                  <button
-                    onClick={() => openModal(p)}
-                    disabled={confirmProcessing}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 text-sm"
-                  >
-                    <CheckCircle size={15} /> Approve
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+    <div className="p-6">
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Management</h1>
+            <p className="text-gray-600">View and manage all payment transactions</p>
+          </div>
+          <button
+            onClick={fetchPayments}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <RefreshCw size={20} />
+            Refresh
+          </button>
         </div>
       </div>
-    </div>
-    {modalOpen && selected && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-        <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl p-6 shadow-lg">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-semibold">Payment Details</h2>
-              <div className="text-sm text-gray-500">Provider Ref: {selected.provider_ref}</div>
-            </div>
-            <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">Close</button>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <div className="text-xs text-gray-500">Patient</div>
-              <div className="font-medium">{selected.patient_name}</div>
-              <div className="text-xs text-gray-400 mt-1">Appointment: {selected.appointment_id ?? '—'}</div>
+      {/* Debug Section - Remove this after fixing the issue */}
+      {payments.length === 0 && !loading && (
+        <div className="mb-6">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center gap-2 text-yellow-800 mb-2">
+              <AlertTriangle size={20} />
+              <span className="font-medium">No payments found - Debug Information</span>
             </div>
-            <div className="text-right">
-              <div className="text-xs text-gray-500">Amount</div>
-              <div className="font-semibold">{selected.currency ?? 'USD'} {Number(selected.amount).toFixed(2)}</div>
-              <div className="text-xs text-gray-400 mt-1">Created: {new Date(selected.created_at).toLocaleString()}</div>
-            </div>
+            <p className="text-yellow-700 text-sm mb-3">
+              If you're seeing this, check the browser console for detailed error logs.
+            </p>
           </div>
+          <BackendTest />
+        </div>
+      )}
 
-          <div className="mb-4">
-            <label className="block text-sm text-gray-600 mb-2">Internal payment id (optional)</label>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg shadow border">
+          <div className="text-2xl font-bold text-blue-600">{counts.total}</div>
+          <div className="text-sm text-gray-600">Total Payments</div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow border">
+          <div className="text-2xl font-bold text-green-600">{counts.succeeded}</div>
+          <div className="text-sm text-gray-600">Successful</div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow border">
+          <div className="text-2xl font-bold text-yellow-600">{counts.pending}</div>
+          <div className="text-sm text-gray-600">Pending</div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow border">
+          <div className="text-2xl font-bold text-red-600">{counts.failed}</div>
+          <div className="text-sm text-gray-600">Failed</div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-lg shadow border mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Search className="inline w-4 h-4 mr-1" />
+              Search
+            </label>
             <input
-              value={modalInternalId}
-              onChange={(e) => setModalInternalId(e.target.value)}
-              placeholder="Enter internal payment id to link (numeric)"
-              className="w-full px-3 py-2 border rounded-md"
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Search by patient, payment ID, or appointment ID"
             />
           </div>
-
-          <div className="mb-4">
-            <label className="block text-sm text-gray-600 mb-2">Raw event</label>
-            <pre className="max-h-48 overflow-auto text-xs bg-gray-50 p-3 rounded">{JSON.stringify(selected.raw || selected, null, 2)}</pre>
-          </div>
-
-          <div className="flex items-center justify-end gap-3">
-            <button onClick={closeModal} className="px-4 py-2 bg-gray-100 rounded">Cancel</button>
-            <button
-              onClick={confirmApprove}
-              disabled={confirmProcessing}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Status Filter
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {confirmProcessing ? 'Approving...' : 'Confirm & Approve'}
-            </button>
+              <option value="all">All Status</option>
+              <option value="succeeded">Succeeded</option>
+              <option value="requires_payment_method">Requires Payment Method</option>
+              <option value="pending">Pending</option>
+              <option value="failed">Failed</option>
+              <option value="canceled">Canceled</option>
+            </select>
           </div>
         </div>
       </div>
-    )}
-    </>
+
+      {/* Payments Table */}
+      <div className="bg-white rounded-lg shadow border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Payment ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Patient
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Appointment
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Amount
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredPayments.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    No payments found
+                  </td>
+                </tr>
+              ) : (
+                filteredPayments.map((payment) => (
+                  <tr key={payment.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+                      {payment.id.substring(0, 20)}...
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {payment.patient_name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        ID: {payment.patient_id}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      #{payment.appointment_id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {formatAmount(payment.amount, payment.currency)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(payment.status)}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.status)}`}>
+                          {payment.status.replace('_', ' ').toUpperCase()}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(payment.created_at)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => {
+                          setSelectedPayment(payment);
+                          setShowModal(true);
+                        }}
+                        className="flex items-center gap-1 text-blue-600 hover:text-blue-900"
+                      >
+                        <Eye size={16} />
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Payment Details Modal */}
+      {showModal && selectedPayment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-900">Payment Details</h2>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <XCircle size={20} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Payment Information</h3>
+                  <div className="space-y-2">
+                    <div>
+                      <span className="text-sm text-gray-500">Payment ID:</span>
+                      <p className="font-mono text-sm break-all">{selectedPayment.id}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">Amount:</span>
+                      <p className="text-lg font-semibold">
+                        {formatAmount(selectedPayment.amount, selectedPayment.currency)}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">Status:</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        {getStatusIcon(selectedPayment.status)}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedPayment.status)}`}>
+                          {selectedPayment.status.replace('_', ' ').toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Patient & Appointment</h3>
+                  <div className="space-y-2">
+                    <div>
+                      <span className="text-sm text-gray-500">Patient:</span>
+                      <p className="font-medium">{selectedPayment.patient_name}</p>
+                      <p className="text-sm text-gray-500">ID: {selectedPayment.patient_id}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">Appointment ID:</span>
+                      <p className="font-medium">#{selectedPayment.appointment_id}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">Created:</span>
+                      <p className="text-sm">{formatDate(selectedPayment.created_at)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Raw Payment Data</h3>
+                <pre className="bg-gray-50 p-4 rounded-lg text-xs overflow-x-auto">
+                  {JSON.stringify(selectedPayment, null, 2)}
+                </pre>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
