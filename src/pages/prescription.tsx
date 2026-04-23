@@ -688,7 +688,32 @@ const Prescription: React.FC = () => {
                         {summaryData.prescriptions.map((prescription: any) => (
                           <div key={prescription.id} className="bg-white rounded-lg p-3 border border-yellow-100">
                             <h4 className="font-medium text-yellow-700">{prescription.title}</h4>
-                            <p className="text-sm text-gray-700 mt-1">{prescription.note}</p>
+                            <div className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">
+                              {prescription.note.includes('DIAGNOSIS:') ? (
+                                <div className="space-y-2">
+                                  {prescription.note.split('\n\n').map((section: string, index: number) => {
+                                    if (section.trim()) {
+                                      const lines = section.split('\n');
+                                      const header = lines[0];
+                                      const content = lines.slice(1).join('\n');
+                                      
+                                      if (header.includes(':')) {
+                                        return (
+                                          <div key={index} className="mb-2">
+                                            <div className="font-semibold text-yellow-800 text-xs uppercase tracking-wide">{header.replace(':', '')}</div>
+                                            <div className="pl-2 border-l-2 border-yellow-200 text-sm">{content}</div>
+                                          </div>
+                                        );
+                                      }
+                                      return <div key={index} className="mb-1 text-sm">{section}</div>;
+                                    }
+                                    return null;
+                                  })}
+                                </div>
+                              ) : (
+                                prescription.note
+                              )}
+                            </div>
                             <p className="text-xs text-gray-400 mt-2">{new Date(prescription.created_at).toLocaleString()}</p>
                           </div>
                         ))}

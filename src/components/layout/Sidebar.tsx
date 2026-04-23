@@ -43,6 +43,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     { path: '/doctor/sent-notifications', icon: Send, label: 'Sent Notifications' },
   ];
 
+  const patientMenuItems = [
+    { path: '/dashboard', icon: Home, label: 'Overview' },
+    { path: '/patient-prescriptions', icon: FileText, label: 'My Prescriptions' },
+  ];
+
   const receptionistMenuItems = [
     { path: '/receptionist-dashboard', icon: Home, label: 'Reception Dashboard' },
     { path: '/schedules', icon: Calendar, label: 'Schedule' },
@@ -53,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     logout();
   };
 
-  const menuItems = user?.role === 'doctor' ? doctorMenuItems : user?.role === 'receptionist' ? receptionistMenuItems : adminMenuItems;
+  const menuItems = user?.role === 'doctor' ? doctorMenuItems : user?.role === 'receptionist' ? receptionistMenuItems : user?.role === 'patient' ? patientMenuItems : adminMenuItems;
 
   return (
     <>

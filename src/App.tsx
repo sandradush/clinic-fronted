@@ -22,6 +22,8 @@ import DoctorSentNotifications from './pages/DoctorSentNotifications';
 import VideoConsultation from './pages/VideoConsultation';
 import MobileVideoConsultation from './pages/MobileVideoConsultation';
 import MedicalRecords from './pages/MedicalRecords';
+import PatientPrescriptions from './pages/PatientPrescriptions';
+import PatientDashboard from './pages/PatientDashboard';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -84,6 +86,8 @@ const ProtectedRoutes = () => {
         <Route path="/video-consultation/:appointmentId" element={<VideoConsultation />} />
         <Route path="/mobile-video/:appointmentId" element={<MobileVideoConsultation />} />
         <Route path="/medical-records" element={<MedicalRecords />} />
+        <Route path="/patient-prescriptions" element={<PatientPrescriptions />} />
+        <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/notifications" element={<AdminNotifications />} />
         <Route path="/admin-reports" element={<AdminReports />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
