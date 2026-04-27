@@ -96,7 +96,7 @@ const Home: React.FC = () => {
           </div>
 
           <a
-            href="https://expo.dev/accounts/sandradush1/projects/smart-health-consultation/builds/8bdfa7f8-26cc-4d61-81c0-aba9fd425faa"
+            href="https://expo.dev/accounts/sandradush1/projects/clinova/builds/c877881a-e2e2-4a1c-9b84-51982bdfd20c"
             target="_blank"
             rel="noopener noreferrer"
             className="ui-btn ui-btn-primary-dark text-center"

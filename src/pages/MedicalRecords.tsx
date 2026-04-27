@@ -9,6 +9,8 @@ interface MedicalRecord {
   file_url: string;
   description: string;
   patient_name: string | null;
+  doctor_id?: number;
+  doctor_name?: string | null;
 }
 
 const MedicalRecords: React.FC = () => {
@@ -24,8 +26,10 @@ const MedicalRecords: React.FC = () => {
 
   const fetchMedicalRecords = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/medical-records');
+      // Fetch medical records with doctor information
+      const response = await fetch('http://localhost:3001/api/medical-records?include_doctor=true');
       const data = await response.json();
+      console.log('Medical records with doctor info:', data);
       setRecords(data);
     } catch (error) {
       console.error('Error fetching medical records:', error);
@@ -111,7 +115,8 @@ const MedicalRecords: React.FC = () => {
 
   const filteredRecords = records.filter(record => {
     const matchesSearch = record.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (record.patient_name && record.patient_name.toLowerCase().includes(searchTerm.toLowerCase()));
+                         (record.patient_name && record.patient_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (record.doctor_name && record.doctor_name.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesSearch;
   });
 
@@ -128,7 +133,7 @@ const MedicalRecords: React.FC = () => {
           <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by description or patient name..."
+            placeholder="Search by description, patient name, or doctor name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -149,6 +154,9 @@ const MedicalRecords: React.FC = () => {
                   Patient
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Doctor
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Consultation ID
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -165,7 +173,7 @@ const MedicalRecords: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                     <FileText size={48} className="mx-auto text-gray-400 mb-4" />
                     <p>No medical records found</p>
                   </td>
@@ -178,6 +186,9 @@ const MedicalRecords: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {record.patient_name || `Patient ID: ${record.patient_id}`}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {record.doctor_name ? `Dr. ${record.doctor_name}` : (record.doctor_id ? `Doctor ID: ${record.doctor_id}` : 'N/A')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {record.consultation_id}
@@ -253,6 +264,7 @@ const MedicalRecords: React.FC = () => {
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Record Information</h4>
                   <p className="text-sm text-gray-600">Record ID: {selectedRecord.record_id}</p>
                   <p className="text-sm text-gray-600">Patient: {selectedRecord.patient_name || `Patient ID: ${selectedRecord.patient_id}`}</p>
+                  <p className="text-sm text-gray-600">Doctor: {selectedRecord.doctor_name ? `Dr. ${selectedRecord.doctor_name}` : (selectedRecord.doctor_id ? `Doctor ID: ${selectedRecord.doctor_id}` : 'N/A')}</p>
                   <p className="text-sm text-gray-600">Consultation ID: {selectedRecord.consultation_id}</p>
                 </div>
                 
@@ -354,7 +366,8 @@ const MedicalRecords: React.FC = () => {
                   <h3 className="font-medium text-gray-900 mb-1">
                     Record #{viewingFile.record.record_id} - {viewingFile.record.patient_name || `Patient ID: ${viewingFile.record.patient_id}`}
                   </h3>
-                  <p className="text-sm text-gray-600">{viewingFile.record.description}</p>
+                  <p className="text-sm text-gray-600 mb-1">{viewingFile.record.description}</p>
+                  <p className="text-xs text-gray-500">Doctor: {viewingFile.record.doctor_name ? `Dr. ${viewingFile.record.doctor_name}` : (viewingFile.record.doctor_id ? `Doctor ID: ${viewingFile.record.doctor_id}` : 'N/A')}</p>
                 </div>
 
                 {/* File Display */}

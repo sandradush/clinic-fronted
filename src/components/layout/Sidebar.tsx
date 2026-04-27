@@ -31,6 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     { path: '/notifications', icon: Bell, label: 'Notifications' },
     { path: '/admin-reports', icon: BarChart3, label: 'Reports' },
     { path: '/payments', icon: ClipboardList, label: 'Payments' },
+
   ];
 
   const doctorMenuItems = [
